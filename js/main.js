@@ -1,19 +1,25 @@
 function intro() {
-	var width = window.innerWidth,
-		height = window.innerHeight - 200;
-	var svg = createSVG('lessPoly', width, height);
-	var palette = ['#c59fc9', '#cfbae1','#c1e0f7','#a4def9','#97f9f9'];
+    var width = window.innerWidth,
+        height = window.innerHeight - 200;
+    svg = createSVG('lessPoly', width, height);
+    palette = ['#c59fc9', '#cfbae1', '#c1e0f7', '#a4def9', '#97f9f9'];
     document.body.appendChild(svg);
-    triangleNodesAsPoints(30, width, height).forEach(function(points){
-    	svg.appendChild(drawPoly(points, getRandomColor(palette),'white'));
-    });
+    lessPoly(svg, 200, palette, width, height);
+    enableMouseMove();
 
 }
 window.onload = intro;
-
-function getRandomColor(palette){
-	return palette[Math.floor(Math.random()*palette.length)];
+var svg, palette;
+function lessPoly(svg, count, palette, width, height) {
+    triangleNodesAsPoints(count, width, height).forEach(function(points) {
+        svg.appendChild(drawPoly(points, getRandomColor(palette), 'white'));
+    });
 }
+
+function getRandomColor(palette) {
+    return palette[Math.floor(Math.random() * palette.length)];
+}
+
 function animateHeadings() {
     TweenLite.fromTo($('h1'), 2, { scale: 0, opacity: 0 }, { scale: 1.5, opacity: 1, ease: Circ.easeIn });
     TweenLite.fromTo($('.content > h5'), 1, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, ease: Circ.easeIn, delay: 1 });
@@ -25,7 +31,7 @@ function createSVG(id, width, height) {
     svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
     svg.setAttribute('version', '1.1');
     svg.setAttribute('id', id);
-    svg.setAttribute('viewBox', '0 0 '+width+ " "+height);
+    svg.setAttribute('viewBox', '0 0 ' + width + " " + height);
     svg.setAttribute('preserveAspectRatio', 'none');
     return svg;
 }
@@ -55,26 +61,23 @@ function getRandomVertices(count, width, height) {
     return vertices;
 }
 
-function getTrianglesFromVertices(vertices){
-	return Delaunay.triangulate(vertices);
+function getTrianglesFromVertices(vertices) {
+    return Delaunay.triangulate(vertices);
 }
 
-function triangleNodesToPoints(triangleNodes, vertices){
-	return triangleNodes.map(function(triplet){
-		return triplet.map(function(nodeIndex){
-			return vertices[nodeIndex];
-		});
-	}).map(function(triplet){
-		return triplet.reduce(function(acc, point){
-			return acc + " " + point.join(',');
-		}, '');
-	});
+function triangleNodesToPoints(triangleNodes, vertices) {
+    return triangleNodes.map(function(triplet) {
+        return triplet.map(function(nodeIndex) {
+            return vertices[nodeIndex];
+        });
+    }).map(function(triplet) {
+        return triplet.reduce(function(acc, point) {
+            return acc + " " + point.join(',');
+        }, '');
+    });
 }
 
-function triangleNodesAsPoints(count, width, height){
-	var vertices = getRandomVertices(count, width, height);
-	return triangleNodesToPoints(getTrianglesFromVertices(vertices), vertices);
+function triangleNodesAsPoints(count, width, height) {
+    var vertices = getRandomVertices(count, width, height);
+    return triangleNodesToPoints(getTrianglesFromVertices(vertices), vertices);
 }
-
-
-
