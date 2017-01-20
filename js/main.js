@@ -5,8 +5,6 @@ function intro() {
     palette = ['#c59fc9', '#cfbae1', '#c1e0f7', '#a4def9', '#97f9f9'];
     document.body.appendChild(svg);
     lessPoly(svg, 200, palette, width, height);
-    enableMouseMove();
-
 }
 window.onload = intro;
 var svg, palette;
