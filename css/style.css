@@ -1,6 +1,7 @@
 body{
     font-family: 'Noto Serif', serif;
     margin:0;
+    height:1000px;
 }
 
 h1{
@@ -22,4 +23,10 @@ HELPERS
 
 .opacity-zero{
     opacity:1;
+}
+
+svg#lessPoly{
+position:absolute;
+left:0;
+top:0;
 }

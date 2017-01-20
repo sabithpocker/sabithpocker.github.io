@@ -1,18 +1,18 @@
 function intro() {
     var width = window.innerWidth,
-        height = window.innerHeight - 200;
+        height = window.innerHeight;
     svg = createSVG('lessPoly', width, height);
     palette = ['#c59fc9', '#cfbae1', '#c1e0f7', '#a4def9', '#97f9f9'];
     document.body.appendChild(svg);
-    lessPoly(svg, 500, palette, width, height);
+    document.body.onclick = explode;
+    lessPoly(svg, 500, palette, width/2, height/2);
 }
 window.onload = intro;
 var svg, palette;
+
 function lessPoly(svg, count, palette, width, height) {
     triangleNodesAsPoints(count, width, height).forEach(function(points, index) {
-    	setTimeout(function(){
-    		svg.appendChild(drawPoly(points, getRandomColor(palette), 'white'));
-    	}, (count * 20) - index * 10);
+        svg.appendChild(drawPoly(points, getRandomColor(palette), 'white', 0.5));
     });
 }
 
@@ -32,15 +32,19 @@ function createSVG(id, width, height) {
     svg.setAttribute('version', '1.1');
     svg.setAttribute('id', id);
     svg.setAttribute('viewBox', '0 0 ' + width + " " + height);
-    svg.setAttribute('preserveAspectRatio', 'none');
+    //svg.setAttribute('preserveAspectRatio', 'none');
     return svg;
 }
 
+function setClipPath(points, svg) {
+    var clipPath = document.createElementNS("http://www.w3.org/2000/svg", "clipPath");
+}
 
-function drawPoly(points, fill, stroke) {
+function drawPoly(points, fill, stroke, strokeWidth) {
     var poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
     poly.setAttribute("points", points);
     poly.setAttribute("stroke", stroke);
+    poly.setAttribute("stroke-width", strokeWidth);
     poly.setAttribute('fill', fill);
     return poly;
 }
@@ -68,7 +72,7 @@ function getTrianglesFromVertices(vertices) {
 function triangleNodesToPoints(triangleNodes, vertices) {
     return triangleNodes.map(function(triplet) {
         return triplet.map(function(nodeIndex) {
-            return vertices[nodeIndex];
+            return [vertices[nodeIndex][0] + window.innerWidth / 4, vertices[nodeIndex][1] + window.innerHeight / 4]
         });
     }).map(function(triplet) {
         return triplet.reduce(function(acc, point) {
@@ -80,4 +84,25 @@ function triangleNodesToPoints(triangleNodes, vertices) {
 function triangleNodesAsPoints(count, width, height) {
     var vertices = getRandomVertices(count, width, height);
     return triangleNodesToPoints(getTrianglesFromVertices(vertices), vertices);
+}
+
+function rndPosNeg() {
+    return (Math.random() * 2) - 1;
+}
+
+function explode() {
+	console.log("svg clicked");
+    var tl = new TimelineMax({ repeat: 1, yoyo: true });
+
+    $("polygon").each(function(index, el) {
+        tl.to(el, 5, {
+            x: (rndPosNeg() * (index * 0.5)),
+            y: (rndPosNeg() * (index * 0.5)),
+            rotation: (rndPosNeg() * 720),
+            scale: (rndPosNeg() * 2),
+            ease:  SlowMo.ease.config(1, 1, false),
+            opacity: 0.3,
+            transformOrigin: "center center"
+        }, .5);
+    });
 }
