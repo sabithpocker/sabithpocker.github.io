@@ -1,11 +1,12 @@
 function intro() {
     var width = window.innerWidth,
-        height = window.innerHeight;
+        height = window.innerHeight,
+        count = Math.max(window.innerWidth, window.innerHeight) / 5;
     svg = createSVG('lessPoly', width, height);
     palette = ['#c59fc9', '#cfbae1', '#c1e0f7', '#a4def9', '#97f9f9'];
     document.body.appendChild(svg);
     $(document).on("click touchstart", explode);
-    lessPoly(svg, 500, palette, width/2, height/2);
+    lessPoly(svg, count, palette, width/2, height/2);
 }
 window.onload = intro;
 var svg, palette;
