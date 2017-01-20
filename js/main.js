@@ -4,7 +4,7 @@ function intro() {
     svg = createSVG('lessPoly', width, height);
     palette = ['#c59fc9', '#cfbae1', '#c1e0f7', '#a4def9', '#97f9f9'];
     document.body.appendChild(svg);
-    document.body.onclick = explode;
+    $(document).on("click touchstart", explode);
     lessPoly(svg, 500, palette, width/2, height/2);
 }
 window.onload = intro;
