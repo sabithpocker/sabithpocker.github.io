@@ -4,13 +4,15 @@ function intro() {
     svg = createSVG('lessPoly', width, height);
     palette = ['#c59fc9', '#cfbae1', '#c1e0f7', '#a4def9', '#97f9f9'];
     document.body.appendChild(svg);
-    lessPoly(svg, 200, palette, width, height);
+    lessPoly(svg, 500, palette, width, height);
 }
 window.onload = intro;
 var svg, palette;
 function lessPoly(svg, count, palette, width, height) {
-    triangleNodesAsPoints(count, width, height).forEach(function(points) {
-        svg.appendChild(drawPoly(points, getRandomColor(palette), 'white'));
+    triangleNodesAsPoints(count, width, height).forEach(function(points, index) {
+    	setTimeout(function(){
+    		svg.appendChild(drawPoly(points, getRandomColor(palette), 'white'));
+    	}, (count * 20) - index * 10);
     });
 }
 
