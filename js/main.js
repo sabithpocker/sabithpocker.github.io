@@ -1,107 +1,113 @@
 function intro() {
     var width = window.innerWidth,
         height = window.innerHeight,
-        count = Math.max(window.innerWidth, window.innerHeight) / 5;
-    svg = createSVG('lessPoly', width, height);
-    palette = ['#c59fc9', '#cfbae1', '#c1e0f7', '#a4def9', '#97f9f9'];
-    document.body.appendChild(svg);
+        count = Math.max(window.innerWidth, window.innerHeight) / 10;
+    svg = createSVG();
     $(document).on("click touchstart", explode);
-    lessPoly(svg, count, palette, width/2, height/2);
+    lessPoly(svg, count, width / 2, height / 2);
+    //createFloor(setup.vertices);
 }
 window.onload = intro;
-var svg, palette;
 
-function lessPoly(svg, count, palette, width, height) {
-    triangleNodesAsPoints(count, width, height).forEach(function(points, index) {
-        svg.appendChild(drawPoly(points, getRandomColor(palette), 'white', 0.5));
-    });
+var setup = {};
+
+function lessPoly(svg, count, width, height) {
+    var vertices = getRandomVertices(count, width, height);
+
+    var triangles = getTrianglesFromVertices(vertices);
+
+    var polygons = getPolygonsFromVertices(vertices, [[0,0],[width, height]]);
+
+
+
+    console.log(triangles);
+    var delauney = svg.append('g').selectAll("polygon")
+        .data(triangles)
+        .enter().append("polygon")
+        .attr("class", "delauney")
+        .attr("points", function(d) {
+            return d.map(function(d) {
+                return [d[0] + width / 2, d[1] + height / 2].join(",");
+            }).join(" ");
+        })
+        .attr("stroke", "#222222")
+        .attr("fill", function() {
+            return getRandomColor()
+        })
+        .attr("stroke-width", 0.1);
+
+    var voronoi = svg.append('g').selectAll("polygon")
+        .data(polygons)
+        .enter().append("polygon")
+        .attr("points", function(d) {
+            return d.map(function(d) {
+                return [d[0] + width / 2, d[1] + height / 2].join(",");
+            }).join(" ");
+        })
+        .attr("stroke", "white")
+        .attr("class", "voronoi")
+        .attr("fill", "transparent")
+        .attr("stroke-width", 0.5);
+
+    var dots = svg.selectAll('circle')
+        .data(vertices.map(function(d) {
+            return [d[0] + width / 2, d[1] + height / 2];
+        }))
+        .enter()
+        .append("circle")
+        .attr("cx", function(d) {
+            return d[0]; })
+        .attr("cy", function(d) {
+            return d[1]; })
+        .attr("r", function(d) {
+            return 5; })
+        .attr("stroke", "white")
+        .attr("stroke-width", 1)
+        .attr("fill", "transparent");
 }
 
-function getRandomColor(palette) {
+function getRandomColor() {
+    var palette = ['#c59fc9', '#cfbae1', '#c1e0f7', '#a4def9', '#97f9f9'];
     return palette[Math.floor(Math.random() * palette.length)];
 }
 
-function animateHeadings() {
-    TweenLite.fromTo($('h1'), 2, { scale: 0, opacity: 0 }, { scale: 1.5, opacity: 1, ease: Circ.easeIn });
-    TweenLite.fromTo($('.content > h5'), 1, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, ease: Circ.easeIn, delay: 1 });
-}
-
-
-function createSVG(id, width, height) {
-    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
-    svg.setAttribute('version', '1.1');
-    svg.setAttribute('id', id);
-    svg.setAttribute('viewBox', '0 0 ' + width + " " + height);
-    //svg.setAttribute('preserveAspectRatio', 'none');
+function createSVG() {
+    var svg = d3.select("svg")
+        .attr("width", '100%')
+        .attr("height", '100%');
     return svg;
 }
 
-function setClipPath(points, svg) {
-    var clipPath = document.createElementNS("http://www.w3.org/2000/svg", "clipPath");
-}
-
-function drawPoly(points, fill, stroke, strokeWidth) {
-    var poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-    poly.setAttribute("points", points);
-    poly.setAttribute("stroke", stroke);
-    poly.setAttribute("stroke-width", strokeWidth);
-    poly.setAttribute('fill', fill);
-    return poly;
-}
-
 function getRandomVertices(count, width, height) {
-    var vertices = new Array(count);
-    for (i = vertices.length; i--;) {
-        do {
-            x = Math.random() - 0.5;
-            y = Math.random() - 0.5;
-        } while (x * x + y * y > 0.25);
-
-        x = (x * 0.96875 + 0.5) * width;
-        y = (y * 0.96875 + 0.5) * height;
-
-        vertices[i] = [x, y];
-    }
-    return vertices;
+    return d3.range(count)
+        .map(function(d) {
+            return [Math.random() * (width), Math.random() * (height)];
+        });
 }
 
 function getTrianglesFromVertices(vertices) {
-    return Delaunay.triangulate(vertices);
+    var voronoi = d3.voronoi();
+    return voronoi(vertices).triangles();
 }
 
-function triangleNodesToPoints(triangleNodes, vertices) {
-    return triangleNodes.map(function(triplet) {
-        return triplet.map(function(nodeIndex) {
-            return [vertices[nodeIndex][0] + window.innerWidth / 4, vertices[nodeIndex][1] + window.innerHeight / 4]
-        });
-    }).map(function(triplet) {
-        return triplet.reduce(function(acc, point) {
-            return acc + " " + point.join(',');
-        }, '');
-    });
+function getPolygonsFromVertices(vertices, extent) {
+    var voronoi = d3.voronoi();
+    voronoi.extent(extent);
+    return voronoi(vertices).polygons();
 }
-
-function triangleNodesAsPoints(count, width, height) {
-    var vertices = getRandomVertices(count, width, height);
-    return triangleNodesToPoints(getTrianglesFromVertices(vertices), vertices);
-}
-
 function rndPosNeg() {
     return (Math.random() * 2) - 1;
 }
-
 function explode() {
-	console.log("svg clicked");
     var tl = new TimelineMax({ repeat: 1, yoyo: true });
 
-    $("polygon").each(function(index, el) {
+    $("polygon, circle").each(function(index, el) {
         tl.to(el, 5, {
             x: (rndPosNeg() * (index * 0.5)),
             y: (rndPosNeg() * (index * 0.5)),
             rotation: (rndPosNeg() * 720),
             scale: (rndPosNeg() * 2),
-            ease:  SlowMo.ease.config(1, 1, false),
+            ease: SlowMo.ease.config(1, 1, false),
             opacity: 0.3,
             transformOrigin: "center center"
         }, .5);
