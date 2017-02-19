@@ -2,6 +2,7 @@ body {
     font-family: 'Noto Serif', serif;
     margin: 0;
     height: 1000px;
+    background: radial-gradient(#9ff6e5, #d25ff9);
 }
 
 h1 {

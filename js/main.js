@@ -3,7 +3,7 @@ function intro() {
         height = window.innerHeight,
         count = Math.max(window.innerWidth, window.innerHeight) / 10;
     svg = createSVG();
-    //$(document).on("click touchstart", explode);
+    //$(document).on("click touchstart",':not("#controls *")', explode);
     $('#controls input').on("input", updateSpirograph);
     lessPoly(svg, count, width / 2, height / 2);
     //createFloor(setup.vertices);
@@ -20,9 +20,13 @@ function updateSpirograph(){
     var r = +$('#innerR').val();
     var R = +$('#outerR').val();
     var p = +$('#locus').val();
+    var red = +$('#red').val();
+    var green = +$('#green').val();
+    var blue = +$('#blue').val();
+    var alpha = +$('#alpha').val();
     var count = +$('#count').val();
     updateValues();
-    createSpirograph('vis', r,R,p,count, "rgba(0,0,0,0.4)", 1, "none");
+    createSpirograph('vis', r,R,p,count, "rgba(" + [red, green, blue, alpha].join(',') + ")", 1, "none");
 }
 
 function updateValues(){
@@ -30,6 +34,10 @@ function updateValues(){
     $('#outerRVal').text($('#outerR').val());
     $('#locusVal').text($('#locus').val());
     $('#countVal').text($('#count').val());   
+    $('#redVal').text($('#red').val());   
+    $('#greenVal').text($('#green').val());   
+    $('#blueVal').text($('#blue').val());   
+    $('#alphaVal').text($('#alpha').val());   
 }
 
 
@@ -180,5 +188,13 @@ function createSpirograph(id, R, r, p, reps, stroke, strokeWidth, fill) {
     //y(t)=(R+r)sin(t) + p*sin((R+r)t/r)
     function y(t) {
         return ((R + r) * Math.sin(t)) + (p * Math.sin((R + r) * (t / r)))
+    }
+    function xEpi(t) {
+        return ((R + r) * Math.cos(r/R*t)) + (p * Math.cos((1 + r/R) * (t)))
+    }
+
+    //y(t)=(R+r)sin(t) + p*sin((R+r)t/r)
+    function yEpi(t) {
+        return ((R + r) * Math.sin(r/R*t)) + (p * Math.sin((1 + r/R) * (t)))
     }
 }
