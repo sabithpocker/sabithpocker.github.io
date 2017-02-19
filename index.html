@@ -4,8 +4,6 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link href="https://fonts.googleapis.com/css?family=Noto+Serif" rel="stylesheet">
-
-        
     <link href="css/style.css" rel="stylesheet">
     <title>Sabith Pocker</title>
 
@@ -15,17 +13,35 @@
         </header>
         <div class="content">
             <h5 class="text-center opacity-zero">Javascript programmer.</h5>
-            <svg id="lessPoly" width="960" height="500"></svg>
+            <svg id="lessPoly" width="960" height="500">
+                <defs>
+                    <mask id="spiromask" x="0" y="0" width="100" height="100">
+                        <circle cx="50%" cy="50%" r="170" style="stroke:none; fill: #ffffff" />
+                    </mask>
+                </defs>
+            </svg>
+            <div id="controls">
+                <div>
+                <label for="outerR">Outer Radius</label><input value="333" id="outerR" type="range" min="1" max="1000"/><span id="outerRVal"></span>
+            </div>
+            <div>
+                <label for="innerR">Inner Radius</label><input value="246" id="innerR" type="range" min="1" max="1000"/><span id="innerRVal"></span>
+            </div>
+            <div>
+                <label for="locus">Locus Point</label><input value="596" id="locus" type="range" min="1" max="1000"/><span id="locusVal"></span>
+            </div>
+            <div>
+                <label for="count">Count</label><input value="700" id="count" type="range" min="1" max="5000"/><span id="countVal"></span>
+            </div>
+            </div>
         </div>
         <footer>
         </footer>
-
-
         <script type="text/javascript" src="js/greensock/TweenMax.min.js"></script>
         <script src="https://d3js.org/d3.v4.min.js"></script>
+        <script src="//d3js.org/d3-selection-multi.v1.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
         <script type="text/javascript" src="js/main.js"></script>
-       
     </body>
 
 </html>
