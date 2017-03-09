@@ -16,7 +16,7 @@ function intro() {
 }
 window.onload = intro;
 
-function updateSpirograph(){
+function updateSpirograph() {
     var r = +$('#innerR').val();
     var R = +$('#outerR').val();
     var p = +$('#locus').val();
@@ -26,18 +26,20 @@ function updateSpirograph(){
     var alpha = +$('#alpha').val();
     var count = +$('#count').val();
     updateValues();
-    createSpirograph('vis', r,R,p,count, "rgba(" + [red, green, blue, alpha].join(',') + ")", 1, "none");
+    createSpirograph('vis', r, R, p, count, "rgba(" + [red, green, blue, alpha].join(',') + ")", 1, "none");
 }
 
-function updateValues(){
+function animateSpirograph() {}
+
+function updateValues() {
     $('#innerRVal').text($('#innerR').val());
     $('#outerRVal').text($('#outerR').val());
     $('#locusVal').text($('#locus').val());
-    $('#countVal').text($('#count').val());   
-    $('#redVal').text($('#red').val());   
-    $('#greenVal').text($('#green').val());   
-    $('#blueVal').text($('#blue').val());   
-    $('#alphaVal').text($('#alpha').val());   
+    $('#countVal').text($('#count').val());
+    $('#redVal').text($('#red').val());
+    $('#greenVal').text($('#green').val());
+    $('#blueVal').text($('#blue').val());
+    $('#alphaVal').text($('#alpha').val());
 }
 
 
@@ -153,30 +155,71 @@ function explode() {
         }, .5);
     });
 }
+
 function createSpirograph(id, R, r, p, reps, stroke, strokeWidth, fill) {
-    $('#'+id).remove();
+    $('#' + id).remove();
     var s = document.createElementNS(d3.namespaces.svg, 'svg');
     s.id = id;
     $('.content').append(s);
-    s = d3.select('#'+id)
-     .attr('width', '100%')
-     .attr('height', '100%');
+    s = d3.select('#' + id)
+        .attr('width', '100%')
+        .attr('height', '100%');
 
     var t = 0; // increment
-    var w = $('#'+id).width();
-    var h = $('#'+id).height();
+    var w = $('#' + id).width();
+    var h = $('#' + id).height();
+    var increment = -1;
+    var v;
 
     var lineFunction = d3.line()
         .x(function(d) {
-            return x(d) + w / 2 })
+            return x(d) + w / 2
+        })
         .y(function(d) {
-            return y(d) + h / 2 });
+            return y(d) + h / 2
+        })
+        .curve(d3.curveCatmullRom.alpha(.5));;
 
     s.append("path")
-        .attr("d", lineFunction(d3.range(0, reps, 0.01)))
+        .attr("d", lineFunction(d3.range(0, reps, .1)))
         .attr("stroke", stroke)
         .attr("stroke-width", strokeWidth)
-        .attr("fill", fill);
+        .attr("fill", fill)
+        .each(pulse);
+
+    /*s.select('path')
+        .transition()
+          .duration(20000)
+          .delay(1500)
+          .ease(d3.easeLinear)
+          .attr("d", function(){
+            count= 800;
+            if(r + increment > 1000) increment = -1;
+            if(r + increment < 0) increment = 1;
+            r = r + increment;
+            return lineFunction(d3.range(0, reps, .1));
+          });*/
+
+    function pulse() {
+        var pa = s.select("path");
+        (function repeat() {
+            pa = pa
+                .transition()
+                .duration(20000)
+                .delay(1000)
+                .attr("d", function() {
+                    count = 1000;
+                    v = r;
+                    if (v + increment > 1000) increment = -0.5;
+                    if (v + increment < 0) increment = 0.5;
+                    v = v + increment;
+                    r = v;
+                    return lineFunction(d3.range(0, reps, 0.1));
+                })
+                .ease(d3.easeLinear)
+                .on("end", repeat);
+        })();
+    }
 
 
     // parametric equations
@@ -189,12 +232,13 @@ function createSpirograph(id, R, r, p, reps, stroke, strokeWidth, fill) {
     function y(t) {
         return ((R + r) * Math.sin(t)) + (p * Math.sin((R + r) * (t / r)))
     }
-    function xEpi(t) {
-        return ((R + r) * Math.cos(r/R*t)) + (p * Math.cos((1 + r/R) * (t)))
+
+    function xAstroid(t) {
+        return R * Math.pow(Math.cos(t), 3);
     }
 
     //y(t)=(R+r)sin(t) + p*sin((R+r)t/r)
-    function yEpi(t) {
-        return ((R + r) * Math.sin(r/R*t)) + (p * Math.sin((1 + r/R) * (t)))
+    function yAstroid(t) {
+        return R * Math.pow(Math.sin(t), 3);
     }
 }
