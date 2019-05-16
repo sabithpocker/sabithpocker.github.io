@@ -1,7 +1,8 @@
 "use strict";
 
 function intro() {
-  createSpirograph("vis", 60, 5, 12, 40, "rgba(255,255,255,1)", 1, "none");
+  // createSpirograph("vis", 60, 5, 12, 40, "rgba(255,255,255,1)", 1, "none");
+  createSpirograph("vis", 100, 10, 30, 100, "rgba(255,255,255,1)", 1, "none");
 }
 
 window.onload = intro;
