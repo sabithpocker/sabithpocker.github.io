@@ -18,7 +18,7 @@ class Spirograph extends HTMLElement {
             width: 100%;
           }
         </style>
-        <div class="mm-spirograph-root" data-content></div>
+        <div class="mm-spirograph-root" data-content><svg></svg></div>
         `;
   }
   connectedCallback() {
@@ -45,59 +45,26 @@ class Spirograph extends HTMLElement {
     //y(t)=(R+r)sin(t) + p*sin((R+r)t/r)
     const y = t => (R + r) * Math.sin(t) + p * Math.sin((R + r) * (t / r));
 
-    const pulse = () => {
-      var pa = s.select("path");
-      (function repeat() {
-        pa = pa
-          .transition()
-          .duration(20000)
-          .delay(1000)
-          .attr("d", function() {
-            var count = 1000;
-            v = r;
-            if (v + increment > count) increment = -0.5;
-            if (v + increment < 0) increment = 0.5;
-            v = v + increment;
-            r = v;
-            return lineFunction(d3.range(0, reps, 0.1));
-          })
-          .ease(d3.easeLinear)
-          .on("end", repeat);
-      })();
-    };
-
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    this.rootElement.appendChild(svg);
-    console.log(this.rootElement, "rootElement");
     const s = d3
       .select(this.rootElement)
       .select("svg")
       .attr("width", "100%")
       .attr("height", "100%");
 
-    console.log(s, "s");
     const w = this.rootElement.clientWidth;
     const h = this.rootElement.clientHeight;
-    console.log(w, h);
-    const increment = -1;
-    let v;
 
     const lineFunction = d3
       .line()
-      .x(function(d) {
-        return x(d) + w / 2;
-      })
-      .y(function(d) {
-        return y(d) + h / 2;
-      })
-      .curve(d3.curveCatmullRom.alpha(0.5));
+      .x(d => x(d) + w / 2)
+      .y(d => y(d) + h / 2)
+      .curve(d3.curveCatmullRom.alpha(0.9));
 
     s.append("path")
       .attr("d", lineFunction(d3.range(0, reps, 0.1)))
       .attr("stroke", stroke)
       .attr("stroke-width", strokeWidth)
-      .attr("fill", fill)
-      .each(pulse);
+      .attr("fill", fill);
   }
 }
 customElements.define("mm-spirograph", Spirograph);
