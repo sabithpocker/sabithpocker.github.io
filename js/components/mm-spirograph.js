@@ -86,7 +86,21 @@ class Spirograph extends HTMLElement {
             stroke: var(--stroke-color, #FFFFFF);
             stroke-width: var(--stroke-width, 1px);
             fill: var(--fill-color, none);
+            animation: var(--animation, glow infinite 10s ease-in);
           }
+          
+          @keyframes glow {
+            0% {
+              stroke: var(--stroke-start-color, rgb(248, 7, 196));
+            }
+            50% {
+              stroke: var(--stroke-halfway-color, rgb(105, 9, 134));
+            }
+            100% {
+              stroke: var(--stroke-end-color, rgb(248, 7, 196));
+            }
+          }
+
         </style>
         <div class="mm-spirograph-root" data-content><svg><path></path></svg></div>
         `;
