@@ -59,6 +59,17 @@ class Spirograph extends HTMLElement {
   }
 
   /**
+   * Declaring the attributes that re observed for value change
+   */
+  static get observedAttributes() {
+    return [
+      "fixed-circle-radius",
+      "moving-circle-radius",
+      "moving-circle-locus-length",
+      "repeat-count"
+    ];
+  }
+  /**
    * Constructor function
    */
   constructor() {
@@ -77,7 +88,7 @@ class Spirograph extends HTMLElement {
             fill: var(--fill-color, none);
           }
         </style>
-        <div class="mm-spirograph-root" data-content><svg></svg></div>
+        <div class="mm-spirograph-root" data-content><svg><path></path></svg></div>
         `;
   }
 
@@ -85,8 +96,22 @@ class Spirograph extends HTMLElement {
    * Callback when the element is mounted to DOM
    */
   connectedCallback() {
-    this.rootElement = this.shadowRoot.querySelector("[data-content]");
-    this.createSpirograph(this.rootElement, this.R, this.r, this.p, this.reps);
+    this.createSpirographFromAttributes();
+  }
+
+  createSpirographFromAttributes() {
+    this.createSpirograph(this.R, this.r, this.p, this.reps);
+  }
+
+  /**
+   * Call back when an onserved attribute is changed
+   * @param {*} name - Name of the attribute
+   * @param {*} oldValue - oldValue of the attribute
+   * @param {*} newValue  - newValue of the attribute
+   */
+  attributeChangedCallback(name, oldValue, newValue) {
+    // TODO: use something like rxjs debounce time?
+    this.createSpirographFromAttributes();
   }
 
   /**
@@ -96,7 +121,6 @@ class Spirograph extends HTMLElement {
 
   /**
    * Creates an SVG spirograph and appends to SVG element in rootElement
-   * @param {*} rootElement  - Element to which SVG is appended
    * @param {*} R - Radius of outer circle
    * @param {*} r - Radius of inner circle
    * @param {*} p - Length from center to locus in inner circle
@@ -105,9 +129,10 @@ class Spirograph extends HTMLElement {
    * @param {*} strokeWidth - stroke width
    * @param {*} fill - fill color
    */
-  createSpirograph(rootElement, R, r, p, reps) {
-    // parametric equations
+  createSpirograph(R, r, p, reps) {
+    const rootElement = this.shadowRoot.querySelector("[data-content]");
 
+    // parametric equations
     //x(t)=(R+r)cos(t) + p*cos((R+r)t/r)
     const x = t => (R + r) * Math.cos(t) + p * Math.cos((R + r) * (t / r));
     //y(t)=(R+r)sin(t) + p*sin((R+r)t/r)
@@ -128,7 +153,7 @@ class Spirograph extends HTMLElement {
       .y(d => y(d) + h / 2)
       .curve(d3.curveCatmullRom.alpha(0.5));
 
-    s.append("path").attr("d", lineFunction(d3.range(0, reps, 0.1)));
+    s.select("path").attr("d", lineFunction(d3.range(0, reps, 0.1)));
   }
 }
 customElements.define("mm-spirograph", Spirograph);

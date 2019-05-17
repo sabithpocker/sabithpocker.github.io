@@ -57,9 +57,9 @@ CONTENT
 }
 
 .spirograph--normal {
-  --stroke-color: red;
-  --stroke-width: 2px;
-  --fill-color: rgba(23, 8, 9, 0.2);
+  --stroke-color: rgb(156, 206, 18);
+  --stroke-width: 0.25px;
+  --fill-color: rgba(160, 243, 6, 0.1);
 }
 
 /*
