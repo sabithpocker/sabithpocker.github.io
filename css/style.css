@@ -56,6 +56,12 @@ CONTENT
   grid-row: 2;
 }
 
+.spirograph--normal {
+  --stroke-color: red;
+  --stroke-width: 2px;
+  --fill-color: rgba(23, 8, 9, 0.2);
+}
+
 /*
 HELPERS
 */
