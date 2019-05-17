@@ -9,6 +9,7 @@ class Spirograph extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
+    this.rootElement = null;
     this.shadowRoot.innerHTML = `
         <style>
           .mm-spirograph-root {
@@ -22,8 +23,9 @@ class Spirograph extends HTMLElement {
   }
   connectedCallback() {
     console.log("connected", this.r + 1);
+    this.rootElement = this.shadowRoot.querySelector("[data-content]");
     this.createSpirograph(
-      "vis",
+      this.rootElement,
       100,
       10,
       30,
@@ -65,17 +67,17 @@ class Spirograph extends HTMLElement {
     };
 
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.id = id;
-    this.shadowRoot.querySelector("[data-content]").appendChild(svg);
+    this.rootElement.appendChild(svg);
+    console.log(this.rootElement, "rootElement");
     const s = d3
-      .select(this.shadowRoot)
-      .select("#" + id)
+      .select(this.rootElement)
+      .select("svg")
       .attr("width", "100%")
       .attr("height", "100%");
 
     console.log(s, "s");
-    const w = this.shadowRoot.getElementById(id).clientWidth;
-    const h = this.shadowRoot.getElementById(id).clientHeight;
+    const w = this.rootElement.clientWidth;
+    const h = this.rootElement.clientHeight;
     console.log(w, h);
     const increment = -1;
     let v;
