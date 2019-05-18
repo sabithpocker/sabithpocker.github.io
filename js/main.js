@@ -1,8 +1,7 @@
 function init() {
   const spirograph = document.querySelector("mm-spirograph");
   const r = parseFloat(spirograph.getAttribute("moving-circle-radius"));
-  console.log(spirograph.getAttribute("moving-circle-radius"), r);
-  animateSpirograph(spirograph, r, 0.001);
+  animateSpirograph(spirograph, r, 0.0001);
 }
 window.onload = init;
 

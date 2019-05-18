@@ -3,10 +3,16 @@
  */
 class Spirograph extends HTMLElement {
   /**
+   * devicePixelRatio
+   */
+  get ratio() {
+    return window.devicePixelRatio;
+  }
+  /**
    * Returns parsed value of fixed-circle-radius
    */
   get R() {
-    return parseFloat(this.getAttribute("fixed-circle-radius"));
+    return this.ratio * parseFloat(this.getAttribute("fixed-circle-radius"));
   }
 
   /**
@@ -20,7 +26,7 @@ class Spirograph extends HTMLElement {
    * Returns parsed value of moving-circle-radius
    */
   get r() {
-    return parseFloat(this.getAttribute("moving-circle-radius"));
+    return this.ratio * parseFloat(this.getAttribute("moving-circle-radius"));
   }
 
   /**
@@ -34,7 +40,9 @@ class Spirograph extends HTMLElement {
    * Returns parsed value of moving-circle-locus-length
    */
   get p() {
-    return parseFloat(this.getAttribute("moving-circle-locus-length"));
+    return (
+      this.ratio * parseFloat(this.getAttribute("moving-circle-locus-length"))
+    );
   }
 
   /**

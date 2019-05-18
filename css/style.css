@@ -47,6 +47,7 @@ CONTENT
 }
 .content__title {
   text-align: center;
+  margin: 0;
   grid-column: 1;
   grid-row: 1;
 }
@@ -60,6 +61,9 @@ CONTENT
   --stroke-color: rgb(156, 206, 18);
   --stroke-width: 0.25px;
   --fill-color: rgba(160, 243, 6, 0.1);
+  --stroke-start-color: rgb(63, 14, 102);
+  --stroke-halfway-color: rgb(241, 25, 223);
+  --stroke-end-color: rgb(63, 14, 102);
 }
 
 /**
@@ -91,4 +95,11 @@ svg[id^="vis"] {
   top: 50%;
   transform: translate(-50%, -50%);
   z-index: 999;
+}
+
+@media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
+  body {
+    font-size: 2.3em;
+    grid-template-rows: 130px auto;
+  }
 }
