@@ -1,12 +1,13 @@
 body {
   font-family: "Noto Serif", serif;
   margin: 0;
-  background: radial-gradient(#9ff6e5, #d25ff9);
+  background: radial-gradient(#09221d, #200629);
   display: grid;
   height: 100vh;
   width: 100vw;
   grid-template-columns: 1fr;
   grid-template-rows: 64px auto;
+  color: rgb(201, 243, 250);
 }
 
 h1 {
@@ -14,7 +15,7 @@ h1 {
 }
 
 header {
-  border-bottom: 1px dashed #888;
+  border-bottom: 1px dashed rgb(43, 41, 53);
 }
 
 /*
@@ -55,15 +56,6 @@ CONTENT
 .content__highlight {
   grid-column: 1;
   grid-row: 2;
-}
-
-.spirograph--normal {
-  --stroke-color: rgb(156, 206, 18);
-  --stroke-width: 0.25px;
-  --fill-color: rgba(160, 243, 6, 0.1);
-  --stroke-start-color: rgb(63, 14, 102);
-  --stroke-halfway-color: rgb(241, 25, 223);
-  --stroke-end-color: rgb(63, 14, 102);
 }
 
 /**
