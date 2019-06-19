@@ -6,20 +6,20 @@ function init() {
     spirograph,
     r,
     p,
-    0.001 * window.devicePixelRatio,
-    0.001 * window.devicePixelRatio
+    0.05 * window.devicePixelRatio,
+    0.05 * window.devicePixelRatio
   );
 }
 window.onload = init;
 
 function animateSpirograph(spirograph, r, p, rIncrement, pIncrement) {
   let v = r;
-  if (v + rIncrement > 100) rIncrement = -Math.abs(rIncrement);
+  if (v + rIncrement > 500) rIncrement = -Math.abs(rIncrement);
   if (v + rIncrement <= 0) rIncrement = Math.abs(rIncrement);
   v = v + rIncrement;
   r = v;
   let w = p;
-  if (w + pIncrement > 200) pIncrement = -Math.abs(pIncrement);
+  if (w + pIncrement > 500) pIncrement = -Math.abs(pIncrement);
   if (w + pIncrement <= 0) pIncrement = Math.abs(pIncrement);
   w = w + pIncrement;
   p = w;
