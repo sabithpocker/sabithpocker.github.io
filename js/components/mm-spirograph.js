@@ -453,7 +453,7 @@ class Spirograph extends HTMLElement {
 
     const w = this.gl.canvas.width;
     const h = this.gl.canvas.height;
-    const array = this.range(0, reps, 0.1);
+    const array = this.range(0, reps, 0.08);
     // const array = this.range(0, reps, 0.1).map(
     //   t => t + this.noiseGenerator.noise1(t) * 10
     // );

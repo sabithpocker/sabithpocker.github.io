@@ -16,23 +16,23 @@ function init() {
   // );
 
   organicAnimateSpirograph(
-    0,
+    0.1,
     spirograph,
-    10,
-    300,
-    -100,
-    50,
+    -400,
+    400,
+    -20,
+    100,
+    100,
     -30,
-    200,
     noiseGenerator
   );
 
   // second
-  const spirograph2 = document.querySelector("[data-spirograph-two]");
-  const R2 = parseFloat(spirograph2.getAttribute("fixed-circle-radius"));
-  const reps2 = parseFloat(spirograph2.getAttribute("repeat-count"));
-  const r2 = parseFloat(spirograph2.getAttribute("moving-circle-radius"));
-  const p2 = parseFloat(spirograph2.getAttribute("moving-circle-locus-length"));
+  // const spirograph2 = document.querySelector("[data-spirograph-two]");
+  // const R2 = parseFloat(spirograph2.getAttribute("fixed-circle-radius"));
+  // const reps2 = parseFloat(spirograph2.getAttribute("repeat-count"));
+  // const r2 = parseFloat(spirograph2.getAttribute("moving-circle-radius"));
+  // const p2 = parseFloat(spirograph2.getAttribute("moving-circle-locus-length"));
   // animateSpirograph(
   //   spirograph,
   //   r,
@@ -41,17 +41,17 @@ function init() {
   //   0.05 * window.devicePixelRatio
   // );
 
-  organicAnimateSpirograph(
-    0,
-    spirograph2,
-    300,
-    10,
-    100,
-    -50,
-    30,
-    -200,
-    noiseGenerator
-  );
+  // organicAnimateSpirograph(
+  //   0,
+  //   spirograph2,
+  //   -600,
+  //   600,
+  //   -500,
+  //   500,
+  //   -200,
+  //   +200,
+  //   noiseGenerator
+  // );
 }
 window.onload = init;
 
@@ -86,18 +86,20 @@ function organicAnimateSpirograph(
   pMax,
   noiseGenerator
 ) {
-  const increment = noiseGenerator.noise1(Math.floor(time) / 1000000);
+  const increment = noiseGenerator.noise1(time);
+  const increment2 = noiseGenerator.noise1(time + 10000);
+  // console.log(time / 100000, increment);
 
   const R = scale(increment, 0, 1, RMin, RMax);
-  const r = scale(increment, 0, 1, rMin, rMax);
+  const r = scale(increment2, 0, 1, rMin, rMax);
   const p = scale(increment, 0, 1, pMin, pMax);
 
   spirograph.setAttribute("fixed-circle-radius", R);
   spirograph.setAttribute("moving-circle-radius", r);
   spirograph.setAttribute("moving-circle-locus-length", p);
-  window.requestAnimationFrame(t =>
+  window.requestAnimationFrame(() =>
     organicAnimateSpirograph(
-      t,
+      time + 0.00001,
       spirograph,
       RMin,
       RMax,
