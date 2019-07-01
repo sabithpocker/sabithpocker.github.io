@@ -1,13 +1,56 @@
+import PerlinNoise from "./perlin.js";
+
 function init() {
-  const spirograph = document.querySelector("mm-spirograph");
+  const spirograph = document.querySelector("[data-spirograph-one]");
+  const R = parseFloat(spirograph.getAttribute("fixed-circle-radius"));
+  const reps = parseFloat(spirograph.getAttribute("repeat-count"));
   const r = parseFloat(spirograph.getAttribute("moving-circle-radius"));
   const p = parseFloat(spirograph.getAttribute("moving-circle-locus-length"));
-  animateSpirograph(
+  const noiseGenerator = new PerlinNoise();
+  // animateSpirograph(
+  //   spirograph,
+  //   r,
+  //   p,
+  //   0.05 * window.devicePixelRatio,
+  //   0.05 * window.devicePixelRatio
+  // );
+
+  organicAnimateSpirograph(
+    0,
     spirograph,
-    r,
-    p,
-    0.05 * window.devicePixelRatio,
-    0.05 * window.devicePixelRatio
+    10,
+    300,
+    -100,
+    50,
+    -30,
+    200,
+    noiseGenerator
+  );
+
+  // second
+  const spirograph2 = document.querySelector("[data-spirograph-two]");
+  const R2 = parseFloat(spirograph2.getAttribute("fixed-circle-radius"));
+  const reps2 = parseFloat(spirograph2.getAttribute("repeat-count"));
+  const r2 = parseFloat(spirograph2.getAttribute("moving-circle-radius"));
+  const p2 = parseFloat(spirograph2.getAttribute("moving-circle-locus-length"));
+  // animateSpirograph(
+  //   spirograph,
+  //   r,
+  //   p,
+  //   0.05 * window.devicePixelRatio,
+  //   0.05 * window.devicePixelRatio
+  // );
+
+  organicAnimateSpirograph(
+    0,
+    spirograph2,
+    300,
+    10,
+    100,
+    -50,
+    30,
+    -200,
+    noiseGenerator
   );
 }
 window.onload = init;
@@ -27,5 +70,42 @@ function animateSpirograph(spirograph, r, p, rIncrement, pIncrement) {
   spirograph.setAttribute("moving-circle-locus-length", p);
   window.requestAnimationFrame(() =>
     animateSpirograph(spirograph, r, p, rIncrement, pIncrement)
+  );
+}
+function scale(num, in_min, in_max, out_min, out_max) {
+  return ((num - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min;
+}
+function organicAnimateSpirograph(
+  time,
+  spirograph,
+  RMin,
+  RMax,
+  rMin,
+  rMax,
+  pMin,
+  pMax,
+  noiseGenerator
+) {
+  const increment = noiseGenerator.noise1(Math.floor(time) / 1000000);
+
+  const R = scale(increment, 0, 1, RMin, RMax);
+  const r = scale(increment, 0, 1, rMin, rMax);
+  const p = scale(increment, 0, 1, pMin, pMax);
+
+  spirograph.setAttribute("fixed-circle-radius", R);
+  spirograph.setAttribute("moving-circle-radius", r);
+  spirograph.setAttribute("moving-circle-locus-length", p);
+  window.requestAnimationFrame(t =>
+    organicAnimateSpirograph(
+      t,
+      spirograph,
+      RMin,
+      RMax,
+      rMin,
+      rMax,
+      pMin,
+      pMax,
+      noiseGenerator
+    )
   );
 }

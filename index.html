@@ -7,8 +7,8 @@
       rel="stylesheet"
     />
     <link href="css/style.css" rel="stylesheet" />
-    <script src="js/components/mm-spirograph.js"></script>
-    <script src="js/main.js"></script>
+    <script type="module" src="js/components/mm-spirograph.js"></script>
+    <script type="module" src="js/main.js"></script>
     <title>Markup Monks</title>
   </head>
   <body>
@@ -19,10 +19,19 @@
       <h5 class="content__title">Code + Design</h5>
       <mm-spirograph
         class="content__highlight spirograph--normal"
-        fixed-circle-radius="10"
-        moving-circle-radius="5"
-        moving-circle-locus-length="3"
-        repeat-count="500"
+        fixed-circle-radius="50"
+        moving-circle-radius="80"
+        moving-circle-locus-length="15"
+        repeat-count="100"
+        data-spirograph-one
+      ></mm-spirograph>
+      <mm-spirograph
+        class="content__highlight spirograph--normal"
+        fixed-circle-radius="50"
+        moving-circle-radius="80"
+        moving-circle-locus-length="15"
+        repeat-count="50"
+        data-spirograph-two
       ></mm-spirograph>
     </div>
   </body>
