@@ -1,4 +1,3 @@
-import PerlinNoise from "../perlin.js";
 /**
  * A custom component that renders a spirograph
  * https://css-tricks.com/simulating-mouse-movement/
@@ -10,17 +9,21 @@ class Spirograph extends HTMLElement {
   get ratio() {
     return window.devicePixelRatio;
   }
+
   /**
    * Returns parsed value of fixed-circle-radius
    */
   get R() {
-    return this.ratio * parseFloat(this.getAttribute("fixed-circle-radius"));
+    return this._R === null
+      ? this.getAttribute("fixed-circle-radius")
+      : this._R;
   }
 
   /**
    * Sets value of fixed-circle-radius back to element
    */
   set R(newValue) {
+    this._R = this.ratio * parseFloat(newValue);
     this.setAttribute("fixed-circle-radius", newValue);
   }
 
@@ -28,13 +31,16 @@ class Spirograph extends HTMLElement {
    * Returns parsed value of moving-circle-radius
    */
   get r() {
-    return this.ratio * parseFloat(this.getAttribute("moving-circle-radius"));
+    return this._r === null
+      ? this.getAttribute("moving-circle-radius")
+      : this._r;
   }
 
   /**
    * Sets value of moving-circle-radius back to element
    */
   set r(newValue) {
+    this._r = this.ratio * parseFloat(newValue);
     this.setAttribute("moving-circle-radius", newValue);
   }
 
@@ -42,15 +48,16 @@ class Spirograph extends HTMLElement {
    * Returns parsed value of moving-circle-locus-length
    */
   get p() {
-    return (
-      this.ratio * parseFloat(this.getAttribute("moving-circle-locus-length"))
-    );
+    return this._p === null
+      ? this.getAttribute("moving-circle-locus-length")
+      : this._p;
   }
 
   /**
    * Sets value of moving-circle-locus-length back to element
    */
   set p(newValue) {
+    this._p = this.ratio * parseFloat(newValue);
     this.setAttribute("moving-circle-locus-length", newValue);
   }
 
@@ -58,33 +65,46 @@ class Spirograph extends HTMLElement {
    * Returns parsed value of repeat-count
    */
   get reps() {
-    return parseFloat(this.getAttribute("repeat-count"));
+    return this._reps === null ? this.getAttribute("repeat-count") : this._reps;
   }
 
   /**
    * Sets value of repeat-count back to element
    */
   set reps(newValue) {
+    this._reps = parseFloat(newValue);
     this.setAttribute("repeat-count", newValue);
+  }
+
+  get frozen() {
+    return this._frozen === null ? this.getAttribute("frozen") : this._frozen;
+  }
+
+  set frozen(newValue) {
+    this._frozen = newValue;
+    this.setAttribute("frozen", newValue);
   }
 
   /**
    * Declaring the attributes that re observed for value change
    */
-  static get observedAttributes() {
-    return [
-      "fixed-circle-radius",
-      "moving-circle-radius",
-      "moving-circle-locus-length",
-      "repeat-count"
-    ];
+  get observedAttributes() {
+    return this.frozen
+      ? null
+      : [
+          "fixed-circle-radius",
+          "moving-circle-radius",
+          "moving-circle-locus-length",
+          "repeat-count"
+        ];
   }
 
   /**
    * Vertex Shader Program for WebGL
    */
   get vertexShaderSource() {
-    return `#version 300 es
+    return this._vertexShaderSource === null
+      ? `#version 300 es
 
     // an attribute is an input (in) to a vertex shader.
     // It will receive data from a buffer
@@ -114,14 +134,23 @@ class Spirograph extends HTMLElement {
       // Colorspace goes from 0.0 to 1.0
       v_color = gl_Position * 0.8 + 0.4;
     }
-    `;
+    `
+      : this._vertexShaderSource;
   }
 
+  /**
+   * Set a vertex shader source
+   */
+
+  set vertexShaderSource(newValue) {
+    this._vertexShaderSource = newValue;
+  }
   /**
    * Fragment Shader Progrm for WebGL
    */
   get fragmentShaderSource() {
-    return `#version 300 es
+    return this._fragmentShaderSource === null
+      ? `#version 300 es
   
     precision mediump float;
 
@@ -135,7 +164,16 @@ class Spirograph extends HTMLElement {
     void main() {
       outColor = v_color;
     }
-    `;
+    `
+      : this._fragmentShaderSource;
+  }
+
+  /**
+   * Set fragment shader source
+   */
+
+  set fragmentShaderSource(newValue) {
+    this._fragmentShaderSource = newValue;
   }
 
   /**
@@ -143,8 +181,15 @@ class Spirograph extends HTMLElement {
    */
   constructor() {
     super();
+    this._R = null;
+    this._p = null;
+    this._r = null;
+    this._reps = null;
+    this._frozen = null;
+    this._vertexShaderSource = null;
+    this._fragmentShaderSource = null;
+
     this.attachShadow({ mode: "open" });
-    this.noiseGenerator = new PerlinNoise();
     this.shadowRoot.innerHTML = `
       <canvas data-canvas></canvas>
       <style>
@@ -322,6 +367,10 @@ class Spirograph extends HTMLElement {
     this.createSpirograph(this.R, this.r, this.p, this.reps);
   }
 
+  render() {
+    this.createSpirograph(this.R, this.r, this.p, this.reps);
+  }
+
   /**
    * Call back when an onserved attribute is changed
    * @param {*} name - Name of the attribute
@@ -330,6 +379,7 @@ class Spirograph extends HTMLElement {
    */
   attributeChangedCallback(name, oldValue, newValue) {
     // TODO: use something like rxjs debounce time?
+    console.log(this._frozen);
     this.createSpirographFromAttributes();
   }
 

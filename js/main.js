@@ -94,12 +94,15 @@ function organicAnimateSpirograph(
   const r = scale(increment2, 0, 1, rMin, rMax);
   const p = scale(increment, 0, 1, pMin, pMax);
 
-  spirograph.setAttribute("fixed-circle-radius", R);
-  spirograph.setAttribute("moving-circle-radius", r);
-  spirograph.setAttribute("moving-circle-locus-length", p);
+  spirograph.R = R;
+  spirograph.r = r;
+  spirograph.p = p;
+  spirograph.reps = 150;
+  spirograph.render();
+
   window.requestAnimationFrame(() =>
     organicAnimateSpirograph(
-      time + 0.00001,
+      time + 0.0001,
       spirograph,
       RMin,
       RMax,
