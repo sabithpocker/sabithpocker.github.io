@@ -15,7 +15,7 @@ class Spirograph extends HTMLElement {
    */
   get R() {
     return this._R === null
-      ? this.getAttribute("fixed-circle-radius")
+      ? parseFloat(this.getAttribute("fixed-circle-radius"))
       : this._R;
   }
 
@@ -32,7 +32,7 @@ class Spirograph extends HTMLElement {
    */
   get r() {
     return this._r === null
-      ? this.getAttribute("moving-circle-radius")
+      ? parseFloat(this.getAttribute("moving-circle-radius"))
       : this._r;
   }
 
@@ -49,7 +49,7 @@ class Spirograph extends HTMLElement {
    */
   get p() {
     return this._p === null
-      ? this.getAttribute("moving-circle-locus-length")
+      ? parseFloat(this.getAttribute("moving-circle-locus-length"))
       : this._p;
   }
 
@@ -65,7 +65,9 @@ class Spirograph extends HTMLElement {
    * Returns parsed value of repeat-count
    */
   get reps() {
-    return this._reps === null ? this.getAttribute("repeat-count") : this._reps;
+    return this._reps === null
+      ? parseFloat(this.getAttribute("repeat-count"))
+      : this._reps;
   }
 
   /**
@@ -85,18 +87,14 @@ class Spirograph extends HTMLElement {
     this.setAttribute("frozen", newValue);
   }
 
-  /**
-   * Declaring the attributes that re observed for value change
-   */
-  get observedAttributes() {
-    return this.frozen
-      ? null
-      : [
-          "fixed-circle-radius",
-          "moving-circle-radius",
-          "moving-circle-locus-length",
-          "repeat-count"
-        ];
+  static get observedAttributes() {
+    return [
+      "fixed-circle-radius",
+      "moving-circle-radius",
+      "moving-circle-locus-length",
+      "repeat-count",
+      "frozen"
+    ];
   }
 
   /**
@@ -232,6 +230,13 @@ class Spirograph extends HTMLElement {
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
   }
 
+  /**
+   * Render a spirograph using webGL
+   * @param {*} R Outer circle radius
+   * @param {*} r inner circle radius
+   * @param {*} p inner circle locus length
+   * @param {*} reps repeat count
+   */
   createSpirograph(R, r, p, reps) {
     const positions = this.getSpirographPoints(R, r, p, reps);
 
@@ -295,6 +300,10 @@ class Spirograph extends HTMLElement {
     this.gl.drawArrays(primitiveType, draw_offset, count);
   }
 
+  /**
+   * Creates and returns a program from shader sources
+   * TODO: Make the function pure
+   */
   getProgram() {
     // create GLSL shaders, upload the GLSL source, compile the shaders
     const vertexShader = this.createShader(
@@ -312,6 +321,12 @@ class Spirograph extends HTMLElement {
     return this.createProgram(this.gl, vertexShader, fragmentShader);
   }
 
+  /**
+   * Create a shader from source
+   * @param {*} gl WebGL context
+   * @param {*} type Vertex or Fragment
+   * @param {*} source Source of shader program
+   */
   createShader(gl, type, source) {
     const shader = gl.createShader(type);
     gl.shaderSource(shader, source);
@@ -324,6 +339,12 @@ class Spirograph extends HTMLElement {
     }
   }
 
+  /**
+   * Create a rendering program from shaders
+   * @param {*} gl WebGL Context
+   * @param {*} vertexShader vertexShader
+   * @param {*} fragmentShader fragmentShader
+   */
   createProgram(gl, vertexShader, fragmentShader) {
     const program = gl.createProgram();
     gl.attachShader(program, vertexShader);
@@ -338,6 +359,10 @@ class Spirograph extends HTMLElement {
     gl.deleteProgram(program);
   }
 
+  /**
+   * resize canvas depending on devicePixelRatio
+   * @param {*} canvas The canvas to be resized
+   */
   resize(canvas) {
     const cssToRealPixels = window.devicePixelRatio || 1;
 
@@ -363,10 +388,17 @@ class Spirograph extends HTMLElement {
     this.createSpirographFromAttributes();
   }
 
+  /**
+   * Callback on attribute change event
+   */
   createSpirographFromAttributes() {
     this.createSpirograph(this.R, this.r, this.p, this.reps);
   }
 
+  /**
+   * A public function that can be called
+   * when using frozen mode
+   */
   render() {
     this.createSpirograph(this.R, this.r, this.p, this.reps);
   }
@@ -378,11 +410,17 @@ class Spirograph extends HTMLElement {
    * @param {*} newValue  - newValue of the attribute
    */
   attributeChangedCallback(name, oldValue, newValue) {
-    // TODO: use something like rxjs debounce time?
-    console.log(this._frozen);
-    this.createSpirographFromAttributes();
+    if (!this.frozen) {
+      this.createSpirographFromAttributes();
+    }
   }
 
+  /**
+   * Generate an array within the range
+   * @param {*} start Starting number
+   * @param {*} stop Ending number
+   * @param {*} step Increment for each step
+   */
   range(start, stop, step) {
     if (typeof stop === "undefined") {
       // one param defined
@@ -464,7 +502,7 @@ class Spirograph extends HTMLElement {
   }
 
   /**
-   * No idea what this is
+   * Linear Interpolation
    * @param {*} a
    * @param {*} b
    * @param {*} t

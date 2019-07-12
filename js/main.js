@@ -72,9 +72,11 @@ function animateSpirograph(spirograph, r, p, rIncrement, pIncrement) {
     animateSpirograph(spirograph, r, p, rIncrement, pIncrement)
   );
 }
+
 function scale(num, in_min, in_max, out_min, out_max) {
   return ((num - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min;
 }
+
 function organicAnimateSpirograph(
   time,
   spirograph,
@@ -102,7 +104,7 @@ function organicAnimateSpirograph(
 
   window.requestAnimationFrame(() =>
     organicAnimateSpirograph(
-      time + 0.0001,
+      time + 0.00001,
       spirograph,
       RMin,
       RMax,

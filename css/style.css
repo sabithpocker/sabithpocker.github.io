@@ -44,13 +44,14 @@ CONTENT
   grid-row: 2;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 50px auto;
+  grid-template-rows: 25px auto;
 }
 .content__title {
   text-align: center;
   margin: 0;
   grid-column: 1;
   grid-row: 1;
+  line-height: 25px;
 }
 
 .content__highlight {
