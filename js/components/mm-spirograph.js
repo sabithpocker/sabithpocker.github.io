@@ -1,6 +1,7 @@
 /**
  * A custom component that renders a spirograph
- * https://css-tricks.com/simulating-mouse-movement/
+ * TODO: Allow switching shaders
+ * TODO: Make default shader single color settable via attribute
  */
 class Spirograph extends HTMLElement {
   /**
@@ -130,7 +131,7 @@ class Spirograph extends HTMLElement {
       // Convert from clipspace to colorspace.
       // Clipspace goes -1.0 to +1.0
       // Colorspace goes from 0.0 to 1.0
-      v_color = gl_Position * 0.8 + 0.4;
+      v_color = vec4(1, 0, 0.5, 1);
     }
     `
       : this._vertexShaderSource;
@@ -541,7 +542,7 @@ class Spirograph extends HTMLElement {
 
     const w = this.gl.canvas.width;
     const h = this.gl.canvas.height;
-    const array = this.range(0, reps, 0.08);
+    const array = this.range(0, reps, 0.005);
     // const array = this.range(0, reps, 0.1).map(
     //   t => t + this.noiseGenerator.noise1(t) * 10
     // );

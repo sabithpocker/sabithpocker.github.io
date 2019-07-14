@@ -20,10 +20,10 @@ function init() {
     spirograph,
     -400,
     400,
-    -20,
-    100,
-    100,
-    -30,
+    -220,
+    300,
+    10,
+    200,
     noiseGenerator
   );
 
@@ -99,12 +99,12 @@ function organicAnimateSpirograph(
   spirograph.R = R;
   spirograph.r = r;
   spirograph.p = p;
-  spirograph.reps = 150;
+  spirograph.reps = 90;
   spirograph.render();
 
   window.requestAnimationFrame(() =>
     organicAnimateSpirograph(
-      time + 0.00001,
+      time + 0.000001,
       spirograph,
       RMin,
       RMax,
