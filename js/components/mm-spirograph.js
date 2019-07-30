@@ -131,7 +131,7 @@ class Spirograph extends HTMLElement {
       // Convert from clipspace to colorspace.
       // Clipspace goes -1.0 to +1.0
       // Colorspace goes from 0.0 to 1.0
-      v_color = vec4(1, 0, 0.5, 1);
+      v_color = vec4(1, 0.5, 0.5, 1);
     }
     `
       : this._vertexShaderSource;
@@ -143,6 +143,7 @@ class Spirograph extends HTMLElement {
 
   set vertexShaderSource(newValue) {
     this._vertexShaderSource = newValue;
+    this.initializeWebGL();
   }
   /**
    * Fragment Shader Progrm for WebGL
@@ -173,6 +174,7 @@ class Spirograph extends HTMLElement {
 
   set fragmentShaderSource(newValue) {
     this._fragmentShaderSource = newValue;
+    this.initializeWebGL(); // redo initialization with new renderer
   }
 
   /**
@@ -202,7 +204,11 @@ class Spirograph extends HTMLElement {
         height: 100%;
       }
       `;
+      this.initializeWebGL();
+  }
 
+  initializeWebGL() {
+    
     // Get A WebGL context
     const canvas = this.shadowRoot.querySelector("[data-canvas]");
     this.gl = canvas.getContext("webgl2");
@@ -230,7 +236,6 @@ class Spirograph extends HTMLElement {
     // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
   }
-
   /**
    * Render a spirograph using webGL
    * @param {*} R Outer circle radius
