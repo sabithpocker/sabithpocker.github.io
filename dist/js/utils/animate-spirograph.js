@@ -1,0 +1,1 @@
+const animateSpirograph=(t,a,e,i,r)=>{let n=a;n+i>500&&(i=-Math.abs(i)),n+i<=0&&(i=Math.abs(i)),n+=i,a=n;let o=e;o+r>500&&(r=-Math.abs(r)),o+r<=0&&(r=Math.abs(r)),o+=r,e=o,t.setAttribute("moving-circle-radius",a),t.setAttribute("moving-circle-locus-length",e),t.render(),window.requestAnimationFrame(()=>animateSpirograph(t,a,e,i,r))};export default animateSpirograph;

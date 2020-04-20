@@ -7,92 +7,61 @@ body {
   width: 100vw;
   grid-template-columns: 1fr;
   grid-template-rows: 64px auto;
-  color: rgb(201, 243, 250);
-}
+  color: #c9f3fa; }
 
 h1 {
-  margin: 10px 0;
-}
+  margin: 10px 0; }
 
 header {
-  border-bottom: 1px dashed rgb(43, 41, 53);
-}
-
-/*
-HOME PAGE
-*/
-/*
-HEADER
-*/
+  border-bottom: 1px dashed green; }
 
 .header {
   grid-column: 1;
-  grid-row: 1;
-}
+  grid-row: 1; }
 
 .header__site-name {
   text-align: center;
   margin: 0;
-  padding: 10px 0;
-}
+  padding: 10px 0; }
 
-/*
-CONTENT
-*/
 .content {
   grid-column: 1;
   grid-row: 2;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 25px auto;
-}
+  grid-template-rows: 25px auto; }
+
 .content__title {
   text-align: center;
   margin: 0;
   grid-column: 1;
   grid-row: 1;
-  line-height: 25px;
-}
+  line-height: 25px; }
 
 .content__highlight {
   grid-column: 1;
-  grid-row: 2;
-}
-
-/**
-ANIMATIONS
-**/
-
-/*
-HELPERS
-*/
+  grid-row: 2; }
 
 .text-center {
-  text-align: center;
-}
+  text-align: center; }
 
 .opacity-zero {
-  opacity: 1;
-}
+  opacity: 1; }
 
 svg#lessPoly {
   position: absolute;
   left: 0;
   top: 0;
-  mask: url("#spiromask");
-}
+  mask: url("#spiromask"); }
 
 svg[id^="vis"] {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  z-index: 999;
-}
+  z-index: 999; }
 
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
   body {
     font-size: 2.3em;
-    grid-template-rows: 130px auto;
-  }
-}
+    grid-template-rows: 130px auto; } }
