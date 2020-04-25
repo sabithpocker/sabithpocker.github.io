@@ -6,18 +6,18 @@ import gradientShader from "./vertex-shaders/gradient-shader.js";
 function init() {
   const spirograph = document.querySelector("[data-spirograph]");
   const noiseGenerator = new PerlinNoise();
-  spirograph.vertexShaderSource = gradientShader;
+  // spirograph.vertexShaderSource = gradientShader;
   // animateSpirograph(spirograph, 20, 400, 10, 20);
   organicAnimateSpirograph(
     0.1,
     spirograph,
     -400,
-    400,
-    -220,
-    300,
-    10,
-    200,
+    1500,
+    -20,
+    30,
+    100,
+    1000,
     noiseGenerator
   );
 }
-window.onload = init;
+window.onload = setTimeout(init, 3000);

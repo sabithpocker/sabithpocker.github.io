@@ -94,7 +94,7 @@ class Spirograph extends HTMLElement {
       "moving-circle-radius",
       "moving-circle-locus-length",
       "repeat-count",
-      "frozen"
+      "frozen",
     ];
   }
 
@@ -131,7 +131,7 @@ class Spirograph extends HTMLElement {
       // Convert from clipspace to colorspace.
       // Clipspace goes -1.0 to +1.0
       // Colorspace goes from 0.0 to 1.0
-      v_color = vec4(1, 0.5, 0.5, 1);
+      v_color = vec4(1, gl_Position.xy, 1);
     }
     `
       : this._vertexShaderSource;
@@ -204,11 +204,10 @@ class Spirograph extends HTMLElement {
         height: 100%;
       }
       `;
-      this.initializeWebGL();
+    this.initializeWebGL();
   }
 
   initializeWebGL() {
-    
     // Get A WebGL context
     const canvas = this.shadowRoot.querySelector("[data-canvas]");
     this.gl = canvas.getContext("webgl2");
@@ -541,9 +540,9 @@ class Spirograph extends HTMLElement {
   getSpirographPoints(R, r, p, reps) {
     // parametric equations
     //x(t)=(R+r)cos(t) + p*cos((R+r)t/r)
-    const x = t => (R + r) * Math.cos(t) + p * Math.cos((R + r) * (t / r));
+    const x = (t) => (R + r) * Math.cos(t) + p * Math.cos((R + r) * (t / r));
     //y(t)=(R+r)sin(t) + p*sin((R+r)t/r)
-    const y = t => (R + r) * Math.sin(t) + p * Math.sin((R + r) * (t / r));
+    const y = (t) => (R + r) * Math.sin(t) + p * Math.sin((R + r) * (t / r));
 
     const w = this.gl.canvas.width;
     const h = this.gl.canvas.height;
@@ -551,7 +550,7 @@ class Spirograph extends HTMLElement {
     // const array = this.range(0, reps, 0.1).map(
     //   t => t + this.noiseGenerator.noise1(t) * 10
     // );
-    const allPoints = array.map(t => [x(t) + w / 2, y(t) + h / 2]);
+    const allPoints = array.map((t) => [x(t) + w / 2, y(t) + h / 2]);
     return this.simplifyPoints(allPoints, 0, allPoints.length, 1).flat();
   }
 }
