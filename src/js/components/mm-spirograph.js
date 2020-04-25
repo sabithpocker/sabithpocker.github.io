@@ -196,12 +196,10 @@ class Spirograph extends HTMLElement {
       <style>
       :host {
         display: grid;
-        justify-items: center;
-        align-content: center;
       }
       canvas {
         width: 100%;
-        height: 100%;
+        min-height: 100%;
       }
       `;
     this.initializeWebGL();

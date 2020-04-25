@@ -1,0 +1,21 @@
+@mixin breakpoint($point)
+    @if $point == large
+        @media screen and (min-width: 1251px)
+            @content
+    @else if $point == medium-and-above
+        @media screen and (min-width: 651px)
+            @content
+    @else if $point == medium
+        @media screen and (min-width: 651px) and (max-width: 1250px)
+            @content
+    @else if $point == small
+        @media screen and (max-width: 650px)
+            @content
+    @else if $point == full-page
+        @media screen and (min-height: 650px)
+            @content
+    @else if $point == video-aspect-ratio-bp
+        @media screen and (max-aspect-ratio: 2048/1080) and (orientation: landscape)
+            @content
+    @else
+        @warn "Unknown breakpoint :" + $point
