@@ -22,12 +22,12 @@ const organicAnimateSpirograph = (
   spirograph.R = R;
   spirograph.r = r;
   spirograph.p = p;
-  spirograph.reps = 10;
+  spirograph.reps = 30;
   spirograph.render();
 
   window.requestAnimationFrame(() =>
     organicAnimateSpirograph(
-      time + 0.0000001,
+      time + 0.0000001 * (increment + increment2),
       spirograph,
       RMin,
       RMax,

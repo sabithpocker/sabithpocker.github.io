@@ -11,13 +11,25 @@ function init() {
   organicAnimateSpirograph(
     0.1,
     spirograph,
-    -400,
-    1500,
+    40,
+    1700,
     -20,
     30,
-    100,
+    -200,
     1000,
     noiseGenerator
   );
+  // organicAnimateSpirograph(
+  //   0.1,
+  //   spirograph,
+  //   -400,
+  //   1500,
+  //   -20,
+  //   30,
+  //   100,
+  //   1000,
+  //   noiseGenerator
+  // );
+  document.querySelector(".highlight__items").style.opacity = "1";
 }
 window.onload = setTimeout(init, 3000);
