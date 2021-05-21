@@ -1,0 +1,26 @@
+.navigation
+    display: grid
+    display: none
+    position: fixed
+    top: 10px
+    right: 10px
+    z-index: 999
+    width: 100%
+    &__list
+        margin: 0
+        padding: 0
+        display: grid
+        grid-auto-flow: column
+        justify-content: center
+        grid-auto-columns: minmax(100px, 200px)
+        list-style: none
+    &__list-item
+        pading: 0
+        text-align: center
+    &__link
+        text-decoration: none
+        color: #fff
+        font-size: 2em
+        transform: color 300ms ease-in
+        &:hover
+            color: var(--coral-red)
