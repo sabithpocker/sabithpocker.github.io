@@ -30,7 +30,7 @@
     "gulp-sass": "5.0.0",
     "gulp-terser": "^2.1.0",
     "node-sass": "^6.0.1",
-    "postcss": "^8.1.0"
+    "postcss": "^8.2.10"
   },
   "dependencies": {
     "cssnano": "^5.0.9"
