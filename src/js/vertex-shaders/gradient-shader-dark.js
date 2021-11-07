@@ -1,4 +1,4 @@
-const gradientShader = `#version 300 es
+const gradientShaderDark = `#version 300 es
 
   // an attribute is an input (in) to a vertex shader.
   // It will receive data from a buffer
@@ -27,8 +27,9 @@ const gradientShader = `#version 300 es
     // Clipspace goes -1.0 to +1.0
     // Colorspace goes from 0.0 to 1.0
     // v_color = vec4(1, 0.5, 1, 1) * gl_Position;
-    v_color = vec4(0.33, 0.737, 0.788, 1);
+    // v_color = vec4(0.14, 0.59, 0.65, 1);
+    v_color = vec4(0.937, 0.423, 0.956, 1);
   }
   `;
 
-export default gradientShader;
+export default gradientShaderDark;

@@ -79,6 +79,23 @@ class Spirograph extends HTMLElement {
     this.setAttribute("repeat-count", newValue);
   }
 
+  /**
+   * Returns parsed value of density
+   */
+  get density() {
+    return this._density === null
+      ? parseFloat(this.getAttribute("density"))
+      : this._density;
+  }
+
+  /**
+   * Sets value of repeat-count back to element
+   */
+  set density(newValue) {
+    this._density = parseFloat(newValue);
+    this.setAttribute("density", newValue);
+  }
+
   get frozen() {
     return this._frozen === null ? this.getAttribute("frozen") : this._frozen;
   }
@@ -186,6 +203,7 @@ class Spirograph extends HTMLElement {
     this._p = null;
     this._r = null;
     this._reps = null;
+    this._density = null;
     this._frozen = null;
     this._vertexShaderSource = null;
     this._fragmentShaderSource = null;
@@ -240,8 +258,8 @@ class Spirograph extends HTMLElement {
    * @param {*} p inner circle locus length
    * @param {*} reps repeat count
    */
-  createSpirograph(R, r, p, reps) {
-    const positions = this.getSpirographPoints(R, r, p, reps);
+  createSpirograph(R, r, p, reps, density) {
+    const positions = this.getSpirographPoints(R, r, p, reps, density);
 
     const numberOfPoints = positions.length / 2;
 
@@ -395,7 +413,7 @@ class Spirograph extends HTMLElement {
    * Callback on attribute change event
    */
   createSpirographFromAttributes() {
-    this.createSpirograph(this.R, this.r, this.p, this.reps);
+    this.createSpirograph(this.R, this.r, this.p, this.reps, this.density);
   }
 
   /**
@@ -403,7 +421,7 @@ class Spirograph extends HTMLElement {
    * when using frozen mode
    */
   render() {
-    this.createSpirograph(this.R, this.r, this.p, this.reps);
+    this.createSpirograph(this.R, this.r, this.p, this.reps, this.density);
   }
 
   /**
@@ -449,7 +467,7 @@ class Spirograph extends HTMLElement {
   /**
    * Callback when the element is disconnected from DOM
    */
-  disconnectedCallback() {}
+  disconnectedCallback() { }
 
   /**
    * Ramer Douglas Peucker algorithm to get rid of unnecessary points
@@ -535,7 +553,7 @@ class Spirograph extends HTMLElement {
    * @param {*} strokeWidth - stroke width
    * @param {*} fill - fill color
    */
-  getSpirographPoints(R, r, p, reps) {
+  getSpirographPoints(R, r, p, reps, density) {
     // parametric equations
     //x(t)=(R+r)cos(t) + p*cos((R+r)t/r)
     const x = (t) => (R + r) * Math.cos(t) + p * Math.cos((R + r) * (t / r));
@@ -544,7 +562,7 @@ class Spirograph extends HTMLElement {
 
     const w = this.gl.canvas.width;
     const h = this.gl.canvas.height;
-    const array = this.range(0, reps, 0.005);
+    const array = this.range(0, reps, density);
     // const array = this.range(0, reps, 0.1).map(
     //   t => t + this.noiseGenerator.noise1(t) * 10
     // );

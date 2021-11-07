@@ -2,21 +2,46 @@ import PerlinNoise from "./perlin.js";
 import animateSpirograph from "./utils/animate-spirograph.js";
 import organicAnimateSpirograph from "./utils/organic-animate-spirograph.js";
 import gradientShader from "./vertex-shaders/gradient-shader.js";
+import gradientShaderDark from "./vertex-shaders/gradient-shader-dark.js";
 
 function init() {
-  const spirograph = document.querySelector("[data-spirograph]");
+  const spirograph = document.querySelector("[data-spirograph='outer']");
+  spirograph.style.opacity = 0.5;
+  const spirographMiddle = document.querySelector("[data-spirograph='middle']");
   const noiseGenerator = new PerlinNoise();
-  // spirograph.vertexShaderSource = gradientShader;
+  spirograph.vertexShaderSource = gradientShaderDark;
+  spirographMiddle.vertexShaderSource = gradientShader;
+  // const density = 0.08;
+  // const reps = 10;
+  // spirograph.density = density * 0.01;
+  // spirographMiddle.density = density;
+  // spirograph.reps = reps;
+  // spirographMiddle.reps = reps;
   // animateSpirograph(spirograph, 20, 400, 10, 20);
   organicAnimateSpirograph(
-    0.1,
+    .314,
     spirograph,
-    40,
+    -400,
     1700,
-    -20,
+    -30,
     30,
-    -200,
-    1000,
+    -900,
+    1200,
+    0.01,
+    0.005,
+    noiseGenerator
+  );
+  organicAnimateSpirograph(
+    0.1,
+    spirographMiddle,
+    690,
+    690,
+    2,
+    3,
+    616,
+    700,
+    0.1,
+    0.8,
     noiseGenerator
   );
   // organicAnimateSpirograph(
@@ -30,6 +55,7 @@ function init() {
   //   1000,
   //   noiseGenerator
   // );
+  document.querySelector(".highlight__items").style.transition = "all 3140ms ease-in";
   document.querySelector(".highlight__items").style.opacity = "1";
 }
-window.onload = setTimeout(init, 3000);
+window.onload = setTimeout(init, 314);

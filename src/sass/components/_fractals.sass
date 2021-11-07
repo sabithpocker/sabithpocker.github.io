@@ -1,9 +1,10 @@
-.highlight
+.fractals
     height: 100vh
     width: 100vw
-    background: radial-gradient(var(--turquoise), var(--turquoise-darker))
+    background: var(--black)
+    position: relative
 
-.highlight__header
+.fractals__header
     position: absolute
     top: 0
     z-index: 99
@@ -15,28 +16,28 @@
     text-align: center
     width: 100vw
 
-.highlight__main-header
+.fractals__main-header
     font-size: 3.14em
     margin: 0
-    color: var(--black)
+    color: var(--turquoise)
     font-weight: normal
     letter-spacing: 0.1em
     text-transform: uppercase
 
-.highlight__sub-header
+.fractals__sub-header
     font-size: calc(3.14em/2)
     margin: 0
-    color: var(--black)
+    color: var(--turquoise)
     font-weight: normal
     letter-spacing: 0.1em
     text-transform: uppercase
 
-.highlight__items
+.fractals__items
     min-height: 100vh
-    opacity: 0
+    opacity: 1
     transition: opacity 1s ease-in
 
-.highlight__item
+.fractals__item
     height: 100vh
     width: 100vw
     position: absolute
