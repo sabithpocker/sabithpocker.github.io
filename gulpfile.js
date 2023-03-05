@@ -36,3 +36,8 @@ exports.default = () => {
     series(minifyJS, sassToCss, postCss, reloadBrowser)
   );
 };
+
+exports.build = (done) => {
+  series(minifyJS, sassToCss, postCss);
+  done();
+};
