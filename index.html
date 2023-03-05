@@ -1,71 +1,105 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link href="dist/css/style.css" rel="stylesheet" />
+    <script type="module" src="dist/js/components/mm-spirograph.js"></script>
+    <script type="module" src="dist/js/components/mm-sierpinski.js"></script>
+    <script type="module" src="dist/js/main.js"></script>
+    <title>Markup Monks</title>
+  </head>
 
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
-    rel="stylesheet">
-  <link href="dist/css/style.css" rel="stylesheet" />
-  <script type="module" src="dist/js/components/mm-spirograph.js"></script>
-  <script type="module" src="dist/js/components/mm-sierpinski.js"></script>
-  <script type="module" src="dist/js/main.js"></script>
-  <title>Markup Monks</title>
-</head>
-
-<body>
-  <div class="content" data-content>
-    <section class="navigation">
-      <ul class="navigation__list">
-        <li class="navigation__list-item">
-          <a class="navigation__link" href="/">Home</a>
-        </li>
-        <li class="navigation__list-item">
-          <a class="navigation__link" href="https://blog.markupmonks.com/">Blog</a>
-        </li>
-        <li class="navigation__list-item">
-          <a class="navigation__link" href="about.html">About Me</a>
-        </li>
-        <li class="navigation__list-item">
-          <a class="navigation__link" href="">Portfolio</a>
-        </li>
-      </ul>
-    </section>
-    <section class="highlight">
-      <header class="highlight__header">
-        <h1 class="highlight__main-header">Markup Monks</h1>
-        <h5 class="highlight__sub-header">Code + Design</h5>
-      </header>
-      <div class="highlight__items">
-        <mm-spirograph class="highlight__item spirograph--normal" fixed-circle-radius="690.2810128000001"
-          moving-circle-radius="2.4890719999899353" moving-circle-locus-length="616.4489008" repeat-count="10"
-          density="0.005" frozen="true" data-spirograph="outer"></mm-spirograph>
-        <mm-spirograph class="highlight__item spirograph--normal" fixed-circle-radius="690.2810128000001"
-          moving-circle-radius="2.4890719999899353" moving-circle-locus-length="616.4489008" repeat-count="10"
-          density="0.005" frozen="true" frozen="true" data-spirograph="middle"></mm-spirograph>
-      </div>
-    </section>
-    <section class="intro">
-      <header class="intro__header">
-        <h1 class="intro__main-header">Hello</h1>
-        <h5 class="intro__sub-header">I am interested in code, design and art.</h5>
-        <p class="intro__details">This attempt is to create a library of web-components like fractals, sprirograph and
-          other geometries that
-          can help with generative arts.This
-          project is in an early/experimental stage now.</p>
-      </header>
-    </section>
-    <section class="fractals">
-      <header class="highlight__header">
-        <h1 class="fractals__main-header">Fractals</h1>
-        <h5 class="fractals__sub-header">Reusable web-components for rendering fractals.</h5>
-      </header>
-      <div class="fractals__items">
-        <mm-sierpinski class="fractals__item"></mm-sierpinski>
-      </div>
-    </section>
-
-  </div>
-</body>
-
+  <body>
+    <div class="content" data-content>
+      <section class="navigation">
+        <ul class="navigation__list">
+          <li class="navigation__list-item">
+            <a class="navigation__link" href="/">Home</a>
+          </li>
+          <li class="navigation__list-item">
+            <a class="navigation__link" href="https://blog.markupmonks.com/"
+              >Blog</a
+            >
+          </li>
+          <li class="navigation__list-item">
+            <a class="navigation__link" href="about.html">About Me</a>
+          </li>
+          <li class="navigation__list-item">
+            <a class="navigation__link" href="">Portfolio</a>
+          </li>
+        </ul>
+      </section>
+      <section class="highlight">
+        <header class="highlight__header">
+          <h1 class="highlight__main-header">Markup Monks</h1>
+          <h5 class="highlight__sub-header">Code + Design</h5>
+        </header>
+        <div class="highlight__items">
+          <mm-spirograph
+            class="highlight__item spirograph--normal"
+            fixed-circle-radius="690.2810128000001"
+            moving-circle-radius="2.4890719999899353"
+            moving-circle-locus-length="616.4489008"
+            repeat-count="10"
+            density="0.005"
+            frozen="true"
+            data-spirograph="outer"
+          ></mm-spirograph>
+          <mm-spirograph
+            class="highlight__item spirograph--normal"
+            fixed-circle-radius="690.2810128000001"
+            moving-circle-radius="2.4890719999899353"
+            moving-circle-locus-length="616.4489008"
+            repeat-count="10"
+            density="0.005"
+            frozen="true"
+            frozen="true"
+            data-spirograph="middle"
+          ></mm-spirograph>
+        </div>
+      </section>
+      <section class="intro">
+        <header class="intro__header">
+          <h1 class="intro__main-header">Hello</h1>
+          <h5 class="intro__sub-header">
+            I am interested in code, design and art.
+          </h5>
+          <p class="intro__details">
+            This is an attempt to create a library of web-components for
+            generative arts. The project has very minimal components like a
+            spirograph and a Sierpinski fractal as of now, I am planning to add
+            more as and when I get time. Kock Code and Koch snowflake are the
+            next items in my list which has to be converted from my
+            existing&nbsp;<a
+              href="https://github.com/sabithpocker/fractals/tree/master/fractals/components"
+              >VueJS code</a
+            >
+          </p>
+        </header>
+      </section>
+      <section class="fractals">
+        <header class="highlight__header">
+          <h1 class="fractals__main-header">Sierpinski Fractal</h1>
+          <h5 class="fractals__sub-header">
+            Web component for Sierpinski Fractal
+          </h5>
+          <!-- <p class="intro__details">
+            Usage:
+            <code
+              >&lt;mm-sierpinski
+              class=&quot;fractals__item&quot;&gt;&lt;/mm-sierpinski&gt;</code
+            >
+          </p> -->
+        </header>
+        <div class="fractals__items">
+          <mm-sierpinski class="fractals__item"></mm-sierpinski>
+        </div>
+      </section>
+    </div>
+  </body>
 </html>

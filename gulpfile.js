@@ -1,6 +1,6 @@
 const { src, dest, series, watch } = require("gulp");
 const terser = require("gulp-terser");
-const sass = require("gulp-sass");
+var sass = require("gulp-sass")(require("sass"));
 const autoprefixer = require("autoprefixer");
 const cssnano = require("cssnano");
 const postcss = require("gulp-postcss");
