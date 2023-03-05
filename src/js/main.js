@@ -3,6 +3,9 @@ import animateSpirograph from "./utils/animate-spirograph.js";
 import organicAnimateSpirograph from "./utils/organic-animate-spirograph.js";
 import gradientShader from "./vertex-shaders/gradient-shader.js";
 import gradientShaderDark from "./vertex-shaders/gradient-shader-dark.js";
+// Option 2: Import just the parts you need.
+
+import Three from 'https://cdn.skypack.dev/three';
 
 function init() {
   const spirograph = document.querySelector("[data-spirograph='outer']");
@@ -57,5 +60,8 @@ function init() {
   // );
   document.querySelector(".highlight__items").style.transition = "all 3140ms ease-in";
   document.querySelector(".highlight__items").style.opacity = "1";
+
+
+  const scene = new Three.Scene();
 }
 window.onload = setTimeout(init, 314);

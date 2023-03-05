@@ -23,16 +23,18 @@
   },
   "homepage": "https://github.com/sabithpocker/sabithpocker.github.io#readme",
   "devDependencies": {
-    "autoprefixer": "^10.4.0",
-    "browser-sync": "^2.27.7",
+    "autoprefixer": "^10.4.13",
+    "browser-sync": "^2.28.3",
     "gulp": "^4.0.2",
     "gulp-postcss": "^9.0.1",
+    "gulp-resolve-dependencies": "^4.1.0",
     "gulp-sass": "5.0.0",
     "gulp-terser": "^2.1.0",
-    "node-sass": "^6.0.1",
-    "postcss": "^8.1.0"
+    "node-sass": "^8.0.0",
+    "postcss": "^8.4.21"
   },
   "dependencies": {
-    "cssnano": "^5.0.9"
+    "cssnano": "^5.1.15",
+    "three": "^0.138.3"
   }
 }
