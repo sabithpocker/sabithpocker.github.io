@@ -28,7 +28,7 @@ const gradientShaderDark = `#version 300 es
     // Colorspace goes from 0.0 to 1.0
     // v_color = vec4(1, 0.5, 1, 1) * gl_Position;
     // v_color = vec4(0.14, 0.59, 0.65, 1);
-    v_color = vec4(0.937, 0.423, 0.956, 1);
+    v_color = vec4(0.937, 0.423, 0.956, 1) * (gl_Position / 0.314);
   }
   `;
 
