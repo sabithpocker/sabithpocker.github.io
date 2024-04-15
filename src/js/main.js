@@ -5,7 +5,7 @@ import gradientShader from "./vertex-shaders/gradient-shader.js";
 import gradientShaderDark from "./vertex-shaders/gradient-shader-dark.js";
 // Option 2: Import just the parts you need.
 
-import Three from 'https://cdn.skypack.dev/three';
+import Three from 'https://cdn.skypack.dev/three@0.138.0';
 
 function init() {
   const spirograph = document.querySelector("[data-spirograph='outer']");
