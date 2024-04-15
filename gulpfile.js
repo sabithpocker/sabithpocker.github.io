@@ -5,6 +5,7 @@ const autoprefixer = require("autoprefixer");
 const cssnano = require("cssnano");
 const postcss = require("gulp-postcss");
 const browserSync = require("browser-sync").create();
+var cache = require('gulp-cache');
 
 const minifyJS = () =>
   src("./src/js/**/*.js").pipe(terser()).pipe(dest("./dist/js"));
@@ -30,6 +31,7 @@ const serve = () =>
   });
 
 exports.default = () => {
+  cache.clearAll();
   serve();
   watch(
     ["./src/js/**/*.js", "./src/sass/**/*.sass"],
