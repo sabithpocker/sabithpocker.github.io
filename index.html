@@ -10,6 +10,8 @@
   <link href="dist/css/style.css" rel="stylesheet" />
   <script type="module" src="dist/js/components/mm-spirograph.js"></script>
   <script type="module" src="dist/js/components/mm-sierpinski.js"></script>
+  <script type="module" src="dist/js/components/mm-mandelbrot.js"></script>
+  <script type="module" src="dist/js/components/mm-kochcode.js"></script>
   <script type="module" src="dist/js/main.js"></script>
   <title>Markup Monks</title>
 </head>
@@ -65,16 +67,72 @@
         <h5 class="fractals__sub-header">
           Web component for Sierpinski Fractal
         </h5>
-        <!-- <p class="intro__details">
-            Usage:
-            <code
-              >&lt;mm-sierpinski
-              class=&quot;fractals__item&quot;&gt;&lt;/mm-sierpinski&gt;</code
-            >
-          </p> -->
+        <p class="intro__details code">
+          Usage:
+          <code>&lt;mm-sierpinski depth="8" min-side-length="2000" max-side-length="2500" color="0.2, 0.6, 0.3"&gt;&lt;/mm-sierpinski&gt;
+          </code>
+        </p>
       </header>
       <div class="fractals__items">
-        <mm-sierpinski class="fractals__item"></mm-sierpinski>
+        <mm-sierpinski depth="8" min-side-length="2000" max-side-length="2500" color="0.2, 0.6, 0.3"
+          class="fractals__item"></mm-sierpinski>
+
+      </div>
+    </section>
+
+    <section class="fractals">
+      <header class="fractals__header">
+        <h1 class="fractals__main-header">Mandelbrot Set</h1>
+        <h5 class="fractals__sub-header">
+          Web component for Mandelbrot set
+        </h5>
+        <p class="intro__details code">
+          Usage:
+          <code>&lt;mm-mandelbrot class=&quot;fractals__item&quot;&gt;&lt;/mm-mandelbrot&gt;
+              </code>
+        </p>
+      </header>
+      <div class="fractals__items">
+        <mm-mandelbrot class="fractals__item"></mm-mandelbrot>
+      </div>
+    </section>
+
+    <section class="fractals">
+      <header class="fractals__header">
+        <h1 class="fractals__main-header">Spirograph</h1>
+        <h5 class="fractals__sub-header">
+          Web component for Spirograph
+        </h5>
+        <p class="intro__details code">
+          Usage:
+          <code>&lt;mm-spirograph fixed-circle-radius=&quot;690.2810128000001&quot;
+            moving-circle-radius=&quot;2.4890719999899353&quot; moving-circle-locus-length=&quot;616.4489008&quot; repeat-count=&quot;10&quot;
+            density=&quot;0.005&quot; frozen=&quot;true&quot; data-spirograph=&quot;outer&quot;&gt;&
+          </code>
+        </p>
+      </header>
+      <div class="fractals__items">
+        <mm-spirograph fixed-circle-radius="690.2810128000001" moving-circle-radius="2.4890719999899353"
+          moving-circle-locus-length="616.4489008" repeat-count="10" density="0.005" frozen="true"
+          data-spirograph="outer"></mm-spirograph>
+      </div>
+    </section>
+
+
+    <section class="fractals">
+      <header class="fractals__header">
+        <h1 class="fractals__main-header">Koch Code</h1>
+        <h5 class="fractals__sub-header">
+          Web component for Koch Code
+        </h5>
+        <p class="intro__details code">
+          Usage:
+          <code>&lt;mm-kochcode levels="5" showgrowth="true"&gt;&lt;/mm-kochcode&gt;
+          </code>
+        </p>
+      </header>
+      <div class="fractals__items">
+        <mm-kochcode levels="5" showgrowth="true"></mm-kochcode>
       </div>
     </section>
   </div>

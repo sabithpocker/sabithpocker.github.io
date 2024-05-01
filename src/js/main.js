@@ -61,7 +61,5 @@ function init() {
   document.querySelector(".highlight__items").style.transition = "all 3140ms ease-in";
   document.querySelector(".highlight__items").style.opacity = "1";
 
-
-  const scene = new Three.Scene();
 }
 window.onload = setTimeout(init, 314);

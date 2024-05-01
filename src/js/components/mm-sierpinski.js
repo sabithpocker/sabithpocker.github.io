@@ -53,16 +53,20 @@ class Sierpinski extends HTMLElement {
           width: 100%;
           min-height: 100%;
         }
+        </style>
         `;
         // this.initializeWebGL();
     }
-    /**
-     * Callback when the element is mounted to DOM
-     */
     connectedCallback() {
+        const depth = parseInt(this.getAttribute('depth')) || 5; // Default depth is 5
+        const minSideLength = parseInt(this.getAttribute('min-side-length')) || 50; // Default min side length is 50
+        const maxSideLength = parseInt(this.getAttribute('max-side-length')) || 200; // Default max side length is 200
+        const color = this.getAttribute('color') || '0.1, 0.2, 0.5'; // Default color is a shade of blue
+
         this.initializeWebGL();
-        this.drawSierpinski();
+        this.drawSierpinski(depth, minSideLength, maxSideLength, color);
     }
+
     initializeWebGL() {
         // Get A WebGL context
         const canvas = this.shadowRoot.querySelector("[data-canvas]");
@@ -98,17 +102,24 @@ class Sierpinski extends HTMLElement {
 
     }
 
-    drawSierpinski() {
-        console.log('draw sierpinski')
+    drawSierpinski(depth, minSideLength, maxSideLength, color) {
+        console.log('draw sierpinski');
         const width = this.gl.canvas.width;
         const height = this.gl.canvas.height;
-        const side = Math.min(width, height) - 100;
+        const side = this.getRandomSideLength(minSideLength, maxSideLength);
         const altitude = (Math.sqrt(3) / 2) * side;
         const center = { x: width / 2, y: altitude / 2 };
         const points = this.getEquilateralPoints(center, side);
-        const childPoints = this.getChildTrianglePoints(points, 5);
-        childPoints.forEach(points => this.drawTriangle(this.simpleShader, ...points));
+        const childPoints = this.getChildTrianglePoints(points, depth);
+        const colorArray = color.split(',').map(parseFloat);
+
+        childPoints.forEach(points => this.drawTriangle(this.simpleShader, ...points, colorArray));
     }
+
+    getRandomSideLength(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
     /**
      * Creates and returns a program from shader sources
      * TODO: Make the function pure
