@@ -129,15 +129,20 @@ body {
 }
 
 .intro__details {
-  width: 90vw;
+  color: var(--white);
+  font-weight: 200;
+  font-size: 22px;
+  letter-spacing: 0.0314em;
+  line-height: 38px;
+  margin: 20px auto;
   max-width: 500px;
   text-align: left;
-  color: var(--white);
-  margin: 20px auto;
-  font-size: 22px;
-  line-height: 38px;
-  letter-spacing: 0.0314em;
-  font-weight: 200;
+  width: 90vw;
+}
+.intro__details.code {
+  border: 1px solid #96ff00;
+  padding: 0 20px;
+  font-size: 12px;
 }
 .intro__details a {
   color: var(--turquoise);
@@ -166,6 +171,7 @@ body {
   background: var(--black);
   padding-top: 5dvh;
   position: relative;
+  border-bottom: 1px dashed #595959;
 }
 .fractals .fractals__header {
   align-content: center;

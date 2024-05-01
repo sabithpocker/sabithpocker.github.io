@@ -1,0 +1,1 @@
+export const fragmentShaderSource="\n  // fragment shaders don't have a default precision so we need\n  // to pick one. mediump is a good default\n  precision highp float;\n  uniform vec4 u_color;\n  void main() {\n    // gl_FragColor is a special variable a fragment shader\n    // is responsible for setting\n    gl_FragColor = u_color; // return redish-purple\n  }";
