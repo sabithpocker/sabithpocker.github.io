@@ -26,7 +26,9 @@ const gradientShader = `#version 300 es
     // Convert from clipspace to colorspace.
     // Clipspace goes -1.0 to +1.0
     // Colorspace goes from 0.0 to 1.0
-    // v_color = vec4(1, 0.5, 1, 1) * gl_Position;
+    // v_color = vec4(0.5, 0.5, 0.5, 0.5) * gl_Position;
+
+    // v_color = vec4(0.937, 0.423, 0.956, 1) * (gl_Position / 0.314);
     v_color = vec4(0.33, 0.737, 0.788, 1);
   }
   `;

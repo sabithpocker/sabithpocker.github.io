@@ -1,7 +1,8 @@
 .highlight {
-  height: 100vh;
+  height: 100dvh;
   width: 100vw;
-  background: radial-gradient(var(--turquoise), var(--turquoise-darker)); }
+  background: radial-gradient(var(--turquoise), var(--turquoise-darker));
+}
 
 .highlight__header {
   position: absolute;
@@ -11,9 +12,10 @@
   grid-template-rows: 100px 50px;
   align-content: center;
   align-items: center;
-  height: 100vh;
+  height: 100dvh;
   text-align: center;
-  width: 100vw; }
+  width: 100vw;
+}
 
 .highlight__main-header {
   font-size: 3.14em;
@@ -21,7 +23,8 @@
   color: var(--black);
   font-weight: normal;
   letter-spacing: 0.1em;
-  text-transform: uppercase; }
+  text-transform: uppercase;
+}
 
 .highlight__sub-header {
   font-size: calc(3.14em/2);
@@ -29,14 +32,17 @@
   color: var(--black);
   font-weight: normal;
   letter-spacing: 0.1em;
-  text-transform: uppercase; }
+  text-transform: uppercase;
+}
 
 .highlight__items {
-  min-height: 100vh;
+  min-height: 100dvh;
   opacity: 0;
-  transition: opacity 1s ease-in; }
+  transition: opacity 1s ease-in;
+}
 
 .highlight__item {
-  height: 100vh;
+  height: 100dvh;
   width: 100vw;
-  position: absolute; }
+  position: absolute;
+}

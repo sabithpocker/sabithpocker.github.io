@@ -2,15 +2,16 @@
     min-height: 100dvh
     width: 100dvw
     background: var(--black)
+    padding-top: 5dvh
     position: relative
-    .highlight__header
+    .fractals__header
         align-content: center
         align-items: center
         display: grid
-        grid-template-rows: 100px 50px
+        grid-template-rows: auto auto
         text-align: center
         margin: 0 5vw
-        height: 100px
+        height: auto
         position: static
         width: auto
 
@@ -18,10 +19,10 @@
     top: 0
     z-index: 99
     display: grid
-    grid-template-rows: 100px 50px
+    grid-template-rows: auto auto
     align-content: center
     align-items: center
-    height: 100vh
+    height: auto
     text-align: center
     width: 100vw
 
@@ -42,10 +43,10 @@
     text-transform: uppercase
 
 .fractals__items
-    min-height: 80vh
+    min-height: 70dvh
     opacity: 1
     transition: opacity 1s ease-in
 
 .fractals__item
-    height: 80vh
+    height: 70dvh
     width: 100vw
