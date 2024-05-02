@@ -611,7 +611,7 @@ class MMKochCode extends HTMLElement {
         this.canvas = document.createElement('canvas');
         this.canvas.classList.add('l__canvas');
         this.paintColor = { rgba: { r: 0, g: 0, b: 0, a: 1 } };
-        this.backgroundColor = { rgba: { r: 0, g: 0, b: 0, a: 1 } };
+        this.backgroundColor = { rgba: { r: 1, g: 1, b: 1, a: 1 } };
         shadow.innerHTML = `<style>
         :host {
           display: grid;

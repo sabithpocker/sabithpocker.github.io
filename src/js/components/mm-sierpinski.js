@@ -59,8 +59,8 @@ class Sierpinski extends HTMLElement {
     }
     connectedCallback() {
         const depth = parseInt(this.getAttribute('depth')) || 5; // Default depth is 5
-        const minSideLength = parseInt(this.getAttribute('min-side-length')) || 50; // Default min side length is 50
-        const maxSideLength = parseInt(this.getAttribute('max-side-length')) || 200; // Default max side length is 200
+        const minSideLength = parseInt(this.getAttribute('min-side-length')) || 500; // Default min side length is 50
+        const maxSideLength = parseInt(this.getAttribute('max-side-length')) || 600; // Default max side length is 200
         const color = this.getAttribute('color') || '0.1, 0.2, 0.5'; // Default color is a shade of blue
 
         this.initializeWebGL();
@@ -70,6 +70,7 @@ class Sierpinski extends HTMLElement {
     initializeWebGL() {
         // Get A WebGL context
         const canvas = this.shadowRoot.querySelector("[data-canvas]");
+        this.resize(canvas);
         this.gl = canvas.getContext("webgl");
         // this.clearCanvas([1, 0, 1, 1], this.gl);
 
@@ -89,7 +90,6 @@ class Sierpinski extends HTMLElement {
         }
 
         this.gl.useProgram(program)
-        this.resize(this.gl.canvas);
         // Tell Webthis.GL how to convert from clip space to pixels
         this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
         // set the resolution
@@ -106,7 +106,7 @@ class Sierpinski extends HTMLElement {
         console.log('draw sierpinski');
         const width = this.gl.canvas.width;
         const height = this.gl.canvas.height;
-        const side = this.getRandomSideLength(minSideLength, maxSideLength);
+        const side = height;
         const altitude = (Math.sqrt(3) / 2) * side;
         const center = { x: width / 2, y: altitude / 2 };
         const points = this.getEquilateralPoints(center, side);
