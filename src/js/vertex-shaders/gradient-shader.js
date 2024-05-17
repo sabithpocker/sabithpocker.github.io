@@ -1,36 +1,26 @@
 const gradientShader = `#version 300 es
 
-  // an attribute is an input (in) to a vertex shader.
-  // It will receive data from a buffer
-  in vec2 a_position;
+#define TARGET_COLOR vec4(0.29, 0.88, 0.31, 1.0) // Define the target color
 
-  // Used to pass in the resolution of the canvas
-  uniform vec2 u_resolution;
+// Vertex Shader
+in vec2 a_position; // Attribute input to vertex shader, receives data from a buffer
 
-  out vec4 v_color;
+// Used to pass in the resolution of the canvas
+uniform vec2 u_resolution;
 
-  // all shaders have a main function
-  void main() {
+out vec4 v_color;
+out vec2 v_fragCoord; // Pass the fragment coordinate to the fragment shader
 
-    // convert the position from pixels to 0.0 to 1.0
-    vec2 zeroToOne = a_position / u_resolution;
+void main() {
+    // Convert the position from pixels to normalized device coordinates (NDC)
+    vec2 clipSpace = (a_position / u_resolution) * 2.0 - 1.0;
 
-    // convert from 0->1 to 0->2
-    vec2 zeroToTwo = zeroToOne * 2.0;
+    // Set the final position of the vertex
+    gl_Position = vec4(clipSpace * vec2(1.0, -1.0), 0.0, 1.0);
 
-    // convert from 0->2 to -1->+1 (clipspace)
-    vec2 clipSpace = zeroToTwo - 1.0;
-
-    gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
-
-    // Convert from clipspace to colorspace.
-    // Clipspace goes -1.0 to +1.0
-    // Colorspace goes from 0.0 to 1.0
-    // v_color = vec4(0.5, 0.5, 0.5, 0.5) * gl_Position;
-
-    // v_color = vec4(0.937, 0.423, 0.956, 1) * (gl_Position / 0.314);
-    v_color = vec4(0.33, 0.737, 0.788, 1);
-  }
-  `;
+    // Pass the fragment coordinate to the fragment shader
+    v_fragCoord = a_position;
+}
+`;
 
 export default gradientShader;
