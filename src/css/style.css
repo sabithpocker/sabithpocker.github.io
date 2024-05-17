@@ -38,7 +38,7 @@ body {
 .highlight {
   height: 100dvh;
   width: 100vw;
-  background: radial-gradient(var(--turquoise), var(--turquoise-darker));
+  background: #828239;
 }
 
 .highlight__header {

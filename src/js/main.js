@@ -37,7 +37,7 @@ function init() {
   //   noiseGenerator
   // );
   organicAnimateSpirograph(
-    0.1,
+    0.01,
     spirographMiddle,
     690,
     690,
@@ -46,7 +46,7 @@ function init() {
     616,
     700,
     0.1,
-    0.8,
+    1,
     noiseGenerator
   );
   // organicAnimateSpirograph(

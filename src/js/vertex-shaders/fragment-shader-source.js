@@ -1,17 +1,27 @@
 const fragmentShaderSource = `#version 300 es
 precision highp float;
-in vec4 v_color;
+
 in vec2 v_fragCoord;
 uniform vec2 u_resolution;
-uniform sampler2D u_texture;
-out vec4 outColor;
 uniform float u_time;
+out vec4 outColor;
+
+vec3 palette( float t ) {
+    vec3 a = vec3(0.5, 0.5, 0.5);
+    vec3 b = vec3(0.5, 0.5, 0.5);
+    vec3 c = vec3(1.0, 1.0, 1.0);
+    vec3 d = vec3(0.263,0.416,0.557);
+
+    return a + b*cos( 6.28318*(c*t+d) );
+}
 
 void main() {
-    vec2 uv =  (v_fragCoord * 2.0 - u_resolution.xy) / u_resolution.y;
-    float d = 0.001 / abs(sin(length(uv)*100. + u_time) / 100.);
-    vec4 color = vec4(d, d, d, 1.0);
-    outColor = color;
+    vec2 uv = (v_fragCoord * 2.0 - u_resolution.xy) / u_resolution.y;
+    float len_uv = length(uv);
+    vec3 col = palette(len_uv + u_time);
+    float sin_val = sin(len_uv * 100.0 + u_time);
+    float d = 0.001 / abs(sin_val / 100.0);
+    outColor = vec4(col * d, d);
 }`;
 
 export default fragmentShaderSource;
