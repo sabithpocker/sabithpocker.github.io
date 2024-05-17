@@ -9,7 +9,8 @@ const organicAnimateSpirograph = (
   pMax,
   dMin,
   dMax,
-  noiseGenerator
+  noiseGenerator,
+  timestamp
 ) => {
   const scale = (num, in_min, in_max, out_min, out_max) =>
     ((num - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min;
@@ -30,11 +31,11 @@ const organicAnimateSpirograph = (
     spirograph.r = r;
     spirograph.p = p;
     spirograph.desity = d;
-    spirograph.render();
+    spirograph.render(timestamp);
   }
   // console.log(time);0.10223184703674987
 
-  window.requestAnimationFrame(() => {
+  window.requestAnimationFrame((timestamp) => {
     organicAnimateSpirograph(
       time + 0.000001 * (increment + increment2),
       spirograph,
@@ -46,7 +47,8 @@ const organicAnimateSpirograph = (
       pMax,
       dMin,
       dMax,
-      noiseGenerator
+      noiseGenerator,
+      timestamp
     )
   }
   );

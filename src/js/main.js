@@ -3,6 +3,7 @@ import animateSpirograph from "./utils/animate-spirograph.js";
 import organicAnimateSpirograph from "./utils/organic-animate-spirograph.js";
 import gradientShader from "./vertex-shaders/gradient-shader.js";
 import gradientShaderDark from "./vertex-shaders/gradient-shader-dark.js";
+import fragmentShaderSource from "./vertex-shaders/fragment-shader-source.js";
 // Option 2: Import just the parts you need.
 
 import Three from 'https://cdn.skypack.dev/three@0.138.0';
@@ -14,6 +15,7 @@ function init() {
   const noiseGenerator = new PerlinNoise();
   spirograph.vertexShaderSource = gradientShaderDark;
   spirographMiddle.vertexShaderSource = gradientShader;
+  spirographMiddle.fragmentShaderSource = fragmentShaderSource;
   // const density = 0.08;
   // const reps = 10;
   // spirograph.density = density * 0.01;
@@ -21,19 +23,19 @@ function init() {
   // spirograph.reps = reps;
   // spirographMiddle.reps = reps;
   // animateSpirograph(spirograph, 20, 400, 10, 20);
-  organicAnimateSpirograph(
-    .314,
-    spirograph,
-    -400,
-    1700,
-    -30,
-    30,
-    -900,
-    1200,
-    0.01,
-    0.005,
-    noiseGenerator
-  );
+  // organicAnimateSpirograph(
+  //   .314,
+  //   spirograph,
+  //   -400,
+  //   1700,
+  //   -30,
+  //   30,
+  //   -900,
+  //   1200,
+  //   0.01,
+  //   0.005,
+  //   noiseGenerator
+  // );
   organicAnimateSpirograph(
     0.1,
     spirographMiddle,

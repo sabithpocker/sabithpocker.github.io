@@ -245,6 +245,9 @@ class Spirograph extends HTMLElement {
 
     this.colorLocation = this.gl.getUniformLocation(this.program, "u_color");
 
+    // create time uniform
+    this.timeLocation = this.gl.getUniformLocation(this.program, "u_time");
+
     // Create a buffer and put three 2d clip space points in it
     const positionBuffer = this.gl.createBuffer();
 
@@ -258,7 +261,7 @@ class Spirograph extends HTMLElement {
    * @param {*} p inner circle locus length
    * @param {*} reps repeat count
    */
-  createSpirograph(R, r, p, reps, density) {
+  createSpirograph(R, r, p, reps, density, timestamp) {
     const positions = this.getSpirographPoints(R, r, p, reps, density);
 
     const numberOfPoints = positions.length / 2;
@@ -268,6 +271,9 @@ class Spirograph extends HTMLElement {
       new Float32Array(positions),
       this.gl.STATIC_DRAW
     );
+
+    // set time uniform
+    this.gl.uniform1f(this.timeLocation, timestamp / 2500.0);
 
     // Create a vertex array object (attribute state)
     const vao = this.gl.createVertexArray();
@@ -420,8 +426,8 @@ class Spirograph extends HTMLElement {
    * A public function that can be called
    * when using frozen mode
    */
-  render() {
-    this.createSpirograph(this.R, this.r, this.p, this.reps, this.density);
+  render(timetamp) {
+    this.createSpirograph(this.R, this.r, this.p, this.reps, this.density, timetamp);
   }
 
   /**
