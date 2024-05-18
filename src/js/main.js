@@ -13,9 +13,10 @@ function init() {
   spirograph.style.opacity = 0.5;
   const spirographMiddle = document.querySelector("[data-spirograph='middle']");
   const noiseGenerator = new PerlinNoise();
-  spirograph.vertexShaderSource = gradientShaderDark;
+  // spirograph.vertexShaderSource = gradientShaderDark;
   spirographMiddle.vertexShaderSource = gradientShader;
   spirographMiddle.fragmentShaderSource = fragmentShaderSource;
+
   // const density = 0.08;
   // const reps = 10;
   // spirograph.density = density * 0.01;
