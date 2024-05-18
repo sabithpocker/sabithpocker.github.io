@@ -17,11 +17,18 @@ vec3 palette( float t ) {
 
 void main() {
     vec2 uv = (v_fragCoord * 2.0 - u_resolution.xy) / u_resolution.y;
-    float len_uv = length(uv);
-    vec3 col = palette(len_uv + u_time);
-    float sin_val = sin(len_uv * 100.0 + u_time);
-    float d = 0.001 / abs(sin_val / 100.0);
-    outColor = vec4(col * d, d);
+    vec3 col = palette(length(uv) + u_time/5.);
+    vec3 finalColor = vec3(0.14);
+    
+    for (float i = 0.0; i < 5.0; i++) {
+        uv=fract(uv * 1.5 + i/10.) - 0.5;
+        float len_uv = length(uv);
+        float sin_val = sin(len_uv * 7.0 + u_time/5.);
+        float d = 0.001 / abs(sin_val / 100.0);
+        finalColor += col * d;
+    }
+        
+    outColor = vec4(finalColor, 1.0);
 }`;
 
 export default fragmentShaderSource;
