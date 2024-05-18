@@ -37,7 +37,7 @@ const organicAnimateSpirograph = (
 
   window.requestAnimationFrame((timestamp) => {
     organicAnimateSpirograph(
-      time + 0.000001 * (increment + increment2),
+      time + 0.0000001 * (increment + increment2),
       spirograph,
       RMin,
       RMax,
