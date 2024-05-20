@@ -1,4 +1,4 @@
-const fragmentShaderSource = `#version 300 es
+const fragmentShader2 = `#version 300 es
 precision highp float;
 
 in vec2 v_fragCoord;
@@ -7,12 +7,12 @@ uniform float u_time;
 out vec4 outColor;
 
 vec3 palette(float t) {
-    vec3 a = vec3(0.5, 0.5, 0.5);
-    vec3 b = vec3(0.5, 0.5, 0.5);
-    vec3 c = vec3(1.0, 1.0, 1.0);
-    vec3 d = vec3(0.263, 0.416, 0.557);
-
-    return a + b * cos(6.28318 * (c * t + d));
+    vec3 a = vec3(1.0, 0.2, 0.2);  // pastel pink
+    vec3 b = vec3(0.68, 0.85, 0.9); // pastel blue
+    vec3 c = vec3(1.0, 1.0, 1.0);   // pastel green
+    vec3 d = vec3(1.0,1.0,1.0);   // pastel purple
+    
+    return a + b * cos(.031428318 * (c * t + d));
 }
 
 float rand(vec2 co) {
@@ -30,7 +30,7 @@ vec2 reactionDiffusion(vec2 uv) {
     float feed = 0.055;
     float kill = 0.062;
 
-    vec2 center = vec2(0.75);
+    vec2 center = vec2(0.5);
     vec2 p = uv * 2.0 - 1.0;
 
     float dist = length(p);
@@ -53,19 +53,19 @@ vec2 reactionDiffusion(vec2 uv) {
 
 void main() {
     vec2 uv = (v_fragCoord * 2.0 - u_resolution.xy) / u_resolution.y;
-    uv = reactionDiffusion(uv);
-    vec3 col = palette(length(uv) + u_time / 5.0);
-    vec3 finalColor = vec3(0.14);
+    // uv = reactionDiffusion(uv) * 2.;
+    vec3 col = palette(u_time);
+    vec3 finalColor = col * vec3(0.7);
 
     for (float i = 0.0; i < 5.0; i++) {
-        uv = fract(uv * 1.5 + i / 10.0) - 0.5;
+        uv = fract(uv * 2. + i / 5.0) - 0.5;
         float len_uv = length(uv);
-        float sin_val = sin(len_uv * 7.0 + u_time / 5.0);
-        float d = 0.001 / abs(sin_val / 100.0);
+        float sin_val = cos(tan(len_uv * 3.14 + u_time/10.));
+        float d = 0.001 / abs(sin_val / 30.0);
         finalColor += col * d;
     }
 
     outColor = vec4(finalColor, 1.0);
 }`;
 
-export default fragmentShaderSource;
+export default fragmentShader2;

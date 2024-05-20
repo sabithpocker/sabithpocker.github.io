@@ -1,0 +1,1 @@
+const fragmentShader2="#version 300 es\nprecision mediump float;\nuniform vec4 u_color;\nout vec4 outColor;\nvoid main() {\n    outColor = vec4(1.0, 0.0,0.0, 1);\n}\n";export default fragmentShader2;

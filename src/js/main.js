@@ -1,14 +1,30 @@
 import PerlinNoise from "./perlin.js";
 import animateSpirograph from "./utils/animate-spirograph.js";
 import organicAnimateSpirograph from "./utils/organic-animate-spirograph.js";
+import organicAnimateSierpinski from "./utils/organic-animate-sierpinski.js";
 import gradientShader from "./vertex-shaders/gradient-shader.js";
 import gradientShaderDark from "./vertex-shaders/gradient-shader-dark.js";
 import fragmentShaderSource from "./vertex-shaders/fragment-shader-source.js";
+import fragmentShader2 from "./vertex-shaders/fragment-shader-2.js";
+import vertexShader2 from "./vertex-shaders/vertex-shader-2.js";
 // Option 2: Import just the parts you need.
 
 import Three from 'https://cdn.skypack.dev/three@0.138.0';
 
 function init() {
+  // sierpinski diffusion experiemnt
+  const sierpinski = document.querySelector("[data-spirograph='sierpinski']");
+  sierpinski.vertexShaderSource = gradientShader;
+  sierpinski.fragmentShaderSource = fragmentShaderSource;
+  organicAnimateSierpinski(sierpinski);
+
+  //standalone difusion experiement
+  const shaderCanvas = document.querySelector("[data-canvas='shader-canvas']");
+  shaderCanvas.vertexShaderSource = vertexShader2;
+  shaderCanvas.fragmentShaderSource = fragmentShader2;
+  shaderCanvas.color = 'rgba(255,2,255,1)';
+  // organicAnimateSierpinski(sierpinski);
+
   const spirograph = document.querySelector("[data-spirograph='outer']");
   spirograph.style.opacity = 0.5;
   const spirographMiddle = document.querySelector("[data-spirograph='middle']");

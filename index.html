@@ -12,6 +12,7 @@
   <script type="module" src="dist/js/components/mm-sierpinski.js"></script>
   <script type="module" src="dist/js/components/mm-mandelbrot.js"></script>
   <script type="module" src="dist/js/components/mm-kochcode.js"></script>
+  <script type="module" src="dist/js/components/mm-shader-canvas.js"></script>
   <script type="module" src="dist/js/main.js"></script>
   <title>Markup Monks</title>
 </head>
@@ -62,6 +63,23 @@
       </header>
     </section>
     <section class="fractals">
+      <header class="fractals__header shader-canvas">
+        <h1 class="fractals__main-header">Shader Component</h1>
+        <h5 class="fractals__sub-header">
+          Blank Web Component that paints based on shader
+        </h5>
+        <p class="intro__details code">
+          Usage:
+          <code>&lt;mm-sierpinski depth="8" min-side-length="2000" max-side-length="2500" color="0.2, 0.6, 0.3"&gt;&lt;/mm-sierpinski&gt;
+          </code>
+        </p>
+      </header>
+      <div class="fractals__items">
+        <mm-shader-canvas class="shader-canvas" color="rgba(255, 255, 0, 1)"
+          data-canvas="shader-canvas"></mm-shader-canvas>
+      </div>
+    </section>
+    <section class="fractals">
       <header class="fractals__header">
         <h1 class="fractals__main-header">Sierpinski Fractal</h1>
         <h5 class="fractals__sub-header">
@@ -74,7 +92,8 @@
         </p>
       </header>
       <div class="fractals__items">
-        <mm-sierpinski depth="5" color="0.2, 0.6, 0.3" class="fractals__item"></mm-sierpinski>
+        <mm-sierpinski depth="5" color="0.2, 0.6, 0.3" class="fractals__item"
+          data-spirograph="sierpinski"></mm-sierpinski>
 
       </div>
     </section>
