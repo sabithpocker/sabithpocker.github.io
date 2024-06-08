@@ -1,3 +1,4 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css");
 :root {
   --black: #010101;
   --white: #ffffff;
@@ -228,7 +229,6 @@ body {
 
 .navigation {
   display: grid;
-  display: none;
   position: fixed;
   top: 10px;
   right: 10px;
@@ -256,6 +256,60 @@ body {
 }
 .navigation__link:hover {
   color: var(--coral-red);
+}
+
+.sidebar {
+  position: fixed;
+  z-index: 998;
+  left: -250px;
+  width: 250px;
+  height: 100%;
+  background-color: #333;
+  overflow-x: hidden;
+  transition: 0.3s;
+  display: flex;
+  flex-direction: column;
+  padding-top: 60px;
+}
+.sidebar.open {
+  left: 0;
+}
+
+.kebab-menu {
+  position: absolute;
+  z-index: 999;
+  top: 20px;
+  left: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  height: 24px;
+}
+.kebab-menu span {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background: #fff;
+}
+
+.sidebar__list {
+  list-style-type: none;
+  padding: 0;
+}
+.sidebar__list .sidebar__list-item {
+  padding: 10px 15px;
+}
+.sidebar__list .sidebar__link {
+  text-decoration: none;
+  color: white;
+  display: block;
+  transition: 0.3s;
+}
+.sidebar__list .sidebar__link:hover {
+  color: #f1f1f1;
 }
 
 .shader-canvas {

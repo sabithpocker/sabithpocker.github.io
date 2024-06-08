@@ -9,149 +9,36 @@
     rel="stylesheet" />
   <link href="dist/css/style.css" rel="stylesheet" />
   <script type="module" src="dist/js/components/mm-spirograph.js"></script>
-  <script type="module" src="dist/js/components/mm-sierpinski.js"></script>
-  <script type="module" src="dist/js/components/mm-mandelbrot.js"></script>
-  <script type="module" src="dist/js/components/mm-kochcode.js"></script>
-  <script type="module" src="dist/js/components/mm-shader-canvas.js"></script>
-  <script type="module" src="dist/js/main.js"></script>
+  <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
+  <script type="module" src="dist/js/components/ui-elements/background-audio.js"></script>
+  <script type="module" src="dist/js/index.js"></script>
   <title>Markup Monks</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-B0BEV3T4NK');
+  </script>
 </head>
 
 <body>
   <div class="content" data-content>
-    <section class="navigation">
-      <ul class="navigation__list">
-        <li class="navigation__list-item">
-          <a class="navigation__link" href="/">Home</a>
-        </li>
-        <li class="navigation__list-item">
-          <a class="navigation__link" href="https://blog.markupmonks.com/">Blog</a>
-        </li>
-        <li class="navigation__list-item">
-          <a class="navigation__link" href="about.html">About Me</a>
-        </li>
-        <li class="navigation__list-item">
-          <a class="navigation__link" href="">Portfolio</a>
-        </li>
-      </ul>
-    </section>
+    <side-bar></side-bar>
     <section class="highlight">
       <header class="highlight__header">
         <h1 class="highlight__main-header">Markup Monks</h1>
         <h5 class="highlight__sub-header">Code + Design</h5>
       </header>
       <div class="highlight__items">
-        <!-- <mm-spirograph class="highlight__item spirograph--normal" fixed-circle-radius="690.2810128000001"
-          moving-circle-radius="2.4890719999899353" moving-circle-locus-length="616.4489008" repeat-count="10"
-          density="0.005" frozen="true" data-spirograph="outer"></mm-spirograph> -->
         <mm-spirograph class="highlight__item spirograph--normal" fixed-circle-radius="690.2810128000001"
           moving-circle-radius="2.4890719999899353" moving-circle-locus-length="616.4489008" repeat-count="30"
           density="0.01" frozen="true" frozen="true" data-spirograph="middle"></mm-spirograph>
       </div>
     </section>
-    <section class="intro">
-      <header class="intro__header">
-        <h1 class="intro__main-header">Welcome</h1>
-        <h5 class="intro__sub-header">
-          I specialize in code, design, and art, with a passion for generative arts.
-        </h5>
-        <p class="intro__details">
-          This project aims to create a comprehensive library of web components tailored for generative arts. Currently,
-          it includes elements like a spirograph and a Sierpinski fractal, with plans for more additions over time.
-          Stay tuned as I continue to expand this collection, bringing together code and creativity in novel ways.
-        </p>
-      </header>
-    </section>
-    <section class="fractals">
-      <header class="fractals__header shader-canvas">
-        <h1 class="fractals__main-header">Shader Component</h1>
-        <h5 class="fractals__sub-header">
-          Blank Web Component that paints based on shader
-        </h5>
-        <p class="intro__details code">
-          Usage:
-          <code>&lt;mm-sierpinski depth="8" min-side-length="2000" max-side-length="2500" color="0.2, 0.6, 0.3"&gt;&lt;/mm-sierpinski&gt;
-          </code>
-        </p>
-      </header>
-      <div class="fractals__items">
-        <mm-shader-canvas class="shader-canvas" color="rgba(255, 255, 0, 1)"
-          data-canvas="shader-canvas"></mm-shader-canvas>
-      </div>
-    </section>
-    <section class="fractals">
-      <header class="fractals__header">
-        <h1 class="fractals__main-header">Sierpinski Fractal</h1>
-        <h5 class="fractals__sub-header">
-          Web component for Sierpinski Fractal
-        </h5>
-        <p class="intro__details code">
-          Usage:
-          <code>&lt;mm-sierpinski depth="8" min-side-length="2000" max-side-length="2500" color="0.2, 0.6, 0.3"&gt;&lt;/mm-sierpinski&gt;
-          </code>
-        </p>
-      </header>
-      <div class="fractals__items">
-        <mm-sierpinski depth="5" color="0.2, 0.6, 0.3" class="fractals__item"
-          data-spirograph="sierpinski"></mm-sierpinski>
-
-      </div>
-    </section>
-
-    <section class="fractals">
-      <header class="fractals__header">
-        <h1 class="fractals__main-header">Mandelbrot Set</h1>
-        <h5 class="fractals__sub-header">
-          Web component for Mandelbrot set
-        </h5>
-        <p class="intro__details code">
-          Usage:
-          <code>&lt;mm-mandelbrot class=&quot;fractals__item&quot;&gt;&lt;/mm-mandelbrot&gt;
-              </code>
-        </p>
-      </header>
-      <div class="fractals__items">
-        <mm-mandelbrot class="fractals__item"></mm-mandelbrot>
-      </div>
-    </section>
-
-    <section class="fractals">
-      <header class="fractals__header">
-        <h1 class="fractals__main-header">Spirograph</h1>
-        <h5 class="fractals__sub-header">
-          Web component for Spirograph
-        </h5>
-        <p class="intro__details code">
-          Usage:
-          <code>&lt;mm-spirograph fixed-circle-radius=&quot;690.2810128000001&quot;
-            moving-circle-radius=&quot;2.4890719999899353&quot; moving-circle-locus-length=&quot;616.4489008&quot; repeat-count=&quot;10&quot;
-            density=&quot;0.005&quot; frozen=&quot;true&quot; data-spirograph=&quot;outer&quot;&gt;&
-          </code>
-        </p>
-      </header>
-      <div class="fractals__items">
-        <mm-spirograph fixed-circle-radius="300" moving-circle-radius="3.14" moving-circle-locus-length="320"
-          repeat-count="50" density="0.0005" frozen="true" data-spirograph="outer"></mm-spirograph>
-      </div>
-    </section>
-
-
-    <section class="fractals">
-      <header class="fractals__header">
-        <h1 class="fractals__main-header">Koch Code</h1>
-        <h5 class="fractals__sub-header">
-          Web component for Koch Code
-        </h5>
-        <p class="intro__details code">
-          Usage:
-          <code>&lt;mm-kochcode levels="5" showgrowth="true"&gt;&lt;/mm-kochcode&gt;
-          </code>
-        </p>
-      </header>
-      <div class="fractals__items">
-        <mm-kochcode levels="5" showgrowth="true"></mm-kochcode>
-      </div>
-    </section>
+    <background-audio audio-src="paperback.mp3" attribution-text="Audio by bensound" /></background-audio>
   </div>
 </body>
 
