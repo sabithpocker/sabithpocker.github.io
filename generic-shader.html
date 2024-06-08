@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="dist/css/style.css" rel="stylesheet" />
+  <script type="module" src="dist/js/components/mm-shader-canvas.js"></script>
+  <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
+  <script type="module" src="dist/js/components/ui-elements/background-audio.js"></script>
+  <script type="module" src="dist/js/generic-shader.js"></script>
+  <title>Generic Shader - Markup Monks</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-B0BEV3T4NK');
+  </script>
+</head>
+
+<body>
+  <div class="content" data-content>
+    <side-bar></side-bar>
+    <section class="fractals">
+      <header class="fractals__header shader-canvas">
+        <h1 class="fractals__main-header">Shader Component</h1>
+        <h5 class="fractals__sub-header">
+          Blank Web Component that paints based on shader
+        </h5>
+        <!-- <p class="intro__details code">
+          Usage:
+          <code>&lt;mm-sierpinski depth="8" min-side-length="2000" max-side-length="2500" color="0.2, 0.6, 0.3"&gt;&lt;/mm-sierpinski&gt;
+          </code>
+        </p> -->
+      </header>
+      <div class="fractals__items">
+        <mm-shader-canvas class="shader-canvas" color="rgba(255, 255, 0, 1)"
+          data-canvas="shader-canvas"></mm-shader-canvas>
+      </div>
+    </section>
+    <background-audio audio-src="paperback.mp3" attribution-text="Audio by bensound" /></background-audio>
+  </div>
+</body>
+
+</html>

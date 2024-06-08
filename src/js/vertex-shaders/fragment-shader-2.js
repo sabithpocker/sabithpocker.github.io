@@ -7,10 +7,10 @@ uniform float u_time;
 out vec4 outColor;
 
 vec3 palette(float t) {
-    vec3 a = vec3(1.0, 0.2, 0.2);  // pastel pink
-    vec3 b = vec3(0.68, 0.85, 0.9); // pastel blue
-    vec3 c = vec3(1.0, 1.0, 1.0);   // pastel green
-    vec3 d = vec3(1.0,1.0,1.0);   // pastel purple
+    vec3 a = vec3(1.0, 0.5, 0.0);  // bright orange
+    vec3 b = vec3(0.0, 1.0, 0.5);  // bright green
+    vec3 c = vec3(0.0, 0.5, 1.0);  // bright blue
+    vec3 d = vec3(1.0, 0.0, 1.0);  // bright magenta
     
     return a + b * cos(.031428318 * (c * t + d));
 }
@@ -26,9 +26,9 @@ vec2 perturb(vec2 p, float scale) {
 
 vec2 reactionDiffusion(vec2 uv) {
     float dA = 1.0;
-    float dB = 0.5;
-    float feed = 0.055;
-    float kill = 0.062;
+    float dB = 0.4;
+    float feed = 0.025;
+    float kill = 0.06;
 
     vec2 center = vec2(0.5);
     vec2 p = uv * 2.0 - 1.0;
@@ -51,21 +51,30 @@ vec2 reactionDiffusion(vec2 uv) {
     return val + diffusion + reaction;
 }
 
+float chaoticZoom(float time) {
+    float scale = sin(time * 0.5) * cos(time * 0.25) * 0.5 + 1.0;
+    return scale;
+}
+
 void main() {
     vec2 uv = (v_fragCoord * 2.0 - u_resolution.xy) / u_resolution.y;
-    // uv = reactionDiffusion(uv) * 2.;
+    uv = reactionDiffusion(uv);
+    float zoom = chaoticZoom(u_time);
+    uv *= zoom * 2.;
+    
     vec3 col = palette(u_time);
-    vec3 finalColor = col * vec3(0.7);
+    vec3 finalColor = col * vec3(0.1);
 
     for (float i = 0.0; i < 5.0; i++) {
         uv = fract(uv * 2. + i / 5.0) - 0.5;
         float len_uv = length(uv);
-        float sin_val = cos(tan(len_uv * 3.14 + u_time/10.));
+        float sin_val = cos(tan(len_uv * 3.14 + u_time));
         float d = 0.001 / abs(sin_val / 30.0);
         finalColor += col * d;
     }
 
     outColor = vec4(finalColor, 1.0);
-}`;
+}
+`;
 
 export default fragmentShader2;
