@@ -148,8 +148,6 @@ class ShaderCanvas extends HTMLElement {
 
         // Draw the rectangle
         gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-        requestAnimationFrame(this.render.bind(this));
     }
 
     get vertexShaderSource() {
@@ -203,15 +201,11 @@ class ShaderCanvas extends HTMLElement {
 
         this.initializeWebGL();
         this.updateCanvasSize();
-        this.render(0);
+        this.render(100);
     }
 
     connectedCallback() {
         this.updateCanvasSize();
-        window.addEventListener('resize', () => {
-            this.updateCanvasSize();
-        });
-        requestAnimationFrame(this.render.bind(this));
     }
 }
 

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="dist/css/style.css" rel="stylesheet" />
+  <script type="module" src="dist/js/components/mm-spirograph.js"></script>
+  <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
+  <script type="module" src="dist/js/index.js"></script>
+  <title>Spirograph - Markup Monks</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-B0BEV3T4NK');
+  </script>
+</head>
+
+<body>
+  <div class="content" data-content>
+    <side-bar></side-bar>
+    <section class="fractals">
+      <header class="fractals__header">
+        <h1 class="fractals__main-header">Spirograph</h1>
+        <h5 class="fractals__sub-header">
+          Web component for Spirograph
+        </h5>
+        <p class="intro__details code">
+          Usage:
+          <code>&lt;mm-spirograph fixed-circle-radius=&quot;690.2810128000001&quot;
+            moving-circle-radius=&quot;2.4890719999899353&quot; moving-circle-locus-length=&quot;616.4489008&quot; repeat-count=&quot;10&quot;
+            density=&quot;0.005&quot; frozen=&quot;true&quot; data-spirograph=&quot;outer&quot;&gt;&
+          </code>
+        </p>
+      </header>
+      <div class="fractals__items">
+        <mm-spirograph fixed-circle-radius="300" moving-circle-radius="3.14" moving-circle-locus-length="320"
+          repeat-count="50" density="0.0005" frozen="true" data-spirograph="outer"></mm-spirograph>
+      </div>
+    </section>
+  </div>
+</body>
+
+</html>

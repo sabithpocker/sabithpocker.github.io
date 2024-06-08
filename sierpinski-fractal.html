@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="dist/css/style.css" rel="stylesheet" />
+  <script type="module" src="dist/js/components/mm-sierpinski.js"></script>
+  <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
+  <script type="module" src="dist/js/index.js"></script>
+  <title>Sierpinski Fractal - Markup Monks</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-B0BEV3T4NK');
+  </script>
+</head>
+
+<body>
+  <div class="content" data-content>
+    <side-bar></side-bar>
+    <section class="fractals">
+      <header class="fractals__header">
+        <h1 class="fractals__main-header">Sierpinski Fractal</h1>
+        <h5 class="fractals__sub-header">
+          Web component for Sierpinski Fractal
+        </h5>
+        <p class="intro__details code">
+          Usage:
+          <code>&lt;mm-sierpinski depth="8" min-side-length="2000" max-side-length="2500" color="0.2, 0.6, 0.3"&gt;&lt;/mm-sierpinski&gt;
+          </code>
+        </p>
+      </header>
+      <div class="fractals__items">
+        <mm-sierpinski depth="5" color="0.2, 0.6, 0.3" class="fractals__item"
+          data-spirograph="sierpinski"></mm-sierpinski>
+
+      </div>
+    </section>
+  </div>
+</body>
+
+</html>
