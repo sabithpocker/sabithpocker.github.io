@@ -30,7 +30,7 @@ vec2 reactionDiffusion(vec2 uv) {
     float feed = 0.055;
     float kill = 0.062;
 
-    vec2 center = vec2(0.5);
+    vec2 center = vec2(0.75);
     vec2 p = uv * 2.0 - 1.0;
 
     float dist = length(p);
@@ -40,7 +40,7 @@ vec2 reactionDiffusion(vec2 uv) {
     float t = u_time * 0.1;
     vec2 noise = perturb(uv + t, 0.02) * 0.005;
     
-    vec2 val = vec2(m, n) + noise;
+    vec2 val = vec2(m, n);
     vec2 diffusion = vec2(dA, dB) * (val - uv);
 
     vec2 reaction = vec2(

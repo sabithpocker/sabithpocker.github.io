@@ -1,0 +1,1 @@
+const organicAnimateSierpinski=(i,n)=>{i.render(n),window.requestAnimationFrame((n=>{organicAnimateSierpinski(i,n)}))};export default organicAnimateSierpinski;

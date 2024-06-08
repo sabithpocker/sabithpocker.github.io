@@ -6,39 +6,36 @@
   <link href="https://fonts.googleapis.com/css?family=Noto+Serif" rel="stylesheet" />
   <link href="dist/css/style.css" rel="stylesheet" />
   <script type="module" src="dist/js/components/mm-spirograph.js"></script>
-  <script type="module" src="dist/js/main.js"></script>
+  <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
+  <script type="module" src="dist/js/components/ui-elements/background-audio.js"></script>
+  <script type="module" src="dist/js/about.js"></script>
   <title>About - Markup Monks</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-B0BEV3T4NK');
+  </script>
 </head>
 
 <body>
   <div class="content" data-content>
-    <section class="navigation">
-      <ul class="navigation__list">
-        <li class="navigtion__list-item">
-          <a class="navigation__link" href="/">Home</a>
-        </li>
-        <li class="navigtion__list-item">
-          <a class="navigation__link" href="https://blog.markupmonks.com/">Blog</a>
-        </li>
-        <li class="navigtion__list-item">
-          <a class="navigation__link" href="about.html">About</a>
-        </li>
-        <li class="navigtion__list-item">
-          <a class="navigation__link" href="">Portfolio</a>
-        </li>
-      </ul>
-    </section>
+    <side-bar></side-bar>
     <section class="highlight">
       <header class="highlight__header">
-        <h1 class="highlight__main-header">About</h1>
-        <h5 class="highlight__sub-header">Meditating on Markup</h5>
+        <h1 class="highlight__main-header">Sabith<br />Pocker</h1>
+        <h5 class="highlight__sub-header">Meditating on Code</h5>
       </header>
       <div class="highlight__items">
         <mm-spirograph class="highlight__item spirograph--normal" fixed-circle-radius="690.2810128000001"
-          moving-circle-radius="2.4890719999899353" moving-circle-locus-length="616.4489008" repeat-count="10"
-          frozen="true" data-spirograph=""></mm-spirograph>
+          moving-circle-radius="2.4890719999899353" moving-circle-locus-length="616.4489008" repeat-count="500"
+          density="0.1" frozen="true" frozen="true" data-spirograph="about"></mm-spirograph>
       </div>
     </section>
+    <background-audio audio-src="paperback.mp3" attribution-text="Audio by bensound" /></background-audio>
   </div>
 </body>
 

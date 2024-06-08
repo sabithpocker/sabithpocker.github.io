@@ -1,3 +1,5 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css')
+
 @import '_colors'
 @import '_normalize'
 @import '_typography'
@@ -8,3 +10,19 @@
 @import './components/_intro'
 @import './components/_fractals'
 @import './components/_navigation'
+@import './components/_sidebar'
+
+.shader-canvas
+    height: 100dvh
+    position: absolute
+    top: 0
+    left: 0
+
+.fractals__header.shader-canvas
+    background: #000000
+    position: absolute
+    top: 50px
+    left: 50%
+    margin: 0
+    padding: 50px
+    transform: translateX(-50%)
