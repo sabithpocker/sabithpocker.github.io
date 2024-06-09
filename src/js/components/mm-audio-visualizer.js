@@ -54,12 +54,16 @@ class AudioVisualizer extends HTMLElement {
         this.attributionText = shadow.querySelector('#attribution-text');
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this.analyser = this.audioContext.createAnalyser();
-        this.dataArray = new Uint8Array(this.analyser.fftSize);
+        this.analyser.fftSize = 2048;
+        this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
         this.isPlaying = false;
 
         this.resizeObserver = new ResizeObserver(() => this.resizeCanvas());
     }
 
+    /**
+     * Called when the element is added to the document.
+     */
     connectedCallback() {
         const audioSrc = this.getAttribute('audio-src');
         const attributionText = this.getAttribute('attribution-text');
@@ -72,65 +76,195 @@ class AudioVisualizer extends HTMLElement {
         }
 
         this.initAudioControl();
+        this.initWebGL();
         this.resizeObserver.observe(this.canvas);
         this.resizeCanvas(); // Ensure the canvas is resized initially
     }
 
+    /**
+     * Load audio data from the given source URL.
+     * @param {string} src - The URL of the audio source.
+     */
     async loadAudio(src) {
         const response = await fetch(src);
         const arrayBuffer = await response.arrayBuffer();
         this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
     }
 
-    resizeCanvas() {
-        this.resize(this.canvas);
-    }
-
+    /**
+     * Resize canvas depending on devicePixelRatio.
+     * @param {HTMLCanvasElement} canvas - The canvas to be resized.
+     */
     resize(canvas) {
         const cssToRealPixels = window.devicePixelRatio || 1;
+
+        // Lookup the size the browser is displaying the canvas in CSS pixels
+        // and compute a size needed to make our drawing buffer match it in
+        // device pixels.
         const displayWidth = Math.floor(canvas.clientWidth * cssToRealPixels);
         const displayHeight = Math.floor(canvas.clientHeight * cssToRealPixels);
 
+        // Check if the canvas is not the same size.
         if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+            // Make the canvas the same size
             canvas.width = displayWidth;
             canvas.height = displayHeight;
         }
     }
 
-    renderWaveform() {
-        const canvasCtx = this.canvas.getContext('2d');
-        this.analyser.getByteTimeDomainData(this.dataArray);
+    /**
+     * Ensure the canvas is resized correctly.
+     */
+    resizeCanvas() {
+        this.resize(this.canvas);
+    }
 
-        canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        canvasCtx.lineWidth = 2;
-        canvasCtx.strokeStyle = 'rgb(0, 255, 0)';
-
-        canvasCtx.beginPath();
-        const sliceWidth = this.canvas.width / this.dataArray.length;
-        let x = 0;
-
-        for (let i = 0; i < this.dataArray.length; i++) {
-            const v = this.dataArray[i] / 128.0;
-            const y = v * this.canvas.height / 2;
-
-            if (i === 0) {
-                canvasCtx.moveTo(x, y);
-            } else {
-                canvasCtx.lineTo(x, y);
-            }
-
-            x += sliceWidth;
+    /**
+     * Initialize the WebGL context and set up shaders and buffers.
+     */
+    initWebGL() {
+        const gl = this.canvas.getContext('webgl2');
+        if (!gl) {
+            console.error('WebGL2 not supported');
+            return;
         }
 
-        canvasCtx.lineTo(this.canvas.width, this.canvas.height / 2);
-        canvasCtx.stroke();
+        const vertexShaderSource = `#version 300 es
+            in vec4 a_position;
+            out vec2 v_texCoord;
+            void main() {
+                gl_Position = a_position;
+                v_texCoord = a_position.xy * 0.5 + 0.5;
+            }
+        `;
+
+        const fragmentShaderSource = `#version 300 es
+            precision mediump float;
+            in vec2 v_texCoord;
+            uniform sampler2D u_texture;
+            uniform vec2 u_resolution;
+            out vec4 outColor;
+
+            void main() {
+                float value = texture(u_texture, vec2(v_texCoord.x, 0.5)).r;
+                float y = (value - 0.5) * u_resolution.y + (u_resolution.y / 2.0);
+                if (abs(gl_FragCoord.y - y) < 1.0) {
+                    outColor = vec4(0.0, 1.0, 0.0, 1.0);
+                } else {
+                    outColor = vec4(0.0, 0.0, 0.0, 1.0);
+                }
+            }
+        `;
+
+        const vertexShader = this.createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+        const fragmentShader = this.createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+        const program = this.createProgram(gl, vertexShader, fragmentShader);
+
+        const positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        const positions = new Float32Array([
+            -1, -1,
+            1, -1,
+            -1, 1,
+            -1, 1,
+            1, -1,
+            1, 1,
+        ]);
+        gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+
+        const vao = gl.createVertexArray();
+        gl.bindVertexArray(vao);
+
+        const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
+        gl.enableVertexAttribArray(positionAttributeLocation);
+        gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
+        const texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        this.gl = gl;
+        this.program = program;
+        this.positionBuffer = positionBuffer;
+        this.vao = vao;
+        this.texture = texture;
+        this.resolutionUniformLocation = gl.getUniformLocation(program, 'u_resolution');
+    }
+
+    /**
+     * Create and compile a shader.
+     * @param {WebGL2RenderingContext} gl - The WebGL context.
+     * @param {number} type - The type of shader, VERTEX_SHADER or FRAGMENT_SHADER.
+     * @param {string} source - The GLSL source code for the shader.
+     * @returns {WebGLShader} The compiled shader.
+     */
+    createShader(gl, type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            console.error('Shader compilation failed:', gl.getShaderInfoLog(shader));
+            gl.deleteShader(shader);
+            return null;
+        }
+        return shader;
+    }
+
+    /**
+     * Create a WebGL program from vertex and fragment shaders.
+     * @param {WebGL2RenderingContext} gl - The WebGL context.
+     * @param {WebGLShader} vertexShader - The vertex shader.
+     * @param {WebGLShader} fragmentShader - The fragment shader.
+     * @returns {WebGLProgram} The linked WebGL program.
+     */
+    createProgram(gl, vertexShader, fragmentShader) {
+        const program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            console.error('Program linking failed:', gl.getProgramInfoLog(program));
+            gl.deleteProgram(program);
+            return null;
+        }
+        return program;
+    }
+
+    /**
+     * Render the waveform using WebGL.
+     */
+    renderWaveform() {
+        this.analyser.getByteTimeDomainData(this.dataArray);
+
+        const gl = this.gl;
+        const program = this.program;
+
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, this.dataArray.length, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, this.dataArray);
+
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        gl.useProgram(program);
+
+        gl.uniform2f(this.resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+
+        gl.bindVertexArray(this.vao);
+
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
 
         if (this.isPlaying) {
             requestAnimationFrame(() => this.renderWaveform());
         }
     }
 
+    /**
+     * Initialize the audio control button.
+     */
     initAudioControl() {
         this.audioControl.addEventListener('click', () => {
             if (this.isPlaying) {
@@ -141,6 +275,9 @@ class AudioVisualizer extends HTMLElement {
         });
     }
 
+    /**
+     * Start playing the audio and rendering the waveform.
+     */
     playAudio() {
         this.source = this.audioContext.createBufferSource();
         this.source.buffer = this.audioBuffer;
@@ -154,6 +291,9 @@ class AudioVisualizer extends HTMLElement {
         this.renderWaveform();
     }
 
+    /**
+     * Stop playing the audio and rendering the waveform.
+     */
     stopAudio() {
         if (this.source) {
             this.source.stop();
