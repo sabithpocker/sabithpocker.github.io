@@ -74,9 +74,9 @@ class MandelbrotSet extends HTMLElement {
             }
 
             void main() {
-                vec2 c = (gl_FragCoord.xy - u_resolution / 2.0) * 4.0 / (u_resolution * u_zoomFactor) + u_center;
+                vec2 c = (gl_FragCoord.xy - u_resolution / 2.0) * 4.0 / (u_resolution * (u_zoomFactor * 0.5)) + u_center;
                 vec2 z = vec2(0.0);
-                int maxIterations = int(min(200.0, u_zoomFactor));; // Dynamically adjust iterations
+                int maxIterations = int(min(200.0, max(u_zoomFactor, 30.)));; // Dynamically adjust iterations
                 int i;
                 for (i = 0; i < maxIterations; i++) {
                     vec2 z2 = vec2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;

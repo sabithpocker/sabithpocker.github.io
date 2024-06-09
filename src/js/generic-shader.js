@@ -1,5 +1,5 @@
-import fragmentShader2 from "./vertex-shaders/fragment-shader-2.js";
-import vertexShader2 from "./vertex-shaders/vertex-shader-2.js";
+import fragmentShader2 from "./shaders/fragment-shaders/fragment-shader-2.js";
+import vertexShader2 from "./shaders/vertex-shaders/vertex-shader-2.js";
 
 
 

@@ -1,7 +1,7 @@
 import PerlinNoise from "./perlin.js";
 import organicAnimateSpirograph from "./utils/organic-animate-spirograph.js";
-import gradientShader from "./vertex-shaders/gradient-shader.js";
-import fragmentShaderSource from "./vertex-shaders/fragment-shader-source.js";
+import gradientShader from "./shaders/fragment-shaders/gradient-shader.js";
+import fragmentShaderSource from "./shaders/fragment-shaders/fragment-shader-source.js";
 
 function init() {
 
