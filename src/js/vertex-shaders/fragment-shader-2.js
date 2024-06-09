@@ -58,7 +58,7 @@ float chaoticZoom(float time) {
 
 void main() {
     vec2 uv = (v_fragCoord * 2.0 - u_resolution.xy) / u_resolution.y;
-    uv = reactionDiffusion(uv);
+    // uv = reactionDiffusion(uv);
     float zoom = chaoticZoom(u_time);
     uv *= zoom * 2.;
     
