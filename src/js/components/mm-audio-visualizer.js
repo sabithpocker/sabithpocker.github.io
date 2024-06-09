@@ -67,6 +67,7 @@ class AudioVisualizer extends HTMLElement {
     connectedCallback() {
         const audioSrc = this.getAttribute('audio-src');
         const attributionText = this.getAttribute('attribution-text');
+        const customFragmentShader = this.getAttribute('fragment-shader');
 
         if (audioSrc) {
             this.loadAudio(audioSrc);
@@ -76,7 +77,7 @@ class AudioVisualizer extends HTMLElement {
         }
 
         this.initAudioControl();
-        this.initWebGL();
+        this.initWebGL(customFragmentShader);
         this.resizeObserver.observe(this.canvas);
         this.resizeCanvas(); // Ensure the canvas is resized initially
     }
@@ -121,8 +122,9 @@ class AudioVisualizer extends HTMLElement {
 
     /**
      * Initialize the WebGL context and set up shaders and buffers.
+     * @param {string} customFragmentShader - The custom fragment shader source, if provided.
      */
-    initWebGL() {
+    initWebGL(customFragmentShader) {
         const gl = this.canvas.getContext('webgl2');
         if (!gl) {
             console.error('WebGL2 not supported');
@@ -138,7 +140,7 @@ class AudioVisualizer extends HTMLElement {
             }
         `;
 
-        const fragmentShaderSource = `#version 300 es
+        const defaultFragmentShaderSource = `#version 300 es
             precision mediump float;
             in vec2 v_texCoord;
             uniform sampler2D u_texture;
@@ -155,6 +157,8 @@ class AudioVisualizer extends HTMLElement {
                 }
             }
         `;
+
+        const fragmentShaderSource = customFragmentShader || defaultFragmentShaderSource;
 
         const vertexShader = this.createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
         const fragmentShader = this.createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);

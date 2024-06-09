@@ -2,11 +2,11 @@ import PerlinNoise from "./perlin.js";
 import animateSpirograph from "./utils/animate-spirograph.js";
 import organicAnimateSpirograph from "./utils/organic-animate-spirograph.js";
 import organicAnimateSierpinski from "./utils/organic-animate-sierpinski.js";
-import gradientShader from "./vertex-shaders/gradient-shader.js";
-import gradientShaderDark from "./vertex-shaders/gradient-shader-dark.js";
-import fragmentShaderSource from "./vertex-shaders/fragment-shader-source.js";
-import fragmentShader2 from "./vertex-shaders/fragment-shader-2.js";
-import vertexShader2 from "./vertex-shaders/vertex-shader-2.js";
+import gradientShader from "./shaders/fragment-shaders/gradient-shader.js";
+import gradientShaderDark from "./shaders/fragment-shaders/gradient-shader-dark.js";
+import fragmentShaderSource from "./shaders/fragment-shaders/fragment-shader-source.js";
+import fragmentShader2 from "./shaders/fragment-shaders/fragment-shader-2.js";
+import vertexShader2 from "./shaders/vertex-shaders/vertex-shader-2.js";
 // Option 2: Import just the parts you need.
 
 import Three from 'https://cdn.skypack.dev/three@0.138.0';
