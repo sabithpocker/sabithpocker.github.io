@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
     rel="stylesheet" />
   <link href="dist/css/style.css" rel="stylesheet" />
-  <script type="module" src="dist/js/components/mm-mandelbrot.js"></script>
+  <script type="module" src="dist/js/components/mm-audio-visualizer.js"></script>
   <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
   <title>Mandelbrot - Markup Monks</title>
   <!-- Google tag (gtag.js) -->
@@ -27,18 +27,18 @@
     <side-bar></side-bar>
     <section class="fractals">
       <header class="fractals__header shader-canvas">
-        <h1 class="fractals__main-header">Mandelbrot Set</h1>
+        <h1 class="fractals__main-header">Audio Visualizer</h1>
         <h5 class="fractals__sub-header">
-          Web component for Mandelbrot set
+          Web component for Audio Visualization
         </h5>
-        <p class="intro__details code">
-          Usage:
-          <code>&lt;mm-mandelbrot class=&quot;fractals__item&quot;&gt;&lt;/mm-mandelbrot&gt;
-              </code>
+        <p>
+          Example inspired by <a
+            href="https://css-tricks.com/making-an-audio-waveform-visualizer-with-vanilla-javascript">CSS Tricks
+            Article</a>
         </p>
       </header>
       <div class="fractals__items">
-        <mm-mandelbrot class="fractals__item shader-canvas" animate="true"></mm-mandelbrot>
+        <mm-audio-visualizer audio-src="paperback.mp3"></mm-audio-visualizer>
       </div>
     </section>
   </div>

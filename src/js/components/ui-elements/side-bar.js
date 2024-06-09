@@ -96,6 +96,9 @@ class SideBar extends HTMLElement {
             <li class="sidebar__list-item level-2">
               <a class="sidebar__link" href="generic-shader.html">Generic Shader</a>
             </li>
+            <li class="sidebar__list-item level-2">
+              <a class="sidebar__link" href="audio-visualizer.html">Audio Visualizer</a>
+            </li>
           </ul>
         </div>
       `;

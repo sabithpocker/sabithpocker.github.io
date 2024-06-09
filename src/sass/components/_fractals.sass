@@ -2,9 +2,10 @@
     min-height: 100dvh
     width: 100dvw
     background: var(--black)
-    padding-top: 5dvh
     position: relative
     border-bottom: 1px dashed #595959
+    &--light
+        background: var(--light)
     .fractals__header
         align-content: center
         align-items: center
@@ -26,7 +27,11 @@
     height: auto
     text-align: center
     width: 100vw
-
+    &--full-view
+        height: 100dvh
+        position: absolute
+        top: 0
+        left: 0
 .fractals__main-header
     font-size: 3.14em
     margin: 0
