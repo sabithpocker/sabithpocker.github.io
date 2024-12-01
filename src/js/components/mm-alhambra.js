@@ -3,12 +3,15 @@ class PointsRenderer {
         this.pointsCanvas = pointsCanvas;
         this.canvas = this.pointsCanvas;
         this.points = points;
+        this.selectedPoints = []; // Track selected points
         this.options = {
             dotRadius: 3,
             dotColor: [1.0, 0.4, 0.4, 0.7],
             hoverColor: [1.0, 0.8, 0.4, 0.9],
+            selectedColor: [0.4, 1.0, 0.4, 0.9], // Green for selected points
+            lineColor: [1.0, 1.0, 1.0, 0.5], // White lines with some transparency
             hoverScale: 1.5,
-            zIndex: 999,  // Default z-index for overlay
+            zIndex: 999,
             onClick: points => console.log(points),
             ...options
         };
@@ -25,27 +28,27 @@ class PointsRenderer {
             return;
         }
 
-        // Create shaders
+        // Create shaders for points
         const vertexShader = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource(vertexShader, `#version 300 es
             layout(location = 0) in vec2 a_position;
             layout(location = 1) in float a_isHovered;
+            layout(location = 2) in float a_isSelected;
             
             uniform vec2 u_resolution;
             uniform float u_pointSize;
             uniform float u_hoverScale;
             
             out float v_isHovered;
+            out float v_isSelected;
             
             void main() {
-                // Convert position from pixels to clip space
                 vec2 clipSpace = (a_position / u_resolution) * 2.0 - 1.0;
                 gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
                 
-                // Pass hover state to fragment shader
                 v_isHovered = a_isHovered;
+                v_isSelected = a_isSelected;
                 
-                // Set point size with hover scaling
                 gl_PointSize = u_pointSize * (1.0 + (u_hoverScale - 1.0) * a_isHovered);
             }
         `);
@@ -57,47 +60,90 @@ class PointsRenderer {
             
             uniform vec4 u_dotColor;
             uniform vec4 u_hoverColor;
+            uniform vec4 u_selectedColor;
             
             in float v_isHovered;
+            in float v_isSelected;
             out vec4 fragColor;
             
             void main() {
-                // Calculate distance from center of point
                 vec2 center = gl_PointCoord - vec2(0.5);
                 float dist = length(center);
-                
-                // Smooth circle with anti-aliasing
                 float alpha = smoothstep(0.5, 0.45, dist);
                 
-                // Mix between normal and hover colors
-                vec4 color = mix(u_dotColor, u_hoverColor, v_isHovered);
+                vec4 color = mix(
+                    mix(u_dotColor, u_selectedColor, v_isSelected),
+                    u_hoverColor,
+                    v_isHovered
+                );
                 fragColor = vec4(color.rgb, color.a * alpha);
             }
         `);
         gl.compileShader(fragmentShader);
 
-        // Create program
-        this.program = gl.createProgram();
-        gl.attachShader(this.program, vertexShader);
-        gl.attachShader(this.program, fragmentShader);
-        gl.linkProgram(this.program);
+        // Create line shaders
+        const lineVertexShader = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(lineVertexShader, `#version 300 es
+            layout(location = 0) in vec2 a_position;
+            
+            uniform vec2 u_resolution;
+            
+            void main() {
+                vec2 clipSpace = (a_position / u_resolution) * 2.0 - 1.0;
+                gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+            }
+        `);
+        gl.compileShader(lineVertexShader);
 
-        // Get uniform locations
-        this.uniformLocations = {
-            resolution: gl.getUniformLocation(this.program, 'u_resolution'),
-            pointSize: gl.getUniformLocation(this.program, 'u_pointSize'),
-            hoverScale: gl.getUniformLocation(this.program, 'u_hoverScale'),
-            dotColor: gl.getUniformLocation(this.program, 'u_dotColor'),
-            hoverColor: gl.getUniformLocation(this.program, 'u_hoverColor')
+        const lineFragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(lineFragmentShader, `#version 300 es
+            precision highp float;
+            
+            uniform vec4 u_lineColor;
+            out vec4 fragColor;
+            
+            void main() {
+                fragColor = u_lineColor;
+            }
+        `);
+        gl.compileShader(lineFragmentShader);
+
+        // Create programs
+        this.pointProgram = gl.createProgram();
+        gl.attachShader(this.pointProgram, vertexShader);
+        gl.attachShader(this.pointProgram, fragmentShader);
+        gl.linkProgram(this.pointProgram);
+
+        this.lineProgram = gl.createProgram();
+        gl.attachShader(this.lineProgram, lineVertexShader);
+        gl.attachShader(this.lineProgram, lineFragmentShader);
+        gl.linkProgram(this.lineProgram);
+
+        // Get uniform locations for points
+        this.pointUniformLocations = {
+            resolution: gl.getUniformLocation(this.pointProgram, 'u_resolution'),
+            pointSize: gl.getUniformLocation(this.pointProgram, 'u_pointSize'),
+            hoverScale: gl.getUniformLocation(this.pointProgram, 'u_hoverScale'),
+            dotColor: gl.getUniformLocation(this.pointProgram, 'u_dotColor'),
+            hoverColor: gl.getUniformLocation(this.pointProgram, 'u_hoverColor'),
+            selectedColor: gl.getUniformLocation(this.pointProgram, 'u_selectedColor')
         };
 
-        // Create buffers
+        // Get uniform locations for lines
+        this.lineUniformLocations = {
+            resolution: gl.getUniformLocation(this.lineProgram, 'u_resolution'),
+            lineColor: gl.getUniformLocation(this.lineProgram, 'u_lineColor')
+        };
+
+        // Create buffers for points
         this.positionBuffer = gl.createBuffer();
         this.hoverBuffer = gl.createBuffer();
+        this.selectedBuffer = gl.createBuffer();
+        this.lineBuffer = gl.createBuffer();
 
-        // Create vertex array
-        this.vao = gl.createVertexArray();
-        gl.bindVertexArray(this.vao);
+        // Create vertex arrays
+        this.pointVAO = gl.createVertexArray();
+        gl.bindVertexArray(this.pointVAO);
 
         // Set up position attribute
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
@@ -113,6 +159,101 @@ class PointsRenderer {
         gl.enableVertexAttribArray(1);
         gl.vertexAttribPointer(1, 1, gl.FLOAT, false, 0, 0);
 
+        // Set up selected attribute
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.selectedBuffer);
+        const selectedData = new Float32Array(this.points.length);
+        gl.bufferData(gl.ARRAY_BUFFER, selectedData, gl.DYNAMIC_DRAW);
+        gl.enableVertexAttribArray(2);
+        gl.vertexAttribPointer(2, 1, gl.FLOAT, false, 0, 0);
+
+        // Create line VAO
+        this.lineVAO = gl.createVertexArray();
+        gl.bindVertexArray(this.lineVAO);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.lineBuffer);
+        gl.enableVertexAttribArray(0);
+        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+        gl.bindVertexArray(null);
+    }
+
+    updateSelectedStates() {
+        const gl = this.gl;
+        const selectedData = new Float32Array(this.points.length);
+
+        this.selectedPoints.forEach(index => {
+            selectedData[index] = 1.0;
+        });
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.selectedBuffer);
+        gl.bufferSubData(gl.ARRAY_BUFFER, 0, selectedData);
+    }
+
+    updateLineBuffer() {
+        const gl = this.gl;
+        const dpr = window.devicePixelRatio || 1;
+        if (this.selectedPoints.length < 2) return;
+
+        const lineVertices = [];
+        for (let i = 1; i < this.selectedPoints.length; i++) {
+            const p1 = this.points[this.selectedPoints[i - 1]];
+            const p2 = this.points[this.selectedPoints[i]];
+            lineVertices.push(p1.x / dpr, p1.y / dpr, p2.x / dpr, p2.y / dpr);
+        }
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.lineBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lineVertices), gl.DYNAMIC_DRAW);
+    }
+
+    handleClick(event) {
+        const rect = this.canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const x = (event.clientX - rect.left) * dpr;
+        const y = (event.clientY - rect.top) * dpr;
+
+        const clickedIndex = this.findPointUnderCursor(x, y);
+        if (clickedIndex !== -1) {
+            if (true) {
+                this.selectedPoints.push(clickedIndex);
+                this.updateSelectedStates();
+                this.updateLineBuffer();
+                this.options.lineColor = [0.0, 1.0, 0.0, 1.0];
+                this.render();
+            }
+        }
+    }
+
+    render() {
+        const gl = this.gl;
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+        // Draw lines
+        if (this.selectedPoints.length >= 2) {
+            gl.useProgram(this.lineProgram);
+            gl.bindVertexArray(this.lineVAO);
+
+            gl.uniform2f(this.lineUniformLocations.resolution, this.canvas.width, this.canvas.height);
+            gl.uniform4fv(this.lineUniformLocations.lineColor, this.options.lineColor);
+
+            gl.lineWidth(2);
+            gl.drawArrays(gl.LINES, 0, (this.selectedPoints.length - 1) * 2);
+        }
+
+        // Draw points
+        gl.useProgram(this.pointProgram);
+        gl.bindVertexArray(this.pointVAO);
+
+        const dpr = window.devicePixelRatio || 1;
+        gl.uniform2f(this.pointUniformLocations.resolution, this.canvas.width * dpr, this.canvas.height * dpr);
+        gl.uniform1f(this.pointUniformLocations.pointSize, this.options.dotRadius * 2 * dpr);
+        gl.uniform1f(this.pointUniformLocations.hoverScale, this.options.hoverScale);
+        gl.uniform4fv(this.pointUniformLocations.dotColor, this.options.dotColor);
+        gl.uniform4fv(this.pointUniformLocations.hoverColor, this.options.hoverColor);
+        gl.uniform4fv(this.pointUniformLocations.selectedColor, this.options.selectedColor);
+
+        gl.drawArrays(gl.POINTS, 0, this.points.length);
         gl.bindVertexArray(null);
     }
 
@@ -142,19 +283,6 @@ class PointsRenderer {
         this.canvas.style.cursor = this.hoveredPointIndex !== -1 ? 'pointer' : 'default';
     }
 
-    handleClick(event) {
-        const rect = this.canvas.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
-        const x = (event.clientX - rect.left) * dpr;
-        const y = (event.clientY - rect.top) * dpr;
-
-        const clickedIndex = this.findPointUnderCursor(x, y);
-        if (clickedIndex !== -1 && this.options.onClick) {
-            this.options.onClick(this.points[clickedIndex]);
-        }
-        console.log(this.points[clickedIndex], x, y)
-    }
-
     findPointUnderCursor(x, y) {
         const dpr = window.devicePixelRatio || 1;
         const threshold = this.options.dotRadius * 2 * dpr;  // Threshold in logical pixels
@@ -178,34 +306,6 @@ class PointsRenderer {
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.hoverBuffer);
         gl.bufferSubData(gl.ARRAY_BUFFER, 0, hoverData);
-    }
-
-    render() {
-        const gl = this.gl;
-
-        // Clear with transparency
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-
-        gl.useProgram(this.program);
-        gl.bindVertexArray(this.vao);
-
-        // Set uniforms
-        const dpr = window.devicePixelRatio || 1;
-        gl.uniform2f(this.uniformLocations.resolution, this.canvas.width * dpr, this.canvas.height * dpr);
-        gl.uniform1f(this.uniformLocations.pointSize, this.options.dotRadius * 2 * dpr);
-        gl.uniform1f(this.uniformLocations.hoverScale, this.options.hoverScale);
-        gl.uniform4fv(this.uniformLocations.dotColor, this.options.dotColor);
-        gl.uniform4fv(this.uniformLocations.hoverColor, this.options.hoverColor);
-
-        // Enable blend mode for transparency
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-        // Draw points
-        gl.drawArrays(gl.POINTS, 0, this.points.length);
-
-        gl.bindVertexArray(null);
     }
 
     cleanup() {
