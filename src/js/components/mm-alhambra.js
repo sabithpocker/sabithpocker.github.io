@@ -23,8 +23,8 @@ class AlhambraTiled extends HTMLElement {
 
         // Create a hidden canvas for texture generation
         this.textureCanvas = document.createElement('canvas');
-        this.textureCanvas.width = 512;  // Size of one tile
-        this.textureCanvas.height = 512;
+        this.textureCanvas.width = 2048;  // Size of one tile
+        this.textureCanvas.height = 2048;
         this.textureCtx = this.textureCanvas.getContext('2d');
 
         this.initializeTexture();
@@ -45,7 +45,7 @@ class AlhambraTiled extends HTMLElement {
 
         // Set common style for all lines
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 2;
 
         // Draw guide lines (16 divisions)
         ctx.beginPath();
@@ -91,6 +91,31 @@ class AlhambraTiled extends HTMLElement {
         ctx.arc(centerX, centerY, mainCircleRadius, 0, Math.PI * 2);
         ctx.stroke();
 
+        // Calculate and draw centerCircle (1/4 of diagonal length)
+        const diagonalLength = width * Math.sqrt(2);
+        const centerCircleRadius = diagonalLength / 8;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, centerCircleRadius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Draw the two squares inside centerCircle
+        const squareSize = centerCircleRadius * Math.sqrt(2); // Side length for squares inscribed in circle
+        const halfSquare = squareSize / 2;
+
+        // First square (aligned)
+        ctx.beginPath();
+        ctx.rect(centerX - halfSquare, centerY - halfSquare, squareSize, squareSize);
+        ctx.stroke();
+
+        // Second square (rotated 45 degrees)
+        ctx.beginPath();
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(Math.PI / 4);
+        ctx.rect(-halfSquare, -halfSquare, squareSize, squareSize);
+        ctx.restore();
+        ctx.stroke();
+
         // Calculate cornerCircle radius
         const halfDiagonal = width * Math.sqrt(2) / 2;
         const cornerCircleRadius = halfDiagonal - mainCircleRadius;
@@ -114,6 +139,60 @@ class AlhambraTiled extends HTMLElement {
         // Bottom-left cornerCircle
         ctx.beginPath();
         ctx.arc(0, height, cornerCircleRadius, Math.PI * 3 / 2, Math.PI * 2);
+        ctx.stroke();
+
+        // Draw extended tangent lines
+        ctx.beginPath();
+
+        // Calculate intersection points
+        const intersectOffset = cornerCircleRadius / Math.sqrt(2);
+
+        // Function to extend line to border
+        function extendLine(x1, y1, x2, y2, width, height) {
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+
+            const m = dy / dx;
+
+            let extendedX, extendedY;
+            if (dx > 0) {
+                extendedX = width;
+                extendedY = y1 + m * (width - x1);
+            } else {
+                extendedX = 0;
+                extendedY = y1 + m * (0 - x1);
+            }
+
+            if (extendedY < 0 || extendedY > height) {
+                extendedY = dy > 0 ? height : 0;
+                extendedX = x1 + (extendedY - y1) / m;
+            }
+
+            return [extendedX, extendedY];
+        }
+
+        // Draw extended tangent lines for each corner
+        const corners = [
+            { mid1: [0, centerY], mid2: [centerX, 0], intersect: [intersectOffset, intersectOffset] },
+            { mid1: [width, centerY], mid2: [centerX, 0], intersect: [width - intersectOffset, intersectOffset] },
+            { mid1: [width, centerY], mid2: [centerX, height], intersect: [width - intersectOffset, height - intersectOffset] },
+            { mid1: [0, centerY], mid2: [centerX, height], intersect: [intersectOffset, height - intersectOffset] }
+        ];
+
+        corners.forEach(corner => {
+            let [endX1, endY1] = extendLine(corner.mid1[0], corner.mid1[1],
+                corner.intersect[0], corner.intersect[1],
+                width, height);
+            ctx.moveTo(corner.mid1[0], corner.mid1[1]);
+            ctx.lineTo(endX1, endY1);
+
+            let [endX2, endY2] = extendLine(corner.mid2[0], corner.mid2[1],
+                corner.intersect[0], corner.intersect[1],
+                width, height);
+            ctx.moveTo(corner.mid2[0], corner.mid2[1]);
+            ctx.lineTo(endX2, endY2);
+        });
+
         ctx.stroke();
     }
 
@@ -162,7 +241,7 @@ class AlhambraTiled extends HTMLElement {
         out vec4 outColor;
         
         void main() {
-            vec2 repeat = u_resolution / 512.0;  // 512 is texture size
+            vec2 repeat = u_resolution / 1024.0;  // 512 is texture size
             vec2 texCoord = fract(v_texCoord * repeat);
             outColor = texture(u_texture, texCoord);
         }`;
