@@ -1,9 +1,9 @@
 class SideBar extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
 
-        this.shadowRoot.innerHTML = `
+    this.shadowRoot.innerHTML = `
         <style>
           .sidebar {
             position: fixed;
@@ -99,17 +99,20 @@ class SideBar extends HTMLElement {
             <li class="sidebar__list-item level-2">
               <a class="sidebar__link" href="audio-visualizer.html">Audio Visualizer</a>
             </li>
+            <li class="sidebar__list-item level-2">
+              <a class="sidebar__link" href="alhambra.html">Al Hambra Pattern</a>
+            </li>
           </ul>
         </div>
       `;
 
-        this.kebabMenu = this.shadowRoot.getElementById('kebab-menu');
-        this.sidebar = this.shadowRoot.getElementById('sidebar');
+    this.kebabMenu = this.shadowRoot.getElementById('kebab-menu');
+    this.sidebar = this.shadowRoot.getElementById('sidebar');
 
-        this.kebabMenu.addEventListener('click', () => {
-            this.sidebar.classList.toggle('open');
-        });
-    }
+    this.kebabMenu.addEventListener('click', () => {
+      this.sidebar.classList.toggle('open');
+    });
+  }
 }
 
 customElements.define('side-bar', SideBar);
