@@ -45,7 +45,7 @@ class AlhambraTiled extends HTMLElement {
 
         // Set common style for all lines
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1;
 
         // Draw guide lines (16 divisions)
         ctx.beginPath();
@@ -98,23 +98,44 @@ class AlhambraTiled extends HTMLElement {
         ctx.arc(centerX, centerY, centerCircleRadius, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Draw the two squares inside centerCircle
+        // Draw the two squares with extended lines
         const squareSize = centerCircleRadius * Math.sqrt(2); // Side length for squares inscribed in circle
         const halfSquare = squareSize / 2;
 
-        // First square (aligned)
+        // First square (aligned) with extended lines
         ctx.beginPath();
-        ctx.rect(centerX - halfSquare, centerY - halfSquare, squareSize, squareSize);
+        // Vertical lines
+        ctx.moveTo(centerX - halfSquare, 0);
+        ctx.lineTo(centerX - halfSquare, height);
+        ctx.moveTo(centerX + halfSquare, 0);
+        ctx.lineTo(centerX + halfSquare, height);
+        // Horizontal lines
+        ctx.moveTo(0, centerY - halfSquare);
+        ctx.lineTo(width, centerY - halfSquare);
+        ctx.moveTo(0, centerY + halfSquare);
+        ctx.lineTo(width, centerY + halfSquare);
         ctx.stroke();
 
-        // Second square (rotated 45 degrees)
-        ctx.beginPath();
+        // Second square (rotated 45 degrees) with extended lines
         ctx.save();
         ctx.translate(centerX, centerY);
         ctx.rotate(Math.PI / 4);
-        ctx.rect(-halfSquare, -halfSquare, squareSize, squareSize);
-        ctx.restore();
+
+        // Draw extended lines
+        ctx.beginPath();
+        // Vertical lines
+        ctx.moveTo(-halfSquare, -width); // Extended beyond tile bounds to ensure coverage
+        ctx.lineTo(-halfSquare, width);
+        ctx.moveTo(halfSquare, -width);
+        ctx.lineTo(halfSquare, width);
+        // Horizontal lines
+        ctx.moveTo(-width, -halfSquare);
+        ctx.lineTo(width, -halfSquare);
+        ctx.moveTo(-width, halfSquare);
+        ctx.lineTo(width, halfSquare);
         ctx.stroke();
+
+        ctx.restore();
 
         // Calculate cornerCircle radius
         const halfDiagonal = width * Math.sqrt(2) / 2;
