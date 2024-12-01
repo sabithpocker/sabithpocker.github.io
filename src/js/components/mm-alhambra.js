@@ -3,16 +3,16 @@ class PointsRenderer {
         this.pointsCanvas = pointsCanvas;
         this.canvas = this.pointsCanvas;
         this.points = points;
-        this.selectedPoints = []; // Track selected points
+        this.selectedPoints = [];
         this.options = {
             dotRadius: 3,
             dotColor: [1.0, 0.4, 0.4, 0.7],
             hoverColor: [1.0, 0.8, 0.4, 0.9],
-            selectedColor: [0.4, 1.0, 0.4, 0.9], // Green for selected points
-            lineColor: [1.0, 1.0, 1.0, 0.5], // White lines with some transparency
+            selectedColor: [0.4, 1.0, 0.4, 0.9],
+            lineColor: [0.0, 1.0, 0.0, 0.8],
             hoverScale: 1.5,
             zIndex: 999,
-            onClick: points => console.log(points),
+            onLineAdded: null,
             ...options
         };
 
@@ -212,13 +212,19 @@ class PointsRenderer {
 
         const clickedIndex = this.findPointUnderCursor(x, y);
         if (clickedIndex !== -1) {
-            if (true) {
-                this.selectedPoints.push(clickedIndex);
-                this.updateSelectedStates();
-                this.updateLineBuffer();
-                this.options.lineColor = [0.0, 1.0, 0.0, 1.0];
-                this.render();
+            const clickedPoint = this.points[clickedIndex];
+
+            if (this.selectedPoints.length > 0) {
+                const lastPoint = this.points[this.selectedPoints[this.selectedPoints.length - 1]];
+                // Call the callback with both points
+                if (this.options.onLineAdded) {
+                    this.options.onLineAdded(lastPoint, clickedPoint);
+                }
             }
+
+            this.selectedPoints.push(clickedIndex);
+            this.updateSelectedStates();
+            this.render();
         }
     }
 
@@ -348,6 +354,7 @@ class AlhambraTiled extends HTMLElement {
 
         this.canvas = this.shadowRoot.querySelector('canvas');
         this.pointsCanvas = this.shadowRoot.querySelector('canvas[data-canvas-points]');
+        this.selectedLines = new Set(); // Track selected line pairs
 
         this.gl = this.canvas.getContext('webgl2');
         if (!this.gl) {
@@ -361,7 +368,7 @@ class AlhambraTiled extends HTMLElement {
         this.points = null;
         // Create a hidden canvas for texture generation
         this.textureCanvas = document.createElement('canvas');
-        this.textureCanvas.width = 2048;  // Size of one tile
+        this.textureCanvas.width = 2048;
         this.textureCanvas.height = 2048;
         this.textureCtx = this.textureCanvas.getContext('2d');
 
@@ -370,6 +377,27 @@ class AlhambraTiled extends HTMLElement {
         this.updateCanvasSize(this.canvas);
         this.render();
     }
+
+    addLineToPattern(point1, point2) {
+        const ctx = this.textureCtx;
+
+        // Draw the new line
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(0, 255, 0, 0.8)'; // Bright green, semi-transparent
+        ctx.lineWidth = 2;
+        ctx.moveTo(point1.x, point1.y);
+        ctx.lineTo(point2.x, point2.y);
+        ctx.stroke();
+
+        // Update WebGL texture
+        const gl = this.gl;
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.textureCanvas);
+
+        // Trigger a re-render
+        this.render();
+    }
+
     generateTilePattern() {
         const ctx = this.textureCtx;
         const width = this.textureCanvas.width;
@@ -654,19 +682,17 @@ class AlhambraTiled extends HTMLElement {
     }
 
     createPointsRenderer(points) {
-        // Create points renderer
         this.pointsRenderer = new PointsRenderer(this.pointsCanvas, points, {
             dotRadius: 3,
-            dotColor: [1.0, 0.4, 0.4, 0.7],     // Red dots
-            hoverColor: [1.0, 0.8, 0.4, 0.9],   // Yellow hover
+            dotColor: [1.0, 0.4, 0.4, 0.7],
+            hoverColor: [1.0, 0.8, 0.4, 0.9],
             hoverScale: 1.5,
+            onLineAdded: (point1, point2) => {
+                this.addLineToPattern(point1, point2);
+            }
         });
 
-        // In your render loop or after drawing the pattern
         this.pointsRenderer.render();
-
-        // When cleaning up
-        // this.pointsRenderer.cleanup();
     }
 
     initializeTexture() {
