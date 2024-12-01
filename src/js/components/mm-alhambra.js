@@ -4,6 +4,7 @@ class PointsRenderer {
         this.canvas = this.pointsCanvas;
         this.points = points;
         this.selectedPoints = [];
+        this.lineConnections = new Set(); // Store line connections as "index1,index2"
         this.options = {
             dotRadius: 3,
             dotColor: [1.0, 0.4, 0.4, 0.7],
@@ -13,12 +14,56 @@ class PointsRenderer {
             hoverScale: 1.5,
             zIndex: 999,
             onLineAdded: null,
+            onExportCSV: null,    // Callback for exporting CSV
+            onImportCSV: null,    // Callback for importing CSV
             ...options
         };
 
         this.gl = this.pointsCanvas.getContext('webgl2');
         this.setupGL();
         this.setupInteraction();
+    }
+    // Export lines to CSV format
+    exportToCSV() {
+        const lines = Array.from(this.lineConnections).map(connection => {
+            const [index1, index2] = connection.split(',');
+            return `${index1},${index2}`;
+        });
+        return 'point1,point2\n' + lines.join('\n');
+    }
+    // Import lines from CSV format
+    importFromCSV(csvContent) {
+        this.lineConnections.clear();
+        this.selectedPoints = [];
+
+        // Skip header and split into lines
+        const lines = csvContent.split('\n').slice(1);
+
+        lines.forEach(line => {
+            if (line.trim()) {
+                const [index1, index2] = line.split(',').map(Number);
+                if (!isNaN(index1) && !isNaN(index2)) {
+                    // Add to connections
+                    this.lineConnections.add(`${index1},${index2}`);
+                    // Add to selected points if not already there
+                    if (!this.selectedPoints.includes(index1)) {
+                        this.selectedPoints.push(index1);
+                    }
+                    if (!this.selectedPoints.includes(index2)) {
+                        this.selectedPoints.push(index2);
+                    }
+                    // Draw the line
+                    const point1 = this.points[index1];
+                    const point2 = this.points[index2];
+                    if (this.options.onLineAdded) {
+                        this.options.onLineAdded(point1, point2);
+                    }
+                }
+            }
+        });
+
+        this.updateSelectedStates();
+        this.render();
     }
 
     setupGL() {
@@ -215,9 +260,14 @@ class PointsRenderer {
             const clickedPoint = this.points[clickedIndex];
 
             if (this.selectedPoints.length > 0) {
-                const lastPoint = this.points[this.selectedPoints[this.selectedPoints.length - 1]];
+                const lastIndex = this.selectedPoints[this.selectedPoints.length - 1];
+                // Store connection with sorted indices for consistency
+                const lineKey = [lastIndex, clickedIndex].sort((a, b) => a - b).join(',');
+                this.lineConnections.add(lineKey);
+
                 // Call the callback with both points
                 if (this.options.onLineAdded) {
+                    const lastPoint = this.points[lastIndex];
                     this.options.onLineAdded(lastPoint, clickedPoint);
                 }
             }
@@ -376,6 +426,41 @@ class AlhambraTiled extends HTMLElement {
         this.initializeWebGL();
         this.updateCanvasSize(this.canvas);
         this.render();
+        this.setupExportImport();
+    }
+
+    setupExportImport() {
+        // Add buttons to the shadow DOM
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.cssText = `
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        `;
+
+        const exportButton = document.createElement('button');
+        exportButton.textContent = 'Export CSV';
+        exportButton.onclick = () => this.exportPattern();
+
+        const importButton = document.createElement('button');
+        importButton.textContent = 'Import CSV';
+        importButton.onclick = () => this.importPattern();
+
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.csv';
+        fileInput.style.display = 'none';
+        fileInput.onchange = (e) => this.handleFileImport(e);
+
+        buttonContainer.appendChild(exportButton);
+        buttonContainer.appendChild(importButton);
+        buttonContainer.appendChild(fileInput);
+        this.shadowRoot.appendChild(buttonContainer);
+
+        this.fileInput = fileInput;
     }
 
     addLineToPattern(point1, point2) {
@@ -681,6 +766,55 @@ class AlhambraTiled extends HTMLElement {
         console.log(this.points);
     }
 
+    exportPattern() {
+        if (this.pointsRenderer) {
+            const csv = this.pointsRenderer.exportToCSV();
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'alhambra_pattern.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+    }
+
+    importPattern() {
+        this.fileInput.click();
+    }
+
+    handleFileImport(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                // Reset the pattern
+                this.resetPattern();
+                // Import the new pattern
+                this.pointsRenderer.importFromCSV(content);
+            };
+            reader.readAsText(file);
+        }
+    }
+
+    resetPattern() {
+        // Clear the texture canvas
+        const ctx = this.textureCtx;
+        ctx.clearRect(0, 0, this.textureCanvas.width, this.textureCanvas.height);
+
+        // Redraw the original pattern
+        this.generateTilePattern();
+
+        // Update the texture
+        const gl = this.gl;
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.textureCanvas);
+
+        // Render
+        this.render();
+    }
+
     createPointsRenderer(points) {
         this.pointsRenderer = new PointsRenderer(this.pointsCanvas, points, {
             dotRadius: 3,
@@ -694,6 +828,7 @@ class AlhambraTiled extends HTMLElement {
 
         this.pointsRenderer.render();
     }
+
 
     initializeTexture() {
         // Generate the pattern
