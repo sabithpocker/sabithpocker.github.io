@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="dist/css/style.css" rel="stylesheet" />
+  <script type="module" src="dist/js/components/mm-alhambra.js"></script>
+  <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
+  <script type="module" src="dist/js/components/ui-elements/fullscreen-button.js"></script>
+  <script type="module" src="dist/js/components/performance/performance-monitor.js"></script>
+  <title>Al Hambra - Markup Monks</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-B0BEV3T4NK');
+  </script>
+</head>
+
+<body>
+  <div class="content" data-content>
+    <side-bar></side-bar>
+    <section class="fractals fractals--light">
+      <header class="fractals__header shader-canvas" style="visibility: hidden;">
+        <h1 class="fractals__main-header">Al Hambra</h1>
+        <h5 class="fractals__sub-header">
+          Web component for Tesselation
+        </h5>
+        <p class="intro__details code" style="visibility: hidden;">
+          Usage:
+          <code>&lt;mm-mandelbrot class=&quot;fractals__item&quot;&gt;&lt;/mm-mandelbrot&gt;
+              </code>
+        </p>
+      </header>
+      <div class="fractals__items">
+        <mm-alhambra class="shader-canvas">
+        </mm-alhambra>
+      </div>
+    </section>
+    <fullscreen-button></fullscreen-button>
+    <mm-performance-monitor></mm-performance-monitor>
+  </div>
+</body>
+
+</html>
