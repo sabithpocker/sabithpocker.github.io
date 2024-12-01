@@ -1,8 +1,57 @@
+const defaultPattern = `point1,point2
+5,80
+54,80
+15,54
+15,39
+39,77
+0,77
+0,13
+1,13
+1,74
+53,74
+16,53
+16,40
+40,75
+4,75
+6,67
+33,67
+9,33
+9,47
+47,66
+3,66
+3,19
+2,19
+2,69
+34,69
+10,34
+10,48
+48,72
+7,72
+7,20
+31,61
+31,64
+15,64
+24,54
+24,48
+48,63
+32,63
+32,62
+16,62
+16,59
+25,59
+25,57
+9,57
+9,61
+15,58
+26,58
+26,60
+10,60`;
 class PointsRenderer {
     constructor(pointsCanvas, points, options = {}) {
         this.pointsCanvas = pointsCanvas;
         this.canvas = this.pointsCanvas;
         this.points = points;
+        this.isDrawingEnabled = false;
         this.selectedPoints = [];
         this.lineConnections = new Set(); // Store line connections as "index1,index2"
         this.options = {
@@ -16,12 +65,41 @@ class PointsRenderer {
             onLineAdded: null,
             onExportCSV: null,    // Callback for exporting CSV
             onImportCSV: null,    // Callback for importing CSV
+            onDrawingStateChanged: null,    // Callback for drawing state changes
             ...options
         };
 
         this.gl = this.pointsCanvas.getContext('webgl2');
         this.setupGL();
         this.setupInteraction();
+        this.importFromCSV(defaultPattern);
+    }
+
+    setDrawingMode(enabled) {
+        this.isDrawingEnabled = enabled;
+        if (!enabled) {
+            // Clear current drawing state
+            this.selectedPoints = [];
+            this.updateSelectedStates();
+            this.render();
+        }
+        // Update cursor style
+        this.updateCursor();
+        // Notify parent component
+        if (this.options.onDrawingStateChanged) {
+            this.options.onDrawingStateChanged(enabled);
+        }
+    }
+    updateCursor() {
+        if (this.isDrawingEnabled) {
+            if (this.hoveredPointIndex !== -1) {
+                this.canvas.style.cursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2"/></svg>') 12 12, crosshair`;
+            } else {
+                this.canvas.style.cursor = 'crosshair';
+            }
+        } else {
+            this.canvas.style.cursor = this.hoveredPointIndex !== -1 ? 'pointer' : 'default';
+        }
     }
     // Export lines to CSV format
     exportToCSV() {
@@ -250,6 +328,8 @@ class PointsRenderer {
     }
 
     handleClick(event) {
+        if (!this.isDrawingEnabled) return;
+
         const rect = this.canvas.getBoundingClientRect();
         const dpr = window.devicePixelRatio || 1;
         const x = (event.clientX - rect.left) * dpr;
@@ -333,10 +413,9 @@ class PointsRenderer {
 
         if (previousHovered !== this.hoveredPointIndex) {
             this.updateHoverStates();
+            this.updateCursor();
             this.render();
         }
-
-        this.canvas.style.cursor = this.hoveredPointIndex !== -1 ? 'pointer' : 'default';
     }
 
     findPointUnderCursor(x, y) {
@@ -427,14 +506,50 @@ class AlhambraTiled extends HTMLElement {
         this.updateCanvasSize(this.canvas);
         this.render();
         this.setupExportImport();
+        this.setupDrawControls();
     }
+    setupDrawControls() {
+        const controlsContainer = document.createElement('div');
+        controlsContainer.style.cssText = `
+            position: absolute;
+            bottom: 10px;
+            left: 200px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        `;
 
+        const startDrawButton = document.createElement('button');
+        startDrawButton.textContent = 'Start Drawing';
+        startDrawButton.onclick = () => this.setDrawingMode(true);
+
+        const stopDrawButton = document.createElement('button');
+        stopDrawButton.textContent = 'Stop Drawing';
+        stopDrawButton.onclick = () => this.setDrawingMode(false);
+        stopDrawButton.style.display = 'none';
+
+        this.drawButtons = {
+            start: startDrawButton,
+            stop: stopDrawButton
+        };
+
+        controlsContainer.appendChild(startDrawButton);
+        controlsContainer.appendChild(stopDrawButton);
+        this.shadowRoot.appendChild(controlsContainer);
+    }
+    setDrawingMode(enabled) {
+        if (this.pointsRenderer) {
+            this.pointsRenderer.setDrawingMode(enabled);
+            this.drawButtons.start.style.display = enabled ? 'none' : 'block';
+            this.drawButtons.stop.style.display = enabled ? 'block' : 'none';
+        }
+    }
     setupExportImport() {
         // Add buttons to the shadow DOM
         const buttonContainer = document.createElement('div');
         buttonContainer.style.cssText = `
             position: absolute;
-            top: 10px;
+            bottom: 10px;
             right: 10px;
             display: flex;
             gap: 10px;
@@ -493,10 +608,16 @@ class AlhambraTiled extends HTMLElement {
 
         // Helper function to add point to set with rounding to avoid floating point issues
         const addPoint = (x, y) => {
-            // Only add points that are within the canvas bounds
-            if (x >= 0 && x <= width && y >= 0 && y <= height) {
-                const roundedX = Math.round(x * 1000) / 1000;
-                const roundedY = Math.round(y * 1000) / 1000;
+            // Add a small epsilon for floating point comparison
+            const epsilon = 0.0001;
+            // Expand the boundary check slightly to catch edge points
+            if (true || x >= -epsilon && x <= width + epsilon && y >= -epsilon && y <= height + epsilon) {
+                // Clamp values to ensure they're within bounds
+                const clampedX = Math.max(0, Math.min(width, x));
+                const clampedY = Math.max(0, Math.min(height, y));
+                // Round to avoid floating point issues
+                const roundedX = Math.round(clampedX * 1000) / 1000;
+                const roundedY = Math.round(clampedY * 1000) / 1000;
                 intersectionPoints.add(`${roundedX},${roundedY}`);
             }
         };
@@ -667,7 +788,22 @@ class AlhambraTiled extends HTMLElement {
             [width, height, cornerCircleRadius],
             [0, height, cornerCircleRadius]
         ];
+        // Add explicit corner circle edge intersections
+        // Top-left corner
+        addPoint(cornerCircleRadius, 0); // Top edge intersection
+        addPoint(0, cornerCircleRadius); // Left edge intersection
 
+        // Top-right corner
+        addPoint(width - cornerCircleRadius, 0); // Top edge intersection
+        addPoint(width, cornerCircleRadius); // Right edge intersection
+
+        // Bottom-right corner
+        addPoint(width - cornerCircleRadius, height); // Bottom edge intersection
+        addPoint(width, height - cornerCircleRadius); // Right edge intersection
+
+        // Bottom-left corner
+        addPoint(cornerCircleRadius, height); // Bottom edge intersection
+        addPoint(0, height - cornerCircleRadius); // Left edge intersection
         // Draw corner circles
         const cornerAngles = [
             [0, Math.PI / 2],
@@ -823,6 +959,10 @@ class AlhambraTiled extends HTMLElement {
             hoverScale: 1.5,
             onLineAdded: (point1, point2) => {
                 this.addLineToPattern(point1, point2);
+            },
+            onDrawingStateChanged: (enabled) => {
+                this.drawButtons.start.style.display = enabled ? 'none' : 'block';
+                this.drawButtons.stop.style.display = enabled ? 'block' : 'none';
             }
         });
 
