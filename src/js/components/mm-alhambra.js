@@ -53,23 +53,26 @@ class PointsRenderer {
         this.points = points;
         this.isDrawingEnabled = false;
         this.selectedPoints = [];
-        this.lineConnections = new Set(); // Store line connections as "index1,index2"
+        this.lineConnections = new Set();
         this.options = {
             dotRadius: 3,
             dotColor: [1.0, 0.4, 0.4, 0.7],
             hoverColor: [1.0, 0.8, 0.4, 0.9],
             selectedColor: [0.4, 1.0, 0.4, 0.9],
             lineColor: [0.0, 1.0, 0.0, 0.8],
+            lineWidth: 2, // Add default line width
             hoverScale: 1.5,
             zIndex: 999,
             onLineAdded: null,
-            onExportCSV: null,    // Callback for exporting CSV
-            onImportCSV: null,    // Callback for importing CSV
-            onDrawingStateChanged: null,    // Callback for drawing state changes
+            onExportCSV: null,
+            onImportCSV: null,
+            onDrawingStateChanged: null,
             ...options
         };
-
-        this.gl = this.pointsCanvas.getContext('webgl2');
+        this.gl = this.pointsCanvas.getContext('webgl2', {
+            antialias: true,
+            alpha: true
+        });
         this.setupGL();
         this.setupInteraction();
         this.importFromCSV(defaultPattern);
@@ -365,7 +368,7 @@ class PointsRenderer {
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-        // Draw lines
+        // Draw lines with dynamic width
         if (this.selectedPoints.length >= 2) {
             gl.useProgram(this.lineProgram);
             gl.bindVertexArray(this.lineVAO);
@@ -373,7 +376,7 @@ class PointsRenderer {
             gl.uniform2f(this.lineUniformLocations.resolution, this.canvas.width, this.canvas.height);
             gl.uniform4fv(this.lineUniformLocations.lineColor, this.options.lineColor);
 
-            gl.lineWidth(2);
+            gl.lineWidth(this.options.lineWidth);
             gl.drawArrays(gl.LINES, 0, (this.selectedPoints.length - 1) * 2);
         }
 
@@ -464,13 +467,70 @@ class AlhambraTiled extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: "open" });
-        this.shadowRoot.innerHTML = `
+        this.shadowRoot.innerHTML = `<div class="controls">
+            <div class="control-group">
+              <label>
+                Tile Size:
+                <input type="range" min="128" max="1024" value="192" step="32" data-tile-size>
+                <span class="tile-size-value">192px</span>
+              </label>
+              <label>
+                Stroke Width:
+                <input type="range" min="1" max="20" value="14" step="1" data-stroke-width>
+                <span class="stroke-width-value">14px</span>
+              </label>
+            </div>
+            <div class="control-group">
+              <label>
+                Line Color:
+                <input type="color" value="#5b6fd2" data-line-color>
+                <input type="hidden" min="0" max="100" value="30" step="5" data-line-opacity>
+              </label>
+              <label>
+                Guide Color:
+                <input type="color" value="#04135d" data-guide-color>
+              </label>
+              <label>
+                Background:
+                <input type="color" value="#031c96" data-bg-color>
+              </label>
+            </div>
+          </div>
           <canvas data-canvas></canvas>
-          <canvas data-canvas-points></canvas>
-          <style>
+          <canvas data-canvas-points style="visibility:hidden"></canvas>
+               <style>
           :host {
             display: grid;
             position: relative;
+          }
+          .controls {
+            position: absolute;
+            bottom: 10px;
+            left: 250px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 4px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+          }
+          .control-group {
+            display: flex;
+            gap: 20px;
+          }
+          .controls label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+          input[type="color"] {
+            width: 40px;
+            height: 24px;
+            padding: 0;
+            border: none;
+            border-radius: 4px;
           }
           canvas {
             width: 100%;
@@ -480,12 +540,40 @@ class AlhambraTiled extends HTMLElement {
             top: 0;
           }
           </style>`;
+        // Add color control properties
+        this.lineColorInput = this.shadowRoot.querySelector('[data-line-color]');
+        this.guideColorInput = this.shadowRoot.querySelector('[data-guide-color]');
+        this.lineOpacityInput = this.shadowRoot.querySelector('[data-line-opacity]');
+        this.lineOpacityValue = this.shadowRoot.querySelector('.line-opacity-value');
+        this.bgColorInput = this.shadowRoot.querySelector('[data-bg-color]');
+
+        this.lineColor = this.lineColorInput.value;
+        this.guideColor = this.guideColorInput.value;
+        this.lineOpacity = parseInt(this.lineOpacityInput.value) / 100;
+        this.backgroundColor = this.bgColorInput.value;
+
+        this.setupColorControls();
+
+        // Add stroke width properties
+        this.strokeWidthInput = this.shadowRoot.querySelector('[data-stroke-width]');
+        this.strokeWidthValue = this.shadowRoot.querySelector('.stroke-width-value');
+        this.strokeWidth = parseFloat(this.strokeWidthInput.value);
+
+        this.setupStrokeWidthControl();
 
         this.canvas = this.shadowRoot.querySelector('canvas');
         this.pointsCanvas = this.shadowRoot.querySelector('canvas[data-canvas-points]');
-        this.selectedLines = new Set(); // Track selected line pairs
+        this.tileSizeInput = this.shadowRoot.querySelector('[data-tile-size]');
+        this.tileSizeValue = this.shadowRoot.querySelector('.tile-size-value');
+        this.tileSize = parseInt(this.tileSizeInput.value);
+        this.selectedLines = new Set();
 
-        this.gl = this.canvas.getContext('webgl2');
+        this.setupTileSizeControl();
+
+        this.gl = this.canvas.getContext('webgl2', {
+            antialias: true,
+            alpha: true
+        });
         if (!this.gl) {
             console.error('WebGL2 not supported');
             return;
@@ -499,15 +587,91 @@ class AlhambraTiled extends HTMLElement {
         this.textureCanvas = document.createElement('canvas');
         this.textureCanvas.width = 2048;
         this.textureCanvas.height = 2048;
-        this.textureCtx = this.textureCanvas.getContext('2d');
+        this.textureCtx = this.textureCanvas.getContext('2d', {
+            antialias: true,
+            alpha: true
+        });
 
         this.initializeTexture();
         this.initializeWebGL();
         this.updateCanvasSize(this.canvas);
-        this.render();
+        // this.render();
         this.setupExportImport();
         this.setupDrawControls();
     }
+    setupColorControls() {
+        this.lineColorInput.addEventListener('input', (e) => {
+            this.lineColor = e.target.value;
+            console.log('line color input listener', this.lineColor)
+            // this.resetPattern();
+            if (this.pointsRenderer) {
+                this.pointsRenderer.lineColor = this.hexToRgba(this.lineColor, this.lineOpacity, true);
+                this.pointsRenderer.importFromCSV(defaultPattern);
+                this.pointsRenderer.render();
+            }
+        });
+
+
+        this.guideColorInput.addEventListener('input', (e) => {
+            this.guideColor = e.target.value;
+            console.log('******guide color changed******', this.guideColor)
+            this.resetPattern();
+            if (this.pointsRenderer) {
+                this.pointsRenderer.lineColor = this.hexToRgba(this.lineColor, this.lineOpacity, true);
+                this.pointsRenderer.importFromCSV(defaultPattern);
+                this.pointsRenderer.render();
+            }
+        });
+
+        this.lineOpacityInput.addEventListener('input', (e) => {
+            this.lineOpacity = parseInt(e.target.value) / 100;
+            this.lineOpacityValue.textContent = `${e.target.value}%`;
+            // this.resetPattern();
+            if (this.pointsRenderer) {
+                this.pointsRenderer.importFromCSV(defaultPattern);
+                this.pointsRenderer.render();
+            }
+        });
+
+        this.bgColorInput.addEventListener('input', (e) => {
+            this.backgroundColor = e.target.value;
+            console.log("change listener", this, this.backgroundColor, this.lineColor);
+            this.resetPattern(); // Regenerate the pattern with the new background color
+            if (this.pointsRenderer) {
+                this.pointsRenderer.importFromCSV(defaultPattern);
+                this.pointsRenderer.render();
+            }
+        });
+    }
+
+    setupStrokeWidthControl() {
+        this.strokeWidthInput.addEventListener('input', (e) => {
+            this.strokeWidth = parseFloat(e.target.value);
+            this.strokeWidthValue.textContent = `${this.strokeWidth}px`;
+            this.resetPattern(); // Regenerate pattern with new stroke width
+            if (this.pointsRenderer) {
+                this.pointsRenderer.importFromCSV(defaultPattern);
+                this.pointsRenderer.options.lineWidth = this.strokeWidth;
+                this.pointsRenderer.render();
+            }
+        });
+    }
+
+    // Helper function to convert hex to rgba
+    hexToRgba(hex, alpha = 1, array = false) {
+        if (!array) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        } else {
+            const r = parseInt(hex.slice(1, 3), 16) / 255;
+            const g = parseInt(hex.slice(3, 5), 16) / 255;
+            const b = parseInt(hex.slice(5, 7), 16) / 255;
+            return [r, g, b, alpha];
+        }
+    }
+
     setupDrawControls() {
         const controlsContainer = document.createElement('div');
         controlsContainer.style.cssText = `
@@ -536,6 +700,14 @@ class AlhambraTiled extends HTMLElement {
         controlsContainer.appendChild(startDrawButton);
         controlsContainer.appendChild(stopDrawButton);
         this.shadowRoot.appendChild(controlsContainer);
+    }
+    setupTileSizeControl() {
+        this.tileSizeInput.addEventListener('input', (e) => {
+            this.tileSize = parseInt(e.target.value);
+            this.tileSizeValue.textContent = `${this.tileSize}px`;
+            this.updatePointsCanvasSize(this.pointsCanvas);
+            this.render();
+        });
     }
     setDrawingMode(enabled) {
         if (this.pointsRenderer) {
@@ -581,20 +753,18 @@ class AlhambraTiled extends HTMLElement {
     addLineToPattern(point1, point2) {
         const ctx = this.textureCtx;
 
-        // Draw the new line
         ctx.beginPath();
-        ctx.strokeStyle = 'rgba(0, 255, 0, 0.8)'; // Bright green, semi-transparent
-        ctx.lineWidth = 2;
+        // Use the same line color but full opacity for drawn lines
+        ctx.strokeStyle = this.hexToRgba(this.lineColor, 0.8);
+        ctx.lineWidth = this.strokeWidth;
         ctx.moveTo(point1.x, point1.y);
         ctx.lineTo(point2.x, point2.y);
         ctx.stroke();
 
-        // Update WebGL texture
         const gl = this.gl;
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.textureCanvas);
 
-        // Trigger a re-render
         this.render();
     }
 
@@ -602,6 +772,16 @@ class AlhambraTiled extends HTMLElement {
         const ctx = this.textureCtx;
         const width = this.textureCanvas.width;
         const height = this.textureCanvas.height;
+
+        // Clear the canvas with the current background color
+        ctx.fillStyle = this.backgroundColor;
+        ctx.fillRect(0, 0, width, height);
+
+        // Update line style with dynamic color and opacity
+        ctx.strokeStyle = this.guideColor;
+        ctx.lineWidth = this.strokeWidth;
+        console.log("TilePattern GuideColor", this, this.guideColor, ctx.strokeStyle, width, height);
+        // ctx.strokeStyle = this.hexToRgba(this.lineColor);//'rgba(255, 255, 255, 0.3)';
         const centerX = width / 2;
         const centerY = height / 2;
         let intersectionPoints = new Set(); // Using Set to avoid duplicate points
@@ -665,13 +845,13 @@ class AlhambraTiled extends HTMLElement {
             return points;
         };
 
-        // Clear canvas with background color
-        ctx.fillStyle = '#1a1324';
-        ctx.fillRect(0, 0, width, height);
+        // // Clear canvas with background color
+        // ctx.fillStyle = this.backgroundColor;
+        // ctx.fillRect(0, 0, width, height);
 
-        // Set common style for all lines
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.lineWidth = 1;
+        // // Set common style for all lines
+        // ctx.strokeStyle = this.hexToRgba(this.lineColor, this.lineOpacity);
+        // ctx.lineWidth = 1;
 
         const angle22_5 = Math.tan(22.5 * Math.PI / 180);
         const angle67_5 = Math.tan(67.5 * Math.PI / 180);
@@ -899,7 +1079,7 @@ class AlhambraTiled extends HTMLElement {
             return { x, y };
         });
         // this.drawIntersectionPoints(points);
-        console.log(this.points);
+        // console.log(this.points);
     }
 
     exportPattern() {
@@ -939,7 +1119,8 @@ class AlhambraTiled extends HTMLElement {
         const ctx = this.textureCtx;
         ctx.clearRect(0, 0, this.textureCanvas.width, this.textureCanvas.height);
 
-        // Redraw the original pattern
+        console.log("In reset pattern: bg, line:", this, this.backgroundColor, this.lineColor);
+        // Redraw the original pattern with the new background color
         this.generateTilePattern();
 
         // Update the texture
@@ -948,15 +1129,24 @@ class AlhambraTiled extends HTMLElement {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.textureCanvas);
 
         // Render
-        this.render();
+        // this.render(); // NOT REQUIRED?
     }
 
     createPointsRenderer(points) {
+        // Convert hex color to array of normalized RGB values
+        const lineColorRgb = [
+            parseInt(this.lineColor.slice(1, 3), 16) / 255,
+            parseInt(this.lineColor.slice(3, 5), 16) / 255,
+            parseInt(this.lineColor.slice(5, 7), 16) / 255,
+        ];
+
         this.pointsRenderer = new PointsRenderer(this.pointsCanvas, points, {
             dotRadius: 3,
             dotColor: [1.0, 0.4, 0.4, 0.7],
             hoverColor: [1.0, 0.8, 0.4, 0.9],
             hoverScale: 1.5,
+            lineWidth: this.strokeWidth,
+            lineColor: [...lineColorRgb, 0.8], // Use line color with 0.8 opacity
             onLineAdded: (point1, point2) => {
                 this.addLineToPattern(point1, point2);
             },
@@ -1014,10 +1204,11 @@ class AlhambraTiled extends HTMLElement {
         in vec2 v_texCoord;
         uniform sampler2D u_texture;
         uniform vec2 u_resolution;
+        uniform float u_tileSize;  // Added uniform for tile size
         out vec4 outColor;
         
         void main() {
-            vec2 repeat = u_resolution / 1024.0;  // 512 is texture size
+            vec2 repeat = u_resolution / u_tileSize;  // Use dynamic tile size
             vec2 texCoord = fract(v_texCoord * repeat);
             outColor = texture(u_texture, texCoord);
         }`;
@@ -1060,6 +1251,7 @@ class AlhambraTiled extends HTMLElement {
         this.positionLocation = gl.getAttribLocation(this.program, 'a_position');
         this.texCoordLocation = gl.getAttribLocation(this.program, 'a_texCoord');
         this.resolutionLocation = gl.getUniformLocation(this.program, 'u_resolution');
+        this.tileSizeLocation = gl.getUniformLocation(this.program, 'u_tileSize');
 
         // Create buffers
         this.positionBuffer = gl.createBuffer();
@@ -1077,6 +1269,21 @@ class AlhambraTiled extends HTMLElement {
         ]), gl.STATIC_DRAW);
     }
 
+
+    updatePointsCanvasSize(canvas) {
+        const ratio = window.devicePixelRatio || 1;
+
+        // Use the dynamic tile size
+        canvas.style.width = `${this.tileSize}px`;
+        canvas.style.height = `${this.tileSize}px`;
+        canvas.style.minHeight = `unset`;
+
+        canvas.width = this.tileSize * ratio;
+        canvas.height = this.tileSize * ratio;
+
+        canvas.getContext('webgl2').viewport(0, 0, canvas.width, canvas.height);
+    }
+
     updateCanvasSize(canvas) {
         const ratio = window.devicePixelRatio || 1;
         const width = this.clientWidth || 300;
@@ -1087,28 +1294,14 @@ class AlhambraTiled extends HTMLElement {
         canvas.getContext('webgl2').viewport(0, 0, canvas.width, canvas.height);
     }
 
-    updatePointsCanvasSize(canvas) {
-        const ratio = window.devicePixelRatio || 1;
-        // Match the size of one tile (2048x2048)
-        const tileSize = 512;
-
-        // Set the canvas CSS size to match one tile
-        canvas.style.width = `${tileSize}px`;
-        canvas.style.height = `${tileSize}px`;
-        canvas.style.minHeight = `unset`;
-
-        // Set the actual canvas size accounting for device pixel ratio
-        canvas.width = tileSize * ratio;
-        canvas.height = tileSize * ratio;
-
-        // Update the WebGL viewport
-        canvas.getContext('webgl2').viewport(0, 0, canvas.width, canvas.height);
-    }
-
     render() {
         const gl = this.gl;
 
-        // Update position buffer
+        // Clear the canvas with the background color
+        const bgColor = this.hexToRgba(this.backgroundColor, 1);
+        gl.clearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3]);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
             0, 0,
@@ -1119,27 +1312,22 @@ class AlhambraTiled extends HTMLElement {
             this.canvas.width, this.canvas.height,
         ]), gl.STATIC_DRAW);
 
-        // Set up program
         gl.useProgram(this.program);
 
-        // Set up position attribute
         gl.enableVertexAttribArray(this.positionLocation);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
         gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-        // Set up texCoord attribute
         gl.enableVertexAttribArray(this.texCoordLocation);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
         gl.vertexAttribPointer(this.texCoordLocation, 2, gl.FLOAT, false, 0, 0);
 
-        // Set resolution uniform
         gl.uniform2f(this.resolutionLocation, gl.canvas.width, gl.canvas.height);
+        gl.uniform1f(this.tileSizeLocation, this.tileSize); // Set tile size uniform
 
-        // Bind texture
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
-        // Draw
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
 
