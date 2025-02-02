@@ -8,7 +8,7 @@ class PerformanceMonitor extends HTMLElement {
                 #container {
                     position: fixed;
                     bottom: 10px;
-                    left: 10px;
+                    right: 10px;
                     background-color: rgba(0, 0, 0, 0.7);
                     color: white;
                     padding: 10px;
