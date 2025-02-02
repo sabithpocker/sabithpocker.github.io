@@ -785,13 +785,14 @@ class MMKochCode extends HTMLElement {
         this.clearCanvas(gl, this.getBackgroundColorRBGA());
 
         const width = gl.canvas.width;
-        const margin = 10;
-        const points = [0 + margin, 0 + margin, width - margin, 0 + margin];
+        const marginX = 0;
+        const marginY = gl.canvas.height / 2;
+        const points = [0 + marginX, 0 + marginY, width - marginX, 0 + marginY];
 
         const fractalTree = new FractalTree(points, generateChildren, levels);
 
         const rangeArray = this.getRangeArray(levels).reverse();
-        const palette = this.getRandomItem(this.RGBAPalette);
+        const palette = this.RGBAPalette[34]; //this.getRandomItem(this.RGBAPalette);
 
         console.log(fractalTree, rangeArray, palette);
         console.log(...palette[5 % palette.length]);
@@ -821,7 +822,7 @@ class MMKochCode extends HTMLElement {
             this.backgroundColor.rgba.r / 255,
             this.backgroundColor.rgba.b / 255,
             this.backgroundColor.rgba.g / 255,
-            this.backgroundColor.rgba.a
+            0.0
         ]
     }
     getRangeArray(length) {
