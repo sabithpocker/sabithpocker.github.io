@@ -498,48 +498,71 @@ class AlhambraTiled extends HTMLElement {
           </div>
           <canvas data-canvas></canvas>
           <canvas data-canvas-points style="visibility:hidden"></canvas>
-               <style>
-          :host {
-            display: grid;
-            position: relative;
-          }
-          .controls {
-            position: absolute;
-            bottom: 10px;
-            left: 250px;
-            z-index: 1000;
-            background: rgba(0,0,0,0.7);
-            padding: 10px;
-            border-radius: 4px;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-          }
-          .control-group {
-            display: flex;
-            gap: 20px;
-          }
-          .controls label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          }
-          input[type="color"] {
-            width: 40px;
-            height: 24px;
-            padding: 0;
-            border: none;
-            border-radius: 4px;
-          }
-          canvas {
-            width: 100%;
-            min-height: 100%;
-            position: absolute;
-            left: 0;
-            top: 0;
-          }
+          <style>
+            :host {
+              display: grid;
+              position: relative;
+            }
+            .controls {
+              position: absolute;
+              z-index: 99;
+              bottom: 10px;
+              left: 50%;
+              transform: translateX(-50%);
+              background: rgba(0, 0, 0, 0.7);
+              padding: 10px;
+              border-radius: 4px;
+              color: white;
+              display: flex;
+              flex-direction: column;
+              gap: 10px;
+              width: 90%;
+              max-width: 400px;
+              text-align: center;
+            }
+            .control-group {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 10px;
+              justify-content: center;
+            }
+            .controls label {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              flex-wrap: wrap;
+              justify-content: center;
+            }
+            input[type="color"] {
+              width: 40px;
+              height: 24px;
+              padding: 0;
+              border: none;
+              border-radius: 4px;
+            }
+            canvas {
+              width: 100%;
+              min-height: 100%;
+              position: absolute;
+              left: 0;
+              top: 0;
+            }
+            @media (max-width: 600px) {
+              .controls {
+                width: 95%;
+                left: 50%;
+                transform: translateX(-50%);
+                bottom: 20px;
+                z-index: 99;
+                padding: 8px;
+              }
+              .control-group {
+                flex-direction: column;
+                align-items: center;
+              }
+            }
           </style>`;
+
         // Add color control properties
         this.lineColorInput = this.shadowRoot.querySelector('[data-line-color]');
         this.guideColorInput = this.shadowRoot.querySelector('[data-guide-color]');
@@ -596,8 +619,9 @@ class AlhambraTiled extends HTMLElement {
         this.initializeWebGL();
         this.updateCanvasSize(this.canvas);
         // this.render();
-        this.setupExportImport();
-        this.setupDrawControls();
+        // todo: drawing controls to be done as its own panel in a more intuitive way
+        // this.setupExportImport();
+        // this.setupDrawControls();
     }
     setupColorControls() {
         this.lineColorInput.addEventListener('input', (e) => {
