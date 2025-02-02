@@ -12,7 +12,7 @@ class AudioVisualizer extends HTMLElement {
                 flex-direction: column;
                 align-items: center;
                 width: 100vw;
-                height: 100vh;
+                height: 100dvh;
                 background-color: #000;
             }
             canvas {

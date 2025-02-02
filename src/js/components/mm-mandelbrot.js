@@ -24,7 +24,7 @@ class MandelbrotSet extends HTMLElement {
         this.shadowRoot.innerHTML = `<style>
             :host {
                 display: block;
-                width: 100vh;
+                width: 100dvh;
                 height: 100%;
             }
             canvas {
