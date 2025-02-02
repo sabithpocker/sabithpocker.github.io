@@ -471,30 +471,33 @@ class AlhambraTiled extends HTMLElement {
             <div class="control-group">
               <label>
                 Tile Size:
-                <input type="range" min="128" max="1024" value="128" step="64" data-tile-size>
-                <span class="tile-size-value">512px</span>
+                <input type="range" min="128" max="1024" value="192" step="32" data-tile-size>
+                <span class="tile-size-value">192px</span>
               </label>
               <label>
                 Stroke Width:
-                <input type="range" min="1" max="20" value="20" step="1" data-stroke-width>
-                <span class="stroke-width-value">2px</span>
+                <input type="range" min="1" max="20" value="14" step="1" data-stroke-width>
+                <span class="stroke-width-value">14px</span>
               </label>
             </div>
             <div class="control-group">
               <label>
                 Line Color:
-                <input type="color" value="#ffffff" data-line-color>
-                <input type="range" min="0" max="100" value="30" step="5" data-line-opacity>
-                <span class="line-opacity-value">30%</span>
+                <input type="color" value="#5b6fd2" data-line-color>
+                <input type="hidden" min="0" max="100" value="30" step="5" data-line-opacity>
+              </label>
+              <label>
+                Guide Color:
+                <input type="color" value="#04135d" data-guide-color>
               </label>
               <label>
                 Background:
-                <input type="color" value="#1a1324" data-bg-color>
+                <input type="color" value="#031c96" data-bg-color>
               </label>
             </div>
           </div>
           <canvas data-canvas></canvas>
-          <canvas data-canvas-points></canvas>
+          <canvas data-canvas-points style="visibility:hidden"></canvas>
                <style>
           :host {
             display: grid;
@@ -539,11 +542,13 @@ class AlhambraTiled extends HTMLElement {
           </style>`;
         // Add color control properties
         this.lineColorInput = this.shadowRoot.querySelector('[data-line-color]');
+        this.guideColorInput = this.shadowRoot.querySelector('[data-guide-color]');
         this.lineOpacityInput = this.shadowRoot.querySelector('[data-line-opacity]');
         this.lineOpacityValue = this.shadowRoot.querySelector('.line-opacity-value');
         this.bgColorInput = this.shadowRoot.querySelector('[data-bg-color]');
 
         this.lineColor = this.lineColorInput.value;
+        this.guideColor = this.guideColorInput.value;
         this.lineOpacity = parseInt(this.lineOpacityInput.value) / 100;
         this.backgroundColor = this.bgColorInput.value;
 
@@ -590,25 +595,38 @@ class AlhambraTiled extends HTMLElement {
         this.initializeTexture();
         this.initializeWebGL();
         this.updateCanvasSize(this.canvas);
-        this.render();
+        // this.render();
         this.setupExportImport();
         this.setupDrawControls();
     }
     setupColorControls() {
         this.lineColorInput.addEventListener('input', (e) => {
             this.lineColor = e.target.value;
-            this.resetPattern();// Regenerate pattern with new stroke width
+            console.log('line color input listener', this.lineColor)
+            // this.resetPattern();
             if (this.pointsRenderer) {
+                this.pointsRenderer.lineColor = this.hexToRgba(this.lineColor, this.lineOpacity, true);
                 this.pointsRenderer.importFromCSV(defaultPattern);
                 this.pointsRenderer.render();
             }
+        });
 
+
+        this.guideColorInput.addEventListener('input', (e) => {
+            this.guideColor = e.target.value;
+            console.log('******guide color changed******', this.guideColor)
+            this.resetPattern();
+            if (this.pointsRenderer) {
+                this.pointsRenderer.lineColor = this.hexToRgba(this.lineColor, this.lineOpacity, true);
+                this.pointsRenderer.importFromCSV(defaultPattern);
+                this.pointsRenderer.render();
+            }
         });
 
         this.lineOpacityInput.addEventListener('input', (e) => {
             this.lineOpacity = parseInt(e.target.value) / 100;
             this.lineOpacityValue.textContent = `${e.target.value}%`;
-            this.resetPattern();// Regenerate pattern with new stroke width
+            // this.resetPattern();
             if (this.pointsRenderer) {
                 this.pointsRenderer.importFromCSV(defaultPattern);
                 this.pointsRenderer.render();
@@ -617,15 +635,13 @@ class AlhambraTiled extends HTMLElement {
 
         this.bgColorInput.addEventListener('input', (e) => {
             this.backgroundColor = e.target.value;
+            console.log("change listener", this, this.backgroundColor, this.lineColor);
+            this.resetPattern(); // Regenerate the pattern with the new background color
+            if (this.pointsRenderer) {
+                this.pointsRenderer.importFromCSV(defaultPattern);
+                this.pointsRenderer.render();
+            }
         });
-    }
-
-    // Helper function to convert hex to rgba
-    hexToRgba(hex, alpha = 1) {
-        const r = parseInt(hex.slice(1, 3), 16);
-        const g = parseInt(hex.slice(3, 5), 16);
-        const b = parseInt(hex.slice(5, 7), 16);
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
     setupStrokeWidthControl() {
@@ -640,6 +656,22 @@ class AlhambraTiled extends HTMLElement {
             }
         });
     }
+
+    // Helper function to convert hex to rgba
+    hexToRgba(hex, alpha = 1, array = false) {
+        if (!array) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        } else {
+            const r = parseInt(hex.slice(1, 3), 16) / 255;
+            const g = parseInt(hex.slice(3, 5), 16) / 255;
+            const b = parseInt(hex.slice(5, 7), 16) / 255;
+            return [r, g, b, alpha];
+        }
+    }
+
     setupDrawControls() {
         const controlsContainer = document.createElement('div');
         controlsContainer.style.cssText = `
@@ -741,14 +773,15 @@ class AlhambraTiled extends HTMLElement {
         const width = this.textureCanvas.width;
         const height = this.textureCanvas.height;
 
-        // Update background color
+        // Clear the canvas with the current background color
         ctx.fillStyle = this.backgroundColor;
         ctx.fillRect(0, 0, width, height);
 
         // Update line style with dynamic color and opacity
-        ctx.strokeStyle = this.hexToRgba(this.lineColor, this.lineOpacity);
+        ctx.strokeStyle = this.guideColor;
         ctx.lineWidth = this.strokeWidth;
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        console.log("TilePattern GuideColor", this, this.guideColor, ctx.strokeStyle, width, height);
+        // ctx.strokeStyle = this.hexToRgba(this.lineColor);//'rgba(255, 255, 255, 0.3)';
         const centerX = width / 2;
         const centerY = height / 2;
         let intersectionPoints = new Set(); // Using Set to avoid duplicate points
@@ -812,13 +845,13 @@ class AlhambraTiled extends HTMLElement {
             return points;
         };
 
-        // Clear canvas with background color
-        ctx.fillStyle = '#1a1324';
-        ctx.fillRect(0, 0, width, height);
+        // // Clear canvas with background color
+        // ctx.fillStyle = this.backgroundColor;
+        // ctx.fillRect(0, 0, width, height);
 
-        // Set common style for all lines
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.lineWidth = 1;
+        // // Set common style for all lines
+        // ctx.strokeStyle = this.hexToRgba(this.lineColor, this.lineOpacity);
+        // ctx.lineWidth = 1;
 
         const angle22_5 = Math.tan(22.5 * Math.PI / 180);
         const angle67_5 = Math.tan(67.5 * Math.PI / 180);
@@ -1086,7 +1119,8 @@ class AlhambraTiled extends HTMLElement {
         const ctx = this.textureCtx;
         ctx.clearRect(0, 0, this.textureCanvas.width, this.textureCanvas.height);
 
-        // Redraw the original pattern
+        console.log("In reset pattern: bg, line:", this, this.backgroundColor, this.lineColor);
+        // Redraw the original pattern with the new background color
         this.generateTilePattern();
 
         // Update the texture
@@ -1095,7 +1129,7 @@ class AlhambraTiled extends HTMLElement {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.textureCanvas);
 
         // Render
-        this.render();
+        // this.render(); // NOT REQUIRED?
     }
 
     createPointsRenderer(points) {
@@ -1262,6 +1296,11 @@ class AlhambraTiled extends HTMLElement {
 
     render() {
         const gl = this.gl;
+
+        // Clear the canvas with the background color
+        const bgColor = this.hexToRgba(this.backgroundColor, 1);
+        gl.clearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3]);
+        gl.clear(gl.COLOR_BUFFER_BIT);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
