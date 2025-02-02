@@ -166,6 +166,11 @@ body {
   position: absolute;
 }
 
+@media (max-width: 1400px) {
+  .intro__details.code {
+    display: none;
+  }
+}
 .fractals {
   min-height: 100dvh;
   width: 100dvw;
@@ -235,6 +240,48 @@ body {
   width: 100vw;
 }
 
+.shader-canvas, .fractals__item--full-view {
+  height: 100dvh;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.fractals__header.shader-canvas, .fractals__header.fractals__header--full-view {
+  background: rgba(0, 0, 0, 0.4705882353);
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  margin: 0;
+  padding: 50px;
+  transform: translateX(-50%);
+}
+
+@media (max-width: 768px) {
+  .shader-canvas, .fractals__item--full-view {
+    height: 100dvh;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .fractals__header.shader-canvas, .fractals__header.fractals__header--full-view {
+    background: rgba(0, 0, 0, 0.5215686275);
+    position: absolute;
+    top: 70px;
+    left: 10px;
+    width: calc(100dvw - 40px);
+    padding: 30px 10px;
+    transform: none;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1882352941);
+  }
+  .fractals__main-header {
+    font-size: 1.57em;
+  }
+  .fractals__sub-header {
+    font-size: 1.0466666667em;
+  }
+}
 .navigation {
   display: grid;
   position: fixed;
@@ -318,21 +365,4 @@ body {
 }
 .sidebar__list .sidebar__link:hover {
   color: #f1f1f1;
-}
-
-.shader-canvas {
-  height: 100dvh;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-.fractals__header.shader-canvas {
-  background: #000000;
-  position: absolute;
-  top: 50px;
-  left: 50%;
-  margin: 0;
-  padding: 50px;
-  transform: translateX(-50%);
 }

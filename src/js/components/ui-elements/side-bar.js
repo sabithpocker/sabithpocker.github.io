@@ -25,7 +25,7 @@ class SideBar extends HTMLElement {
           }
           .kebab-menu {
             position: fixed;
-            z-index: 9999; /* Increased z-index */
+            z-index: 99999; /* Increased z-index */
             top: 20px;
             left: 20px;
             background: none;

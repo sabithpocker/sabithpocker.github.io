@@ -89,9 +89,9 @@ class Sierpinski extends HTMLElement {
     drawSierpinski(depth, minSideLength, maxSideLength, color) {
         const width = this.gl.canvas.width;
         const height = this.gl.canvas.height;
-        const side = height;
+        const side = Math.min(width, height) * 0.75;
         const altitude = (Math.sqrt(3) / 2) * side;
-        const center = { x: width / 2, y: altitude / 2 };
+        const center = width < height ? { x: width / 2, y: altitude + (side / 4) } : { x: width / 2, y: altitude - (side / 4) };
         const points = this.getEquilateralPoints(center, side);
         const childPoints = this.getChildTrianglePoints(points, depth);
         const colorArray = color.split(',').map(parseFloat);

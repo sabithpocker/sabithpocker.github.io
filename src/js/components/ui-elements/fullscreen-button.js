@@ -18,6 +18,11 @@ class FullscreenButton extends HTMLElement {
             z-index: 9999;
             color: #333;
           }
+            @media (max-width: 768px) {
+                :host {
+                    display: none
+                }
+            }
         </style>
         <i id="fullscreen-control" class="fas fa-expand fullscreen-control"></i>
       `;
