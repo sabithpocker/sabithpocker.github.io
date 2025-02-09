@@ -1,3 +1,15 @@
+
+// Custom debounce function
+function debounce(func, wait) {
+    let timeoutId;
+    return function (...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(this, args);
+        }, wait);
+    };
+}
+
 const defaultPattern = `point1,point2
 5,80
 54,80
@@ -463,6 +475,7 @@ class PointsRenderer {
         // this.canvas.remove();
     }
 }
+
 class AlhambraTiled extends HTMLElement {
     constructor() {
         super();
@@ -471,8 +484,8 @@ class AlhambraTiled extends HTMLElement {
             <div class="control-group">
               <label>
                 Tile Size:
-                <input type="range" min="128" max="1024" value="192" step="32" data-tile-size>
-                <span class="tile-size-value">192px</span>
+                <input type="range" min="32" max="1024" value="32" step="32" data-tile-size>
+                <span class="tile-size-value">32px</span>
               </label>
               <label>
                 Stroke Width:
@@ -563,6 +576,16 @@ class AlhambraTiled extends HTMLElement {
             }
           </style>`;
 
+        // Mouse tracking variables
+        this.isDragging = false;
+        this.lastMouseX = 0.0;
+        this.lastMouseY = 0.0;
+        this.rotationX = Math.PI + (Math.PI / 32);
+        this.rotationY = Math.PI - (Math.PI / 8);
+        // Create a debounced function for updating the view matrix
+        this.debouncedUpdateView = debounce(function () {
+            this.updateViewMatrix();
+        }, 50); // roughly 60fps, adjust as needed
         // Add color control properties
         this.lineColorInput = this.shadowRoot.querySelector('[data-line-color]');
         this.guideColorInput = this.shadowRoot.querySelector('[data-guide-color]');
@@ -618,11 +641,127 @@ class AlhambraTiled extends HTMLElement {
         this.initializeTexture();
         this.initializeWebGL();
         this.updateCanvasSize(this.canvas);
+
+        // titlt & perspective
+        // Create perspective matrix
+        const fieldOfView = 60 * Math.PI / 180;   // 60 degrees in radians
+        const aspect = 1.0; //this.gl.canvas.clientWidth / this.gl.canvas.clientHeight;
+        const zNear = 1.0;
+        const zFar = 100.0;
+        this.projectionMatrix = mat4.create();
+        mat4.perspective(this.projectionMatrix, fieldOfView, aspect, zNear, zFar);
+        // mat4.perspective(perspectiveMatrix,.6*Math.PI,1,.001,10);
+
+        // Initialize view matrix
+        this.viewMatrix = mat4.create();
+        // Reset view matrix
+        mat4.identity(this.viewMatrix);
+        mat4.translate(this.viewMatrix, this.viewMatrix, [0.0, 0.0, -1.0]);
+        // Apply uniform 2x scaling
+        mat4.scale(this.viewMatrix, this.viewMatrix, [10.0, 10.0, 10.0]);
+
+        // // Limit rotation angles
+        // this.rotationX = Math.max(Math.min(this.rotationX, Math.PI / 4), -Math.PI / 4);
+        // this.rotationY = Math.max(Math.min(this.rotationY, Math.PI / 4), -Math.PI / 4);
+
+        // // Apply rotations
+        // mat4.rotate(this.viewMatrix, this.viewMatrix, 0.0, [1, 0, 0]); // X-axis rotation
+        // mat4.rotate(this.viewMatrix, this.viewMatrix, 0.0, [0, 1, 0]); // Y-axis rotation
+
+        this.setupMouseControls();
+        this.debouncedUpdateView();
         // this.render();
         // todo: drawing controls to be done as its own panel in a more intuitive way
         // this.setupExportImport();
         // this.setupDrawControls();
     }
+
+    async requestPermission() {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            try {
+                const permission = await DeviceOrientationEvent.requestPermission();
+                if (permission === 'granted') {
+                    window.addEventListener('deviceorientation', this.handleOrientation);
+                }
+            } catch (error) {
+                console.error('Error requesting device orientation permission:', error);
+            }
+        } else {
+            // For non-iOS devices, add the listener directly
+            window.addEventListener('deviceorientation', this.handleOrientation);
+        }
+    }
+
+    // Handle device orientation changes
+    handleOrientation(event) {
+        const beta = event.beta * Math.PI / 180;  // Convert to radians
+        const gamma = event.gamma * Math.PI / 180; // Convert to radians
+
+        // Update rotation angles
+        this.rotationX = Math.max(Math.min(beta, Math.PI / 4), -Math.PI / 4);
+        this.rotationY = Math.max(Math.min(gamma, Math.PI / 4), -Math.PI / 4);
+
+        // Call the debounced update function
+        this.debouncedUpdateView();
+    }
+
+    // Update view matrix based on current rotation
+    updateViewMatrix() {
+        // Reset view matrix
+        mat4.identity(this.viewMatrix);
+        mat4.translate(this.viewMatrix, this.viewMatrix, [0.0, 0.0, -2.0]);
+
+        // Apply uniform 2x scaling
+        mat4.scale(this.viewMatrix, this.viewMatrix, [10.0, 10.0, 10.0]);
+
+        // Apply rotations
+        mat4.rotate(this.viewMatrix, this.viewMatrix, this.rotationX, [1, 0, 0]); // X-axis rotation
+        mat4.rotate(this.viewMatrix, this.viewMatrix, this.rotationY, [0, 1, 0]); // Y-axis rotation
+
+        // console.log('updated view matrix')
+        //rerender
+        this.resetPattern();
+        if (this.pointsRenderer) {
+            this.pointsRenderer.lineColor = this.hexToRgba(this.lineColor, this.lineOpacity, true);
+            this.pointsRenderer.importFromCSV(defaultPattern);
+            this.pointsRenderer.render();
+        }
+    }
+
+    setupMouseControls() {
+        // Mouse event handlers
+        // Add mouse event listeners to the canvas
+        this.shadowRoot.addEventListener('mousedown', (event) => {
+            this.isDragging = true;
+            this.lastMouseX = event.clientX;
+            this.lastMouseY = event.clientY;
+        });
+        this.shadowRoot.addEventListener('mouseup', () => {
+            this.isDragging = false;
+        });
+        this.shadowRoot.addEventListener('mousemove', (event) => {
+            if (!this.isDragging) return;
+
+            const deltaX = event.clientX - this.lastMouseX;
+            const deltaY = event.clientY - this.lastMouseY;
+
+            // Update rotation angles (scale down the movement for smoother rotation)
+            this.rotationY += deltaX * 0.005;
+            this.rotationX += deltaY * 0.005;
+
+            // console.log(this.rotationX, this.rotationY);
+            // Limit rotation angles
+            // this.rotationX = Math.max(Math.min(this.rotationX, Math.PI), -Math.PI);
+            // this.rotationY = Math.max(Math.min(this.rotationY, Math.PI), -Math.PI);
+
+            this.lastMouseX = event.clientX;
+            this.lastMouseY = event.clientY;
+
+            // Call the debounced update function
+            this.debouncedUpdateView();
+        });
+    }
+
     setupColorControls() {
         this.lineColorInput.addEventListener('input', (e) => {
             this.lineColor = e.target.value;
@@ -804,7 +943,7 @@ class AlhambraTiled extends HTMLElement {
         // Update line style with dynamic color and opacity
         ctx.strokeStyle = this.guideColor;
         ctx.lineWidth = this.strokeWidth;
-        console.log("TilePattern GuideColor", this, this.guideColor, ctx.strokeStyle, width, height);
+        // console.log("TilePattern GuideColor", this, this.guideColor, ctx.strokeStyle, width, height);
         // ctx.strokeStyle = this.hexToRgba(this.lineColor);//'rgba(255, 255, 255, 0.3)';
         const centerX = width / 2;
         const centerY = height / 2;
@@ -1143,12 +1282,25 @@ class AlhambraTiled extends HTMLElement {
         const ctx = this.textureCtx;
         ctx.clearRect(0, 0, this.textureCanvas.width, this.textureCanvas.height);
 
-        console.log("In reset pattern: bg, line:", this, this.backgroundColor, this.lineColor);
+        // console.log("In reset pattern: bg, line:", this, this.backgroundColor, this.lineColor);
         // Redraw the original pattern with the new background color
         this.generateTilePattern();
 
         // Update the texture
         const gl = this.gl;
+
+        // START TILT
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // Combine projection and view matrices
+        const pvMatrix = mat4.create();
+        mat4.multiply(pvMatrix, this.projectionMatrix, this.viewMatrix);
+
+        // Set the matrix uniform in your shader
+        gl.uniformMatrix4fv(this.matrixLocation, false, pvMatrix);
+
+        //stop TITLT
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.textureCanvas);
 
@@ -1210,6 +1362,7 @@ class AlhambraTiled extends HTMLElement {
         return `#version 300 es
         in vec4 a_position;
         in vec2 a_texCoord;
+        uniform mat4 u_matrix;
         uniform vec2 u_resolution;
         out vec2 v_texCoord;
         
@@ -1217,6 +1370,7 @@ class AlhambraTiled extends HTMLElement {
             vec2 zeroToOne = a_position.xy / u_resolution;
             vec2 clipSpace = (zeroToOne * 2.0 - 1.0) * vec2(1, -1);
             gl_Position = vec4(clipSpace, 0, 1);
+            gl_Position = u_matrix * gl_Position;
             v_texCoord = a_texCoord;
         }`;
     }
@@ -1273,6 +1427,7 @@ class AlhambraTiled extends HTMLElement {
 
         // Get locations
         this.positionLocation = gl.getAttribLocation(this.program, 'a_position');
+        this.matrixLocation = this.gl.getUniformLocation(this.program, 'u_matrix');
         this.texCoordLocation = gl.getAttribLocation(this.program, 'a_texCoord');
         this.resolutionLocation = gl.getUniformLocation(this.program, 'u_resolution');
         this.tileSizeLocation = gl.getUniformLocation(this.program, 'u_tileSize');
@@ -1309,7 +1464,7 @@ class AlhambraTiled extends HTMLElement {
     }
 
     updateCanvasSize(canvas) {
-        const ratio = window.devicePixelRatio || 1;
+        const ratio = window.devicePixelRatio * 2 || 2;
         const width = this.clientWidth || 300;
         const height = this.clientHeight || 300;
 
