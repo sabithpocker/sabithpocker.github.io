@@ -11,6 +11,7 @@
   <script type="module" src="dist/js/components/mm-sierpinski.js"></script>
   <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
   <script type="module" src="dist/js/index.js"></script>
+  <script type="module" src="dist/js/utils/title-card.js"></script>
   <title>Sierpinski Fractal - Markup Monks</title>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
@@ -27,7 +28,8 @@
   <div class="content" data-content>
     <side-bar></side-bar>
     <section class="fractals">
-      <header class="fractals__header fractals__header--full-view">
+      <header class="fractals__header fractals__header--full-view" data-title-card>
+        <button type="button" class="title-card__close" data-close-title aria-label="Close title">&times;</button>
         <h1 class="fractals__main-header">Sierpinski Fractal</h1>
         <h5 class="fractals__sub-header">
           Web component for Sierpinski Fractal
@@ -38,6 +40,7 @@
           </code>
         </p>
       </header>
+      <button type="button" class="title-card__open" data-open-title></button>
       <div class="fractals__items">
         <mm-sierpinski class="fractals__item--full-view" depth="5" color="0.2, 0.6, 0.3" class="fractals__item"
           data-spirograph="sierpinski"></mm-sierpinski>

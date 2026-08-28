@@ -21,6 +21,7 @@
   <script type="module" src="dist/js/components/ui-elements/background-audio.js"></script>
   <script type="module" src="dist/js/components/ui-elements/fullscreen-button.js"></script>
   <script type="module" src="dist/js/index.js"></script>
+  <script type="module" src="dist/js/utils/title-card.js"></script>
   <title>Markup Monks</title>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
@@ -37,10 +38,12 @@
   <div class="content" data-content>
     <side-bar></side-bar>
     <section class="highlight">
-      <header class="highlight__header">
+      <header class="highlight__header" data-title-card>
+        <button type="button" class="title-card__close" data-close-title aria-label="Close title">&times;</button>
         <h1 class="highlight__main-header">Markup Monks</h1>
         <h5 class="highlight__sub-header">Code + Design</h5>
       </header>
+      <button type="button" class="title-card__open" data-open-title></button>
       <div class="highlight__items">
         <mm-spirograph class="highlight__item spirograph--normal" fixed-circle-radius="690.2810128000001"
           moving-circle-radius="2.4890719999899353" moving-circle-locus-length="616.4489008" repeat-count="30"

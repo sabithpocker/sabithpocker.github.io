@@ -5,20 +5,31 @@
 
 .highlight__header
     position: absolute
-    top: 0
     z-index: 99
+    top: 50px
+    left: 50%
+    transform: translateX(-50%)
     display: grid
-    grid-template-rows: 100px 50px
+    grid-template-rows: auto auto
     align-content: center
     align-items: center
-    height: 100dvh
+    height: auto
+    width: auto
+    margin: 0
+    padding: 50px
     text-align: center
-    width: 100vw
+    background: rgba(20, 20, 24, 0.16)
+    backdrop-filter: blur(2px) saturate(165%)
+    -webkit-backdrop-filter: blur(2px) saturate(165%)
+    border: 1px solid rgba(255, 255, 255, 0.28)
+    border-radius: 28px
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.3)
 
 .highlight__main-header
     font-size: 3.14em
     margin: 0
-    color: var(--black)
+    color: rgba(255, 255, 255, 0.78)
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.35), 0 1px 3px rgba(0, 0, 0, 0.35)
     font-weight: normal
     letter-spacing: 0.1em
     text-transform: uppercase
@@ -26,10 +37,26 @@
 .highlight__sub-header
     font-size: calc(3.14em/2)
     margin: 0
-    color: var(--black)
+    color: rgba(255, 255, 255, 0.55)
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 1px 3px rgba(0, 0, 0, 0.35)
     font-weight: normal
     letter-spacing: 0.1em
     text-transform: uppercase
+
+@media (max-width: 768px)
+    .highlight__header
+        top: 70px
+        left: 10px
+        width: calc(100dvw - 40px)
+        padding: 30px 10px
+        transform: none
+        border-radius: 22px
+
+    .highlight__main-header
+        font-size: calc(3.14em/2)
+
+    .highlight__sub-header
+        font-size: calc(3.14em/3)
 
 .highlight__items
     min-height: 100dvh

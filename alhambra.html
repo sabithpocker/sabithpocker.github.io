@@ -13,6 +13,7 @@
   <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
   <script type="module" src="dist/js/components/ui-elements/fullscreen-button.js"></script>
   <script type="module" src="dist/js/components/performance/performance-monitor.js"></script>
+  <script type="module" src="dist/js/utils/title-card.js"></script>
   <title>Al Hambra - Markup Monks</title>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
@@ -29,7 +30,8 @@
   <div class="content" data-content>
     <side-bar></side-bar>
     <section class="fractals fractals--light">
-      <header class="fractals__header shader-canvas">
+      <header class="fractals__header shader-canvas" data-title-card>
+        <button type="button" class="title-card__close" data-close-title aria-label="Close title">&times;</button>
         <h1 class="fractals__main-header">Al Hambra</h1>
         <h5 class="fractals__sub-header">
           Web component for Tesselation
@@ -40,6 +42,7 @@
               </code>
         </p>
       </header>
+      <button type="button" class="title-card__open" data-open-title></button>
       <div class="fractals__items">
         <mm-alhambra style="height:100dvh; width: 100vw">
         </mm-alhambra>

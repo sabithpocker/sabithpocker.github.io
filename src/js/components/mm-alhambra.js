@@ -1,3 +1,4 @@
+import PerlinNoise from "../perlin.js";
 
 // Custom debounce function
 function debounce(func, wait) {
@@ -480,7 +481,8 @@ class AlhambraTiled extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: "open" });
-        this.shadowRoot.innerHTML = `<div class="controls">
+        this.shadowRoot.innerHTML = `<div class="controls collapsed" data-controls>
+            <button type="button" class="controls__close" data-close-controls aria-label="Close toolbar">&times;</button>
             <div class="control-group">
               <label>
                 Tile Size:
@@ -491,6 +493,11 @@ class AlhambraTiled extends HTMLElement {
                 Stroke Width:
                 <input type="range" min="1" max="20" value="14" step="1" data-stroke-width>
                 <span class="stroke-width-value">14px</span>
+              </label>
+              <label>
+                Diffusion Speed:
+                <input type="range" min="0" max="5" value="2.5" step="0.1" data-diffusion-speed>
+                <span class="diffusion-speed-value">2.5x</span>
               </label>
             </div>
             <div class="control-group">
@@ -508,7 +515,14 @@ class AlhambraTiled extends HTMLElement {
                 <input type="color" value="#031c96" data-bg-color>
               </label>
             </div>
+            <div class="control-group">
+              <label>
+                <input type="checkbox" data-perspective-toggle>
+                Perspective Drag (impacts performance)
+              </label>
+            </div>
           </div>
+          <button type="button" class="controls__open visible" data-open-controls>Open Toolbar</button>
           <canvas data-canvas></canvas>
           <canvas data-canvas-points style="visibility:hidden"></canvas>
           <style>
@@ -522,16 +536,79 @@ class AlhambraTiled extends HTMLElement {
               bottom: 10px;
               left: 50%;
               transform: translateX(-50%);
-              background: rgba(0, 0, 0, 0.7);
-              padding: 10px;
-              border-radius: 4px;
-              color: white;
+              background: rgba(20, 20, 24, 0.16);
+              backdrop-filter: blur(2px) saturate(165%);
+              -webkit-backdrop-filter: blur(2px) saturate(165%);
+              border: 1px solid rgba(255, 255, 255, 0.28);
+              box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+              padding: 16px;
+              border-radius: 24px;
+              color: rgba(255, 255, 255, 0.72);
+              text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.35);
               display: flex;
               flex-direction: column;
               gap: 10px;
               width: 90%;
               max-width: 400px;
               text-align: center;
+              transition: opacity 0.3s ease, transform 0.3s ease;
+              transform-origin: bottom center;
+            }
+            .controls.collapsed {
+              opacity: 0;
+              transform: translateX(-50%) scale(0.85) translateY(10px);
+              pointer-events: none;
+            }
+            .controls__close {
+              position: absolute;
+              top: 8px;
+              right: 8px;
+              width: 22px;
+              height: 22px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: rgba(255, 255, 255, 0.1);
+              border: 1px solid rgba(255, 255, 255, 0.28);
+              border-radius: 50%;
+              color: inherit;
+              font-size: 14px;
+              line-height: 1;
+              cursor: pointer;
+              transition: background 0.2s ease;
+            }
+            .controls__close:hover {
+              background: rgba(255, 255, 255, 0.2);
+            }
+            .controls__open {
+              position: absolute;
+              z-index: 99;
+              bottom: 10px;
+              left: 50%;
+              background: rgba(20, 20, 24, 0.16);
+              backdrop-filter: blur(2px) saturate(165%);
+              -webkit-backdrop-filter: blur(2px) saturate(165%);
+              border: 1px solid rgba(255, 255, 255, 0.28);
+              box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+              padding: 10px 22px;
+              border-radius: 20px;
+              color: rgba(255, 255, 255, 0.72);
+              text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.35);
+              font: inherit;
+              cursor: pointer;
+              opacity: 0;
+              transform: translateX(-50%) scale(0.85);
+              pointer-events: none;
+              transition: opacity 0.3s ease, transform 0.3s ease;
+              transform-origin: bottom center;
+            }
+            .controls__open.visible {
+              opacity: 1;
+              transform: translateX(-50%) scale(1);
+              pointer-events: auto;
+            }
+            .controls__open:hover {
+              background: rgba(20, 20, 24, 0.3);
             }
             .control-group {
               display: flex;
@@ -547,11 +624,28 @@ class AlhambraTiled extends HTMLElement {
               justify-content: center;
             }
             input[type="color"] {
-              width: 40px;
-              height: 24px;
+              width: 32px;
+              height: 32px;
               padding: 0;
+              border: 1px solid rgba(255, 255, 255, 0.3);
+              border-radius: 50%;
+              overflow: hidden;
+            }
+            input[type="color"]::-webkit-color-swatch-wrapper {
+              padding: 0;
+              border-radius: 50%;
+            }
+            input[type="color"]::-webkit-color-swatch {
               border: none;
-              border-radius: 4px;
+              border-radius: 50%;
+            }
+            input[type="color"]::-moz-color-swatch {
+              border: none;
+              border-radius: 50%;
+            }
+            input[type="range"],
+            input[type="checkbox"] {
+              accent-color: rgba(255, 255, 255, 0.85);
             }
             canvas {
               width: 100%;
@@ -567,11 +661,15 @@ class AlhambraTiled extends HTMLElement {
                 transform: translateX(-50%);
                 bottom: 20px;
                 z-index: 99;
-                padding: 8px;
+                padding: 12px;
+                border-radius: 20px;
               }
               .control-group {
                 flex-direction: column;
                 align-items: center;
+              }
+              .controls__open {
+                bottom: 20px;
               }
             }
           </style>`;
@@ -580,8 +678,11 @@ class AlhambraTiled extends HTMLElement {
         this.isDragging = false;
         this.lastMouseX = 0.0;
         this.lastMouseY = 0.0;
-        this.rotationX = Math.PI + (Math.PI / 32);
-        this.rotationY = Math.PI - (Math.PI / 8);
+        // No baked-in tilt by default - Perspective Drag is opt-in (see
+        // data-perspective-toggle), so the initial view should render flat
+        // until the user explicitly turns it on and drags.
+        this.rotationX = 0;
+        this.rotationY = 0;
         // Create a debounced function for updating the view matrix
         this.debouncedUpdateView = debounce(function () {
             this.updateViewMatrix();
@@ -606,6 +707,31 @@ class AlhambraTiled extends HTMLElement {
         this.strokeWidth = parseFloat(this.strokeWidthInput.value);
 
         this.setupStrokeWidthControl();
+
+        // Diffusion speed properties
+        this.diffusionSpeedInput = this.shadowRoot.querySelector('[data-diffusion-speed]');
+        this.diffusionSpeedValue = this.shadowRoot.querySelector('.diffusion-speed-value');
+        this.diffusionSpeed = parseFloat(this.diffusionSpeedInput.value);
+        // The toolbar's Diffusion Speed value is a ceiling, not a constant
+        // rate - stepSimulation() modulates it with 1D Perlin noise each step
+        // (see _diffusionNoiseTime below) so the erosion visibly speeds up and
+        // slows down over time instead of crawling at one fixed pace.
+        this.diffusionNoise = new PerlinNoise();
+        this._diffusionNoiseTime = Math.random() * 1000;
+
+        this.setupDiffusionSpeedControl();
+        this.setupToolbarCollapse();
+
+        // Dragging to change perspective forces a full pattern/texture
+        // regeneration + sim re-seed on every move (see resetPattern()) -
+        // expensive enough that it should stay opt-in rather than run by
+        // default just because the mouse moves over the canvas.
+        this.perspectiveToggleInput = this.shadowRoot.querySelector('[data-perspective-toggle]');
+        this.perspectiveEnabled = this.perspectiveToggleInput.checked;
+        this.perspectiveToggleInput.addEventListener('change', (e) => {
+            this.perspectiveEnabled = e.target.checked;
+            if (!this.perspectiveEnabled) this.isDragging = false;
+        });
 
         this.canvas = this.shadowRoot.querySelector('canvas');
         this.pointsCanvas = this.shadowRoot.querySelector('canvas[data-canvas-points]');
@@ -732,6 +858,7 @@ class AlhambraTiled extends HTMLElement {
         // Mouse event handlers
         // Add mouse event listeners to the canvas
         this.shadowRoot.addEventListener('mousedown', (event) => {
+            if (!this.perspectiveEnabled) return;
             this.isDragging = true;
             this.lastMouseX = event.clientX;
             this.lastMouseY = event.clientY;
@@ -820,6 +947,28 @@ class AlhambraTiled extends HTMLElement {
         });
     }
 
+    setupDiffusionSpeedControl() {
+        this.diffusionSpeedInput.addEventListener('input', (e) => {
+            this.diffusionSpeed = parseFloat(e.target.value);
+            this.diffusionSpeedValue.textContent = `${this.diffusionSpeed.toFixed(1)}x`;
+        });
+    }
+
+    setupToolbarCollapse() {
+        const controls = this.shadowRoot.querySelector('[data-controls]');
+        const closeButton = this.shadowRoot.querySelector('[data-close-controls]');
+        const openButton = this.shadowRoot.querySelector('[data-open-controls]');
+
+        closeButton.addEventListener('click', () => {
+            controls.classList.add('collapsed');
+            openButton.classList.add('visible');
+        });
+        openButton.addEventListener('click', () => {
+            controls.classList.remove('collapsed');
+            openButton.classList.remove('visible');
+        });
+    }
+
     // Helper function to convert hex to rgba
     hexToRgba(hex, alpha = 1, array = false) {
         if (!array) {
@@ -869,6 +1018,9 @@ class AlhambraTiled extends HTMLElement {
             this.tileSize = parseInt(e.target.value);
             this.tileSizeValue.textContent = `${this.tileSize}px`;
             this.updatePointsCanvasSize(this.pointsCanvas);
+            // The dissolve source mask is seeded from where the lines actually
+            // land on screen, which shifts whenever the tile size changes.
+            if (this.simSeedProgram) this.seedSimulation();
             this.render();
         });
     }
@@ -1289,6 +1441,12 @@ class AlhambraTiled extends HTMLElement {
         // Update the texture
         const gl = this.gl;
 
+        // uniformMatrix4fv writes into whichever program is currently bound via
+        // useProgram - now that stepSimulation() also binds simProgram each
+        // frame, this must explicitly rebind this.program first or the write
+        // can silently target the wrong program and leave u_matrix zeroed out.
+        gl.useProgram(this.program);
+
         // START TILT
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -1303,6 +1461,10 @@ class AlhambraTiled extends HTMLElement {
         //stop TITLT
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.textureCanvas);
+
+        // Colors/geometry changed - re-seed the dissolve source mask from the
+        // freshly-drawn pattern so the erosion effect restarts from the new lines.
+        if (this.simSeedProgram) this.seedSimulation();
 
         // Render
         // this.render(); // NOT REQUIRED?
@@ -1360,36 +1522,188 @@ class AlhambraTiled extends HTMLElement {
 
     get vertexShaderSource() {
         return `#version 300 es
-        in vec4 a_position;
-        in vec2 a_texCoord;
-        uniform mat4 u_matrix;
-        uniform vec2 u_resolution;
-        out vec2 v_texCoord;
-        
-        void main() {
-            vec2 zeroToOne = a_position.xy / u_resolution;
-            vec2 clipSpace = (zeroToOne * 2.0 - 1.0) * vec2(1, -1);
-            gl_Position = vec4(clipSpace, 0, 1);
-            gl_Position = u_matrix * gl_Position;
-            v_texCoord = a_texCoord;
-        }`;
+            in vec4 a_position;
+            in vec2 a_texCoord;
+            uniform mat4 u_matrix;
+            uniform vec2 u_resolution;
+            out vec2 v_texCoord;
+
+            void main() {
+                vec2 zeroToOne = a_position.xy / u_resolution;
+                vec2 clipSpace = (zeroToOne * 2.0 - 1.0) * vec2(1, -1);
+                gl_Position = vec4(clipSpace, 0, 1);
+                gl_Position = u_matrix * gl_Position;
+                v_texCoord = a_texCoord;
+            }`;
     }
 
     get fragmentShaderSource() {
         return `#version 300 es
-        precision highp float;
-        
-        in vec2 v_texCoord;
-        uniform sampler2D u_texture;
-        uniform vec2 u_resolution;
-        uniform float u_tileSize;  // Added uniform for tile size
-        out vec4 outColor;
-        
-        void main() {
-            vec2 repeat = u_resolution / u_tileSize;  // Use dynamic tile size
-            vec2 texCoord = fract(v_texCoord * repeat);
-            outColor = texture(u_texture, texCoord);
-        }`;
+precision highp float;
+
+in vec2 v_texCoord;
+uniform sampler2D u_texture;
+uniform sampler2D u_simTexture;
+uniform vec2 u_resolution;
+uniform float u_tileSize;
+uniform vec3 u_backgroundColor;
+uniform float u_rdEnabled;
+out vec4 outColor;
+
+void main() {
+    // Tiled texture sample (the original, crisp render)
+    vec2 repeat = u_resolution / u_tileSize;
+    vec2 texCoord = fract(v_texCoord * repeat);
+    vec4 texColor = texture(u_texture, texCoord);
+
+    // Sample the diffusion field (screen-space, not tiled) - "erosion" grows
+    // outward from the pattern's line pixels and erases toward the flat
+    // background color as it spreads, i.e. the lines dissolve into the background.
+    vec2 screenUV = gl_FragCoord.xy / u_resolution;
+    float erosion = texture(u_simTexture, screenUV).r * u_rdEnabled;
+
+    outColor = vec4(mix(texColor.rgb, u_backgroundColor, erosion), texColor.a);
+}`;
+    }
+
+    // Fullscreen-quad vertex shader shared by the reaction-diffusion simulation pass
+    get simVertexShaderSource() {
+        return `#version 300 es
+            layout(location = 0) in vec2 a_position;
+            layout(location = 1) in vec2 a_uv;
+            out vec2 v_uv;
+
+            void main() {
+                v_uv = a_uv;
+                gl_Position = vec4(a_position, 0.0, 1.0);
+            }`;
+    }
+
+    // Seeds the simulation state from the actual tile pattern: r = 0 (nothing
+    // eroded yet), g = a static "source" mask of how much each pixel looks like
+    // a drawn line (vs. background) - this is what the diffusion pass grows from.
+    get simSeedFragmentShaderSource() {
+        return `#version 300 es
+precision highp float;
+
+in vec2 v_uv;
+uniform sampler2D u_pattern;
+uniform vec2 u_resolution;
+uniform float u_tileSize;
+uniform vec3 u_backgroundColor;
+out vec4 outColor;
+
+void main() {
+    vec2 repeat = u_resolution / u_tileSize;
+    vec2 texCoord = fract(v_uv * repeat);
+    vec3 color = texture(u_pattern, texCoord).rgb;
+    float lineness = clamp(length(color - u_backgroundColor) * 2.0, 0.0, 1.0);
+    outColor = vec4(0.0, lineness, 0.0, 1.0);
+}`;
+    }
+
+    // Diffusion step: r = erosion amount, g = the static source mask carried
+    // through unchanged (where the original lines were). Two phases share this
+    // shader: dissolving pins source (line) pixels fully-eroded and lets that
+    // spread outward via diffusion (lines fade to background, and - since the
+    // source is a fixed boundary rather than competing with diffusion's outward
+    // flow - the whole domain eventually reaches it, not a partial equilibrium);
+    // reforming releases the pin and decays erosion back toward 0 everywhere
+    // (lines return).
+    get simFragmentShaderSource() {
+        return `#version 300 es
+precision highp float;
+
+in vec2 v_uv;
+uniform sampler2D u_state;
+uniform vec2 u_texel;
+uniform float u_diffusion;
+uniform float u_reformRate;
+uniform float u_mode; // 0 = dissolving, 1 = reforming
+uniform float u_dt;
+uniform float u_time; // slow-drifting phase for the spatial noise field below
+out vec4 outColor;
+
+// Classic 2D Perlin (gradient) noise - Ashima Arts / Stefan Gustavson's
+// webgl-noise, permutation-hashed so it needs no texture lookups.
+vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 permute(vec4 x) { return mod289(((x * 34.0) + 1.0) * x); }
+vec2 fade(vec2 t) { return t * t * t * (t * (t * 6.0 - 15.0) + 10.0); }
+
+float cnoise(vec2 P) {
+    vec4 Pi = floor(P.xyxy) + vec4(0.0, 0.0, 1.0, 1.0);
+    vec4 Pf = fract(P.xyxy) - vec4(0.0, 0.0, 1.0, 1.0);
+    Pi = mod289(Pi);
+    vec4 ix = Pi.xzxz;
+    vec4 iy = Pi.yyww;
+    vec4 fx = Pf.xzxz;
+    vec4 fy = Pf.yyww;
+    vec4 i = permute(permute(ix) + iy);
+    vec4 gx = fract(i * (1.0 / 41.0)) * 2.0 - 1.0;
+    vec4 gy = abs(gx) - 0.5;
+    vec4 tx = floor(gx + 0.5);
+    gx = gx - tx;
+    vec2 g00 = vec2(gx.x, gy.x);
+    vec2 g10 = vec2(gx.y, gy.y);
+    vec2 g01 = vec2(gx.z, gy.z);
+    vec2 g11 = vec2(gx.w, gy.w);
+    vec4 norm = 1.79284291400159 - 0.85373472095314 *
+        vec4(dot(g00, g00), dot(g01, g01), dot(g10, g10), dot(g11, g11));
+    g00 *= norm.x;
+    g01 *= norm.y;
+    g10 *= norm.z;
+    g11 *= norm.w;
+    float n00 = dot(g00, vec2(fx.x, fy.x));
+    float n10 = dot(g10, vec2(fx.y, fy.y));
+    float n01 = dot(g01, vec2(fx.z, fy.z));
+    float n11 = dot(g11, vec2(fx.w, fy.w));
+    vec2 fade_xy = fade(Pf.xy);
+    vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
+    float n_xy = mix(n_x.x, n_x.y, fade_xy.y);
+    return 2.3 * n_xy;
+}
+
+void main() {
+    vec2 state = texture(u_state, v_uv).rg;
+    float c = state.r;
+    float source = state.g;
+
+    float lap = 0.0;
+    lap += texture(u_state, v_uv + u_texel * vec2(-1.0,  0.0)).r * 0.2;
+    lap += texture(u_state, v_uv + u_texel * vec2( 1.0,  0.0)).r * 0.2;
+    lap += texture(u_state, v_uv + u_texel * vec2( 0.0, -1.0)).r * 0.2;
+    lap += texture(u_state, v_uv + u_texel * vec2( 0.0,  1.0)).r * 0.2;
+    lap += texture(u_state, v_uv + u_texel * vec2(-1.0, -1.0)).r * 0.05;
+    lap += texture(u_state, v_uv + u_texel * vec2( 1.0, -1.0)).r * 0.05;
+    lap += texture(u_state, v_uv + u_texel * vec2(-1.0,  1.0)).r * 0.05;
+    lap += texture(u_state, v_uv + u_texel * vec2( 1.0,  1.0)).r * 0.05;
+    lap -= c;
+
+    // Diffusion coefficient is spatially varied by a slow-drifting 2D Perlin
+    // field instead of being uniform across the whole texture - some regions
+    // erode/reform faster than others, so the dissolve grows in uneven,
+    // organic patches rather than a perfectly even spread.
+    float n = cnoise(v_uv * 4.0 + u_time);
+    float diffusionMult = mix(0.25, 1.75, 0.5 + 0.5 * n);
+
+    float delta = mix(0.0, -u_reformRate, u_mode);
+    float newC = clamp(c + u_dt * (u_diffusion * diffusionMult * lap + delta), 0.0, 1.0);
+
+    // Pin source (line) pixels fully-eroded during dissolve. This needs to be
+    // a hard, fast pin (not a slow pull) - a slow pull is diffusion's outward
+    // flow to fight against, which settles into the same kind of partial
+    // equilibrium a growth term did (never actually reaching fully dissolved,
+    // no matter how long it runs). A hard pin is a true fixed boundary, so
+    // diffusion has something solid to spread from and genuinely reaches
+    // every pixel over time instead of plateauing.
+    float src = step(0.1, source);
+    if (src > 0.5 && u_mode < 0.5) {
+        newC = 1.0;
+    }
+
+    outColor = vec4(newC, source, 0.0, 1.0);
+}`;
     }
 
     createShader(gl, type, source) {
@@ -1427,10 +1741,18 @@ class AlhambraTiled extends HTMLElement {
 
         // Get locations
         this.positionLocation = gl.getAttribLocation(this.program, 'a_position');
-        this.matrixLocation = this.gl.getUniformLocation(this.program, 'u_matrix');
+        this.rdEnabledLocation = gl.getUniformLocation(this.program, 'u_rdEnabled');
+        this.matrixLocation = gl.getUniformLocation(this.program, 'u_matrix');
         this.texCoordLocation = gl.getAttribLocation(this.program, 'a_texCoord');
         this.resolutionLocation = gl.getUniformLocation(this.program, 'u_resolution');
         this.tileSizeLocation = gl.getUniformLocation(this.program, 'u_tileSize');
+        this.textureLocation = gl.getUniformLocation(this.program, 'u_texture');
+        this.simTextureLocation = gl.getUniformLocation(this.program, 'u_simTexture');
+        this.backgroundColorLocation = gl.getUniformLocation(this.program, 'u_backgroundColor');
+
+        // Reaction-diffusion is on by default; set to false to freeze the simulation
+        // and show only the plain tiled render (skips the sim step entirely).
+        this.reactionDiffusionEnabled = true;
 
         // Create buffers
         this.positionBuffer = gl.createBuffer();
@@ -1446,8 +1768,272 @@ class AlhambraTiled extends HTMLElement {
             1.0, 0.0,
             1.0, 1.0,
         ]), gl.STATIC_DRAW);
+
+        this.initializeSimulation();
     }
 
+    // Sets up the ping-pong framebuffers/textures and shader programs that run
+    // the line-dissolve diffusion simulation, independent of canvas size.
+    initializeSimulation() {
+        const gl = this.gl;
+
+        this.simSize = 256;
+
+        // Diffusion spreads erosion outward from the (pinned, during dissolve)
+        // source pixels; reformRate is how fast erosion decays back to 0 once
+        // the pin is released. The state texture is 8-bit (1/255 ~= 0.0039 per
+        // step), so reformRate must stay comfortably above that or it quantizes
+        // to 0 and reform never progresses.
+        this.simDiffusion = 0.3;
+        this.simReformRate = 0.02;
+        this.simDt = 1.0;
+
+        // Loops between dissolving (lines fade to background) and reforming
+        // (lines return). Dissolve bounces back to reform once the *actual*
+        // average erosion crosses simDissolveTarget (checked periodically via
+        // readback, not every step - it's cheap on this small 256x256 texture
+        // but still not free), rather than running to full completion.
+        // simDissolveSteps is just a safety cap in case that check never fires.
+        this.simPhase = 'dissolve';
+        this.simElapsedSteps = 0;
+        this.simDissolveSteps = 2000;
+        this.simReformSteps = 200;
+        this.simDissolveTarget = 0.75;
+        this.simProgressCheckInterval = 10; // steps between readback checks
+        this._simStepsSinceCheck = 0;
+
+        // Real-time pacing: at diffusionSpeed 1x, run this many simulation
+        // steps per second (independent of display refresh rate). diffusion=0.3
+        // above already converges fully within a few hundred steps, so pacing
+        // is controlled here rather than by weakening the physics constants -
+        // that path either destabilizes the stencil (too strong) or gets stuck
+        // in a slowly-converging transient that never visually finishes within
+        // a reasonable step budget (too weak).
+        this.simStepsPerSecond = 15;
+        this._simStepAccumulator = 0;
+        this._simLastStepTime = undefined;
+        // Phase driving the shader's spatial diffusion-rate noise field
+        // (u_time in simFragmentShaderSource) - drifts slowly and
+        // independently of diffusionSpeed, so the noise pattern itself
+        // keeps evolving even while paused/slow.
+        this._simNoiseFieldTime = Math.random() * 1000;
+
+        // Fullscreen quad geometry shared by the seed and diffusion passes
+        this.simVAO = gl.createVertexArray();
+        gl.bindVertexArray(this.simVAO);
+
+        const simPosBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, simPosBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+            -1, -1, 1, -1, -1, 1,
+            -1, 1, 1, -1, 1, 1,
+        ]), gl.STATIC_DRAW);
+        gl.enableVertexAttribArray(0);
+        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+        const simUvBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, simUvBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+            0, 0, 1, 0, 0, 1,
+            0, 1, 1, 0, 1, 1,
+        ]), gl.STATIC_DRAW);
+        gl.enableVertexAttribArray(1);
+        gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 0, 0);
+
+        gl.bindVertexArray(null);
+
+        const simVertexShader = this.createShader(gl, gl.VERTEX_SHADER, this.simVertexShaderSource);
+        const simFragmentShader = this.createShader(gl, gl.FRAGMENT_SHADER, this.simFragmentShaderSource);
+        this.simProgram = this.createProgram(gl, simVertexShader, simFragmentShader);
+
+        this.simUniforms = {
+            state: gl.getUniformLocation(this.simProgram, 'u_state'),
+            texel: gl.getUniformLocation(this.simProgram, 'u_texel'),
+            diffusion: gl.getUniformLocation(this.simProgram, 'u_diffusion'),
+            reformRate: gl.getUniformLocation(this.simProgram, 'u_reformRate'),
+            mode: gl.getUniformLocation(this.simProgram, 'u_mode'),
+            dt: gl.getUniformLocation(this.simProgram, 'u_dt'),
+            time: gl.getUniformLocation(this.simProgram, 'u_time'),
+        };
+
+        const seedVertexShader = this.createShader(gl, gl.VERTEX_SHADER, this.simVertexShaderSource);
+        const seedFragmentShader = this.createShader(gl, gl.FRAGMENT_SHADER, this.simSeedFragmentShaderSource);
+        this.simSeedProgram = this.createProgram(gl, seedVertexShader, seedFragmentShader);
+
+        this.simSeedUniforms = {
+            pattern: gl.getUniformLocation(this.simSeedProgram, 'u_pattern'),
+            resolution: gl.getUniformLocation(this.simSeedProgram, 'u_resolution'),
+            tileSize: gl.getUniformLocation(this.simSeedProgram, 'u_tileSize'),
+            backgroundColor: gl.getUniformLocation(this.simSeedProgram, 'u_backgroundColor'),
+        };
+
+        const w = this.simSize, h = this.simSize;
+        this.simTextures = [0, 1].map(() => {
+            const tex = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, tex);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            return tex;
+        });
+
+        this.simFramebuffers = this.simTextures.map(tex => {
+            const fb = gl.createFramebuffer();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+            return fb;
+        });
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+        this.simCurrent = 0;
+        // Deliberately not seeding here: this.canvas hasn't been sized yet at
+        // construction time (the element isn't connected to the DOM, so
+        // clientWidth/Height are still 0) - seeding now would bake in the wrong
+        // resolution and produce a seed mask misaligned with the real pattern.
+        // The textures start zeroed (erosion=0, source=0), which renders as the
+        // plain crisp pattern; connectedCallback's ResizeObserver does the real
+        // first seed once actual dimensions are known.
+    }
+
+    // Renders the actual tile pattern into simTextures[0] to seed the erosion
+    // source mask - so the diffusion grows outward from wherever the pattern's
+    // lines actually are on screen, not arbitrary points. Call again whenever
+    // the canvas size or tile size changes, so the seed stays aligned.
+    seedSimulation() {
+        const gl = this.gl;
+        const bg = this.hexToRgba(this.backgroundColor, 1, true);
+
+        gl.useProgram(this.simSeedProgram);
+        gl.bindVertexArray(this.simVAO);
+        gl.viewport(0, 0, this.simSize, this.simSize);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.simFramebuffers[0]);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+        gl.uniform1i(this.simSeedUniforms.pattern, 0);
+        gl.uniform2f(this.simSeedUniforms.resolution, this.canvas.width, this.canvas.height);
+        gl.uniform1f(this.simSeedUniforms.tileSize, this.tileSize);
+        gl.uniform3f(this.simSeedUniforms.backgroundColor, bg[0], bg[1], bg[2]);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.bindVertexArray(null);
+        this.simCurrent = 0;
+
+        // A fresh seed means erosion is back at 0 everywhere - restart the
+        // cycle from the dissolve phase rather than possibly resuming mid-reform.
+        this.simPhase = 'dissolve';
+        this.simElapsedSteps = 0;
+        this._simStepAccumulator = 0;
+        this._simLastStepTime = undefined;
+        this._simStepsSinceCheck = 0;
+    }
+
+    // Advances the diffusion simulation, ping-ponging between the two state
+    // textures/framebuffers. Paced by real elapsed time (simStepsPerSecond x
+    // an organic, Perlin-noise-modulated diffusionSpeed) rather than by
+    // rendered frame count, so it runs at a watchable but non-mechanical rate
+    // regardless of display refresh rate. The diffusion coefficient itself
+    // stays fixed - it's already tuned to fully converge within a few hundred
+    // steps; pacing controls how long that takes in real seconds.
+    stepSimulation() {
+        const now = performance.now();
+        if (this._simLastStepTime === undefined) this._simLastStepTime = now;
+        const elapsedSec = (now - this._simLastStepTime) / 1000;
+        this._simLastStepTime = now;
+
+        if (this.diffusionSpeed <= 0) {
+            this._simStepAccumulator = 0; // frozen: also pauses the dissolve/reform cycle
+            return;
+        }
+
+        // Toolbar's Diffusion Speed is a ceiling the noise wanders under
+        // (roughly 0.3x-1.3x of it), not a constant rate - keeps the erosion
+        // visibly speeding up and slowing down instead of crawling evenly.
+        this._diffusionNoiseTime += elapsedSec * 0.25;
+        const noiseFactor = 0.3 + this.diffusionNoise.noise1(this._diffusionNoiseTime); // ~0.3..1.3
+        const effectiveSpeed = this.diffusionSpeed * noiseFactor;
+
+        this._simStepAccumulator += elapsedSec * this.simStepsPerSecond * effectiveSpeed;
+        // Cap the catch-up burst (e.g. after the tab was backgrounded) so a long
+        // stall doesn't suddenly fast-forward the cycle by hundreds of steps.
+        const iterations = Math.min(Math.floor(this._simStepAccumulator), 30);
+        if (iterations <= 0) return;
+        this._simStepAccumulator -= iterations;
+
+        const gl = this.gl;
+        gl.useProgram(this.simProgram);
+        gl.bindVertexArray(this.simVAO);
+        gl.viewport(0, 0, this.simSize, this.simSize);
+
+        this._simNoiseFieldTime += elapsedSec * 0.08;
+
+        gl.uniform2f(this.simUniforms.texel, 1 / this.simSize, 1 / this.simSize);
+        gl.uniform1f(this.simUniforms.diffusion, this.simDiffusion);
+        gl.uniform1f(this.simUniforms.reformRate, this.simReformRate);
+        gl.uniform1f(this.simUniforms.dt, this.simDt);
+        gl.uniform1f(this.simUniforms.time, this._simNoiseFieldTime);
+        gl.uniform1i(this.simUniforms.state, 0);
+
+        for (let i = 0; i < iterations; i++) {
+            this.simElapsedSteps += 1;
+            // Safety cap: normally the readback check below bounces dissolve
+            // back to reform well before this, but guarantees eventual
+            // switching even if that check somehow never fires.
+            const limit = this.simPhase === 'dissolve' ? this.simDissolveSteps : this.simReformSteps;
+            if (this.simElapsedSteps >= limit) {
+                this.simPhase = this.simPhase === 'dissolve' ? 'reform' : 'dissolve';
+                this.simElapsedSteps = 0;
+            }
+            gl.uniform1f(this.simUniforms.mode, this.simPhase === 'reform' ? 1.0 : 0.0);
+
+            const src = this.simCurrent;
+            const dst = 1 - this.simCurrent;
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this.simFramebuffers[dst]);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, this.simTextures[src]);
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+            this.simCurrent = dst;
+
+            // Bounce dissolve back to reform once actual progress crosses the
+            // target, rather than running to full completion. Checked every
+            // simProgressCheckInterval steps (not every step, since it forces
+            // a GPU readback) and stops dissolving immediately within this same
+            // batch once it fires, instead of only after the whole batch -
+            // otherwise a single call (up to 30 steps) could overshoot well
+            // past the target before the check ever ran.
+            if (this.simPhase === 'dissolve') {
+                this._simStepsSinceCheck += 1;
+                if (this._simStepsSinceCheck >= this.simProgressCheckInterval) {
+                    this._simStepsSinceCheck = 0;
+                    if (this.measureAvgErosion() >= this.simDissolveTarget) {
+                        this.simPhase = 'reform';
+                        this.simElapsedSteps = 0;
+                    }
+                }
+            }
+        }
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.bindVertexArray(null);
+    }
+
+    // Reads back the (small) simulation texture and returns the average
+    // erosion value across the whole domain, used to gauge dissolve progress.
+    measureAvgErosion() {
+        const gl = this.gl;
+        const s = this.simSize;
+        if (!this._simReadBuf) this._simReadBuf = new Uint8Array(s * s * 4);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.simFramebuffers[this.simCurrent]);
+        gl.readPixels(0, 0, s, s, gl.RGBA, gl.UNSIGNED_BYTE, this._simReadBuf);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        let sum = 0;
+        const buf = this._simReadBuf;
+        for (let i = 0; i < s * s; i++) sum += buf[i * 4];
+        return sum / (s * s) / 255;
+    }
 
     updatePointsCanvasSize(canvas) {
         const ratio = window.devicePixelRatio || 1;
@@ -1476,10 +2062,27 @@ class AlhambraTiled extends HTMLElement {
     render() {
         const gl = this.gl;
 
+        // Guard against calls made before initializeWebGL() finishes: some
+        // constructor-time paths (e.g. importing the default point pattern)
+        // trigger a render before this.program / this.simProgram exist.
+        if (!this.program || !this.simProgram) return;
+
+        if (this.reactionDiffusionEnabled) {
+            this.stepSimulation();
+        }
+        // stepSimulation leaves the viewport set to the simulation's small
+        // off-screen size; restore it before drawing the main scene.
+        gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+
+        gl.useProgram(this.program);
+
+        gl.uniform1f(this.rdEnabledLocation, this.reactionDiffusionEnabled ? 1.0 : 0.0);
+
         // Clear the canvas with the background color
-        const bgColor = this.hexToRgba(this.backgroundColor, 1);
+        const bgColor = this.hexToRgba(this.backgroundColor, 1, true);
         gl.clearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3]);
         gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.uniform3f(this.backgroundColorLocation, bgColor[0], bgColor[1], bgColor[2]);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
@@ -1490,8 +2093,6 @@ class AlhambraTiled extends HTMLElement {
             this.canvas.width, 0,
             this.canvas.width, this.canvas.height,
         ]), gl.STATIC_DRAW);
-
-        gl.useProgram(this.program);
 
         gl.enableVertexAttribArray(this.positionLocation);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
@@ -1506,20 +2107,48 @@ class AlhambraTiled extends HTMLElement {
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
+        gl.uniform1i(this.textureLocation, 0);
+
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, this.simTextures[this.simCurrent]);
+        gl.uniform1i(this.simTextureLocation, 1);
 
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
 
+    startRenderLoop() {
+        // Guard against starting a second concurrent loop (e.g. from a resize
+        // observer firing again) which would stack forever and freeze the page.
+        if (this.rafId) return;
+        const loop = () => {
+            this.render();
+            this.rafId = requestAnimationFrame(loop);
+        };
+        this.rafId = requestAnimationFrame(loop);
+    }
+
+    stopRenderLoop() {
+        if (this.rafId) {
+            cancelAnimationFrame(this.rafId);
+            this.rafId = null;
+        }
+    }
+
     connectedCallback() {
-        const resizeObserver = new ResizeObserver(() => {
+        this.resizeObserver = new ResizeObserver(() => {
             this.updateCanvasSize(this.canvas);
             this.updatePointsCanvasSize(this.pointsCanvas);
+            // Re-seed the dissolve source mask against the now-correct canvas
+            // resolution (it may have been seeded against the pre-resize size).
+            if (this.simSeedProgram) this.seedSimulation();
             this.render();
         });
-        resizeObserver.observe(this);
+        this.resizeObserver.observe(this);
+        this.startRenderLoop();
     }
 
     disconnectedCallback() {
+        this.stopRenderLoop();
         if (this.resizeObserver) {
             this.resizeObserver.disconnect();
         }

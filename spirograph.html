@@ -10,7 +10,8 @@
   <link href="dist/css/style.css" rel="stylesheet" />
   <script type="module" src="dist/js/components/mm-spirograph.js"></script>
   <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
-  <script type="module" src="dist/js/index.js"></script>
+  <script type="module" src="dist/js/spirograph.js"></script>
+  <script type="module" src="dist/js/utils/title-card.js"></script>
   <title>Spirograph - Markup Monks</title>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
@@ -27,7 +28,8 @@
   <div class="content" data-content>
     <side-bar></side-bar>
     <section class="fractals">
-      <header class="fractals__header fractals__header--full-view">
+      <header class="fractals__header fractals__header--full-view" data-title-card>
+        <button type="button" class="title-card__close" data-close-title aria-label="Close title">&times;</button>
         <h1 class="fractals__main-header">Spirograph</h1>
         <h5 class="fractals__sub-header">
           Web component for Spirograph
@@ -40,13 +42,203 @@
           </code>
         </p>
       </header>
+      <button type="button" class="title-card__open" data-open-title></button>
       <div class="fractals__items">
         <mm-spirograph class="fractals__item--full-view" fixed-circle-radius="300" moving-circle-radius="3.14"
-          moving-circle-locus-length="320" repeat-count="50" density="0.0005" frozen="true"
+          moving-circle-locus-length="320" repeat-count="90" density="0.0009" frozen="true"
           data-spirograph="outer"></mm-spirograph>
       </div>
+      <div class="spirograph-controls collapsed" data-spirograph-controls>
+        <button type="button" class="spirograph-controls__close" data-close-controls aria-label="Close toolbar">&times;</button>
+        <div class="spirograph-controls__group">
+          <label>
+            Outer Radius:
+            <input type="range" min="50" max="600" value="300" step="10" data-fixed-radius>
+            <span class="spirograph-controls__value" data-fixed-radius-value>300</span>
+          </label>
+          <label>
+            Inner Min:
+            <input type="range" min="1" max="500" value="1" step="1" data-moving-radius-min>
+            <span class="spirograph-controls__value" data-moving-radius-min-value>1</span>
+          </label>
+          <label>
+            Inner Max:
+            <input type="range" min="1" max="500" value="500" step="1" data-moving-radius-max>
+            <span class="spirograph-controls__value" data-moving-radius-max-value>500</span>
+          </label>
+          <label data-moving-radius-label hidden>
+            Inner Radius:
+            <input type="range" min="1" max="500" value="45" step="1" data-moving-radius>
+            <span class="spirograph-controls__value" data-moving-radius-value>45</span>
+          </label>
+        </div>
+        <div class="spirograph-controls__group">
+          <label>
+            Line Count:
+            <input type="range" min="10" max="1000" value="90" step="10" data-repeat-count>
+            <span class="spirograph-controls__value" data-repeat-count-value>90</span>
+          </label>
+          <label>
+            Line Detail:
+            <input type="range" min="2" max="20" value="9" step="1" data-density>
+            <span class="spirograph-controls__value" data-density-value>0.0009</span>
+          </label>
+          <label>
+            Animation Speed:
+            <input type="range" min="0" max="5" value="1" step="0.1" data-anim-speed>
+            <span class="spirograph-controls__value" data-anim-speed-value>1.0x</span>
+          </label>
+        </div>
+        <div class="spirograph-controls__buttons">
+          <button type="button" class="spirograph-controls__play-pause" data-play-pause>Pause</button>
+          <button type="button" class="spirograph-controls__play-pause" data-copy-values hidden>Copy Values</button>
+        </div>
+      </div>
+      <button type="button" class="spirograph-controls__open visible" data-open-controls>Open Toolbar</button>
     </section>
   </div>
+  <style>
+    .spirograph-controls {
+      position: fixed;
+      z-index: 99;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(20, 20, 24, 0.16);
+      backdrop-filter: blur(2px) saturate(165%);
+      -webkit-backdrop-filter: blur(2px) saturate(165%);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      padding: 16px;
+      border-radius: 24px;
+      color: rgba(255, 255, 255, 0.72);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 90%;
+      max-width: 460px;
+      text-align: center;
+      font-family: 'IBM Plex Sans', sans-serif;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform-origin: bottom center;
+    }
+    .spirograph-controls.collapsed {
+      opacity: 0;
+      transform: translateX(-50%) scale(0.85) translateY(10px);
+      pointer-events: none;
+    }
+    .spirograph-controls__close {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 50%;
+      color: inherit;
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .spirograph-controls__close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .spirograph-controls__open {
+      position: fixed;
+      z-index: 99;
+      bottom: 10px;
+      left: 50%;
+      background: rgba(20, 20, 24, 0.16);
+      backdrop-filter: blur(2px) saturate(165%);
+      -webkit-backdrop-filter: blur(2px) saturate(165%);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      padding: 10px 22px;
+      border-radius: 20px;
+      color: rgba(255, 255, 255, 0.72);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.35);
+      font: inherit;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateX(-50%) scale(0.85);
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform-origin: bottom center;
+    }
+    .spirograph-controls__open.visible {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+      pointer-events: auto;
+    }
+    .spirograph-controls__open:hover {
+      background: rgba(20, 20, 24, 0.3);
+    }
+    .spirograph-controls__group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 20px;
+      justify-content: center;
+      width: 100%;
+    }
+    .spirograph-controls label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .spirograph-controls label[hidden] {
+      display: none;
+    }
+    .spirograph-controls input[type="range"] {
+      accent-color: rgba(255, 255, 255, 0.85);
+    }
+    .spirograph-controls__value {
+      min-width: 3.5em;
+      display: inline-block;
+    }
+    .spirograph-controls__buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .spirograph-controls__play-pause {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 14px;
+      color: inherit;
+      font: inherit;
+      font-size: 14px;
+      padding: 6px 20px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .spirograph-controls__play-pause:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    @media (max-width: 600px) {
+      .spirograph-controls {
+        width: 95%;
+        bottom: 20px;
+        padding: 12px;
+        border-radius: 20px;
+      }
+      .spirograph-controls__group {
+        flex-direction: column;
+        align-items: center;
+      }
+      .spirograph-controls__open {
+        bottom: 20px;
+      }
+    }
+  </style>
 </body>
 
 </html>
