@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /all.html
+Disallow: /tensor.html
+
+Sitemap: https://markupmonks.com/sitemap.xml
