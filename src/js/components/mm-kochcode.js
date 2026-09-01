@@ -27,6 +27,14 @@ const vertexShaderSource = `
   }
   `;
 
+// Bright, saturated swatches only - no dark/brown/muddy tones - used for
+// grid mode (see MMKochCode.paintGrid()) instead of the paletteHex sets
+// below, which are curated per-set for the single-curve mode and mix in
+// darker tones that don't read well tiled across a whole grid.
+const gridPaletteHex = [
+    '#00e5ff', '#7cffcb', '#ffe066', '#ff6f91', '#a685e2', '#5ee7df', '#ff9f45', '#c58cff'
+];
+
 const paletteHex = [
     ['#69d2e7', '#a7dbd8', '#e0e4cc', '#f38630', '#fa6900'],
     ['#fe4365', '#fc9d9a', '#f9cdad', '#c8c8a9', '#83af9b'],
@@ -603,6 +611,10 @@ class FractalTree {
     }
 }
 class MMKochCode extends HTMLElement {
+    static get observedAttributes() {
+        return ['levels', 'showgrowth', 'grid-cols', 'grid-rows'];
+    }
+
     constructor() {
         super();
         // Attach a shadow DOM
@@ -611,7 +623,7 @@ class MMKochCode extends HTMLElement {
         this.canvas = document.createElement('canvas');
         this.canvas.classList.add('l__canvas');
         this.paintColor = { rgba: { r: 0, g: 0, b: 0, a: 1 } };
-        this.backgroundColor = { rgba: { r: 1, g: 1, b: 1, a: 1 } };
+        this.backgroundColor = { rgba: { r: 0, g: 0, b: 0, a: 1 } };
         shadow.innerHTML = `<style>
         :host {
           display: grid;
@@ -626,9 +638,19 @@ class MMKochCode extends HTMLElement {
         this.RGBAPalette = paletteHex.map(palette => {
             return palette.map(hex => getColorRBGA(hexToRgbA(hex)))
         })
+        // Dedicated bright/saturated palette for grid mode (paintGrid()) -
+        // the paletteHex swatches above are curated for the single-curve mode
+        // and several include dark/brown tones that read poorly against the
+        // black background once tiled across a whole grid.
+        this.gridPalette = gridPaletteHex.map(hex => getColorRBGA(hexToRgbA(hex)))
 
         this.showGrowth = this.hasAttribute('showgrowth') ? this.getAttribute('showgrowth') === 'true' : true;
         this.levels = this.hasAttribute('levels') ? parseInt(this.getAttribute('levels')) : 5;
+        this.paletteIndex = 34;
+        // Grid mode: when both are set, paint() draws a full grid of Koch-ified
+        // edges (see paintGrid()) instead of a single recursive Koch curve.
+        this.gridCols = this.hasAttribute('grid-cols') ? parseInt(this.getAttribute('grid-cols')) : null;
+        this.gridRows = this.hasAttribute('grid-rows') ? parseInt(this.getAttribute('grid-rows')) : null;
 
     }
     connectedCallback() {
@@ -639,8 +661,17 @@ class MMKochCode extends HTMLElement {
             this.showGrowth = newValue === 'true';
         } else if (name === 'levels') {
             this.levels = parseInt(newValue) || 5;
+        } else if (name === 'grid-cols') {
+            this.gridCols = newValue ? parseInt(newValue) : null;
+        } else if (name === 'grid-rows') {
+            this.gridRows = newValue ? parseInt(newValue) : null;
         }
-        this.paint(this.gl, this.simpleShader);
+        // observedAttributes fires this for attributes present in the initial
+        // markup before connectedCallback ever runs, when this.gl doesn't
+        // exist yet - only repaint once WebGL is actually initialized.
+        if (this.gl) {
+            this.paint(this.gl, this.simpleShader);
+        }
     }
     initialize(canvas) {
         const { gl, simpleShader } = this.initializeWebGL(canvas)
@@ -737,8 +768,8 @@ class MMKochCode extends HTMLElement {
         this.gl.uniform4f(
             this.simpleShader.colorUniformLocation,
             r,
-            b,
             g,
+            b,
             a
         )
     }
@@ -780,8 +811,12 @@ class MMKochCode extends HTMLElement {
         return { gl: gl, simpleShader: simpleShader }
     }
     paint(gl, simpleShader) {
-        const levels = 5; // or fetch dynamically
-        this.changeColor(gl, ...this.getPaintColorRBGA());
+        if (this.gridCols && this.gridRows) {
+            this.paintGrid(gl, simpleShader);
+            return;
+        }
+        const levels = this.levels;
+        this.changeColor(...this.getPaintColorRBGA());
         this.clearCanvas(gl, this.getBackgroundColorRBGA());
 
         const width = gl.canvas.width;
@@ -792,37 +827,135 @@ class MMKochCode extends HTMLElement {
         const fractalTree = new FractalTree(points, generateChildren, levels);
 
         const rangeArray = this.getRangeArray(levels).reverse();
-        const palette = this.RGBAPalette[34]; //this.getRandomItem(this.RGBAPalette);
-
-        console.log(fractalTree, rangeArray, palette);
-        console.log(...palette[5 % palette.length]);
+        const palette = this.RGBAPalette[this.paletteIndex];
 
         if (this.showGrowth) {
             rangeArray.forEach(level => {
                 fractalTree.getValuesAtDepth(level).forEach((points, index) => {
-                    this.changeColor(gl, ...palette[level % palette.length]);
+                    this.changeColor(...palette[level % palette.length]);
                     this.drawLine(gl, simpleShader, ...points);
                 });
             });
         } else {
-            this.changeColor(gl, ...palette[levels % palette.length]);
+            this.changeColor(...palette[levels % palette.length]);
             fractalTree.getValuesAtDepth(levels).forEach(points => this.drawLine(gl, simpleShader, ...points));
         }
+    }
+
+    // Draws an evenly-spaced grid of points (gridCols x gridRows cells) where
+    // every horizontal/vertical edge between adjacent grid points is replaced
+    // by a Koch curve (this.levels iterations of the same subdivision used by
+    // the single-curve mode above), instead of one big recursive curve. All
+    // segments sharing a palette color are batched into one gl.bufferData +
+    // gl.drawArrays call (grouped by color, not drawn one segment at a time)
+    // since a full grid at any real recursion depth can produce tens of
+    // thousands of tiny segments - one draw call per segment would make the
+    // toolbar's live sliders unusably slow.
+    paintGrid(gl, simpleShader) {
+        this.clearCanvas(gl, this.getBackgroundColorRBGA());
+
+        const width = gl.canvas.width;
+        const height = gl.canvas.height;
+        const cols = Math.max(1, this.gridCols);
+        const rows = Math.max(1, this.gridRows);
+        const baseDepth = Math.max(0, this.levels);
+        const marginX = width * 0.04;
+        const marginY = height * 0.04;
+        const usableW = width - marginX * 2;
+        const usableH = height - marginY * 2;
+
+        const pointAt = (col, row) => [
+            marginX + (usableW * col) / cols,
+            marginY + (usableH * row) / rows
+        ];
+
+        // Recurse with a subdivision function on one side of the base segment,
+        // then again with its mirror on the other side, so each grid edge
+        // grows Koch bumps outward in both directions instead of just one.
+        const kochifyOneSide = (segment, subdivide, depth) => {
+            let segments = [segment];
+            for (let i = 0; i < depth; i++) {
+                segments = segments.reduce((acc, s) => acc.concat(subdivide(s)), []);
+            }
+            return segments;
+        };
+        const kochify = (segment, depth) => [
+            ...kochifyOneSide(segment, generateChildren, depth),
+            ...kochifyOneSide(segment, generateChildrenMirrored, depth)
+        ];
+
+        const palette = this.gridPalette;
+        const buckets = new Map(); // paletteColorIndex -> flat [x1,y1,x2,y2,...] segments
+
+        // Optional per-edge depth override - (row, col, isHorizontal) => depth
+        // (float, rounded below) - lets an external animation loop grow/shrink
+        // each edge on its own schedule instead of the whole grid jumping
+        // between recursion levels in lockstep. Falls back to a single
+        // uniform depth (this.levels) when not set.
+        const depthAt = this.edgeDepthFn || (() => baseDepth);
+
+        const addEdge = (a, b, colorIndex, row, col, horizontal) => {
+            const key = colorIndex % palette.length;
+            const bucket = buckets.get(key) || [];
+            const depth = Math.max(0, Math.round(depthAt(row, col, horizontal)));
+            bucket.push(...kochify([...a, ...b], depth));
+            buckets.set(key, bucket);
+        };
+
+        for (let row = 0; row <= rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                addEdge(pointAt(col, row), pointAt(col + 1, row), row + col, row, col, true);
+            }
+        }
+        for (let col = 0; col <= cols; col++) {
+            for (let row = 0; row < rows; row++) {
+                addEdge(pointAt(col, row), pointAt(col, row + 1), row + col + 1, row, col, false);
+            }
+        }
+
+        buckets.forEach((segments, colorIndex) => {
+            this.changeColor(...palette[colorIndex]);
+            this.drawLines(gl, simpleShader, segments);
+        });
+    }
+
+    // Batched version of drawLine(): uploads every segment's endpoints in one
+    // buffer and issues a single drawArrays(LINES,...) call instead of one
+    // bufferData+drawArrays pair per segment.
+    drawLines(gl, shader, segments) {
+        if (segments.length === 0) return;
+        const flat = new Float32Array(segments.length * 4);
+        segments.forEach((seg, i) => {
+            flat[i * 4] = seg[0];
+            flat[i * 4 + 1] = seg[1];
+            flat[i * 4 + 2] = seg[2];
+            flat[i * 4 + 3] = seg[3];
+        });
+        gl.bufferData(gl.ARRAY_BUFFER, flat, gl.STATIC_DRAW);
+        gl.vertexAttribPointer(shader.positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+        gl.drawArrays(gl.LINES, 0, segments.length * 2);
+    }
+
+    // Public hook for external animation loops (mirrors mm-spirograph.render()
+    // / mm-sierpinski.render()) - call after changing this.levels/showGrowth/
+    // paletteIndex as properties to redraw without a setAttribute round-trip.
+    render() {
+        this.paint(this.gl, this.simpleShader);
     }
     getPaintColorRBGA() {
         return [
             this.paintColor.rgba.r / 255,
-            this.paintColor.rgba.b / 255,
             this.paintColor.rgba.g / 255,
+            this.paintColor.rgba.b / 255,
             this.paintColor.rgba.a
         ]
     }
     getBackgroundColorRBGA() {
         return [
             this.backgroundColor.rgba.r / 255,
-            this.backgroundColor.rgba.b / 255,
             this.backgroundColor.rgba.g / 255,
-            0.0
+            this.backgroundColor.rgba.b / 255,
+            this.backgroundColor.rgba.a
         ]
     }
     getRangeArray(length) {
@@ -923,6 +1056,27 @@ function generateChildren(points) {
     ];
 }
 
+// Same subdivision as generateChildren but with the perpendicular offset (V)
+// negated, so the middle point bumps out to the opposite side of the base
+// segment - used to grow a mirror-image Koch curve on the other side of a
+// grid edge (see MMKochCode.paintGrid()).
+function generateChildrenMirrored(points) {
+    const [Ax, Ay, Bx, By] = points;
+    const [Ux, Uy] = [Bx - Ax, By - Ay];
+    const [Vx, Vy] = [By - Ay, Ax - Bx];
+
+    const Px = Ax + (1 / 3) * Ux, Py = Ay + (1 / 3) * Uy;
+    const [Qx, Qy] = [Ax + (1 / 2) * Ux + (Math.sqrt(3) / 6) * Vx, Ay + (1 / 2) * Uy + (Math.sqrt(3) / 6) * Vy];
+    const [Rx, Ry] = [Ax + (2 / 3) * Ux, Ay + (2 / 3) * Uy];
+
+    return [
+        [Ax, Ay, Px, Py],
+        [Px, Py, Qx, Qy],
+        [Qx, Qy, Rx, Ry],
+        [Rx, Ry, Bx, By]
+    ];
+}
+
 function hexToRgbA(hex) {
     var c
     if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
@@ -936,7 +1090,7 @@ function hexToRgbA(hex) {
     throw new Error('Bad Hex')
 }
 function getColorRBGA(rgba) {
-    return [rgba.r / 255, rgba.b / 255, rgba.g / 255, rgba.a]
+    return [rgba.r / 255, rgba.g / 255, rgba.b / 255, rgba.a]
 }
 
 

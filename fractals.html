@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description"
+    content="Complex-plane fractals: Mandelbrot, Multibrot, Phoenix and Burning Ship. What they are, their history, and where the field is headed." />
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="dist/css/style.css" rel="stylesheet" />
+  <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
+  <title>Fractals - Markup Monks</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-B0BEV3T4NK');
+  </script>
+</head>
+
+<body>
+  <div class="content" data-content>
+    <side-bar></side-bar>
+    <section class="fractals">
+      <header class="fractals__header category-header">
+        <h1 class="fractals__main-header">Fractals</h1>
+        <h5 class="fractals__sub-header">
+          Complex-plane escape-time systems
+        </h5>
+      </header>
+      <div class="category-intro">
+        <div class="category-intro__section">
+          <h3>What it is</h3>
+          <p>
+            Fractals in this category come from iterating a function on complex numbers, pixel by pixel, and
+            recording whether (and how fast) each point escapes to infinity. The image is either the set of
+            points that never escape (the black "prisoner set") or a coloring of everyone else by how quickly
+            they got away. Small changes to the iteration formula - an added exponent, an absolute value, a
+            memory term referencing the previous step - produce entirely different-looking families from the
+            same basic technique.
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>History</h3>
+          <p>
+            Gaston Julia and Pierre Fatou studied iterated complex functions in the 1910s-20s, decades before
+            computers could visualize what they were describing. Benoit Mandelbrot, working at IBM in the late
+            1970s and 80s, used early computer graphics to render the set that now bears his name, coining the
+            term "fractal" (from Latin <em>fractus</em>, "broken") in 1975 to describe self-similar, infinitely
+            detailed shapes. The resulting image became one of the most recognizable outputs of computational
+            mathematics and helped popularize chaos theory far beyond academia.
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>Main Contributors</h3>
+          <p>
+            Gaston Julia, Pierre Fatou, Benoit Mandelbrot, and later explorers such as Michael Barnsley (fractal
+            compression and iterated function systems) and John Milnor (complex dynamical systems theory).
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>Latest Trends</h3>
+          <p>
+            Real-time GPU shader rendering now makes smooth infinite zooming interactive rather than a
+            multi-hour batch render. Arbitrary-precision "deep zoom" renderers use perturbation theory to
+            explore fractals far beyond what ordinary floating-point math allows. And generative-art
+            communities increasingly treat parameter families - Multibrot, Burning Ship, Phoenix - as a design
+            space to explore, discovering new visual territory from tiny formula tweaks rather than a single
+            fixed picture.
+          </p>
+        </div>
+      </div>
+      <div class="category-grid">
+        <a class="category-card" href="mandelbrot.html">
+          <h4>Mandelbrot / Multibrot</h4>
+          <p>The classic escape-time set, generalized from z&sup2;+c to z<sup>n</sup>+c - a single exponent
+            slider turns one fractal into a whole family.</p>
+        </a>
+        <a class="category-card" href="phoenix.html">
+          <h4>Phoenix Fractal</h4>
+          <p>Adds a memory term referencing the previous iteration, producing tendrils, feathers, and
+            flame-like sprays instead of smooth bulbs.</p>
+        </a>
+        <a class="category-card" href="burning-ship.html">
+          <h4>Burning Ship</h4>
+          <p>One absolute value on the imaginary term turns Mandelbrot's bulbs into jagged flame and
+            mountain-like silhouettes. Built for deep zooming.</p>
+        </a>
+      </div>
+    </section>
+  </div>
+</body>
+
+</html>

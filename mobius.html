@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="dist/css/style.css" rel="stylesheet" />
+  <!-- OrbitControls (loaded inside mm-mobiusstrip.js) imports "three" as a
+       bare module specifier internally - this import map is what lets the
+       browser resolve that without a bundler. -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.138.3/build/three.module.js"
+    }
+  }
+  </script>
+  <script type="module" src="dist/js/components/mm-mobiusstrip.js"></script>
+  <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
+  <script type="module" src="dist/js/mobius.js"></script>
+  <script type="module" src="dist/js/utils/title-card.js"></script>
+  <title>Mobius Strip - Markup Monks</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-B0BEV3T4NK');
+  </script>
+</head>
+
+<body>
+  <div class="content" data-content>
+    <side-bar></side-bar>
+    <section class="fractals">
+      <header class="fractals__header fractals__header--full-view" data-title-card>
+        <button type="button" class="title-card__close" data-close-title aria-label="Close title">&times;</button>
+        <h1 class="fractals__main-header">Mobius Strip</h1>
+        <h5 class="fractals__sub-header">
+          The site's first topology experiment
+        </h5>
+        <p class="intro__details code">
+          Usage:
+          <code>&lt;mm-mobiusstrip&gt;&lt;/mm-mobiusstrip&gt;
+          </code>
+        </p>
+      </header>
+      <button type="button" class="title-card__open" data-open-title></button>
+      <div class="mobius-canvas">
+        <mm-mobiusstrip data-mobius-el></mm-mobiusstrip>
+      </div>
+      <div class="mobius-controls collapsed" data-mobius-controls>
+        <button type="button" class="mobius-controls__close" data-close-controls aria-label="Close toolbar">&times;</button>
+        <div class="mobius-controls__group">
+          <label>
+            Twist:
+            <input type="range" min="1" max="6" value="1" step="1" data-twist>
+            <span class="mobius-controls__value" data-twist-value>1</span>
+          </label>
+          <label>
+            Width:
+            <input type="range" min="0.2" max="2" value="1" step="0.05" data-width>
+            <span class="mobius-controls__value" data-width-value>1.00</span>
+          </label>
+          <label>
+            Segments:
+            <input type="range" min="20" max="300" value="160" step="10" data-segments>
+            <span class="mobius-controls__value" data-segments-value>160</span>
+          </label>
+        </div>
+        <div class="mobius-controls__group">
+          <label>
+            Material:
+            <select data-material>
+              <option value="normal">Normal</option>
+              <option value="solid">Solid</option>
+              <option value="wireframe">Wireframe</option>
+            </select>
+          </label>
+          <label data-color-label hidden>
+            Color:
+            <input type="color" value="#7cc6ff" data-color>
+          </label>
+        </div>
+        <div class="mobius-controls__group">
+          <label>
+            <input type="checkbox" data-drift-toggle checked>
+            Organic Drift
+          </label>
+          <label>
+            Drift Speed:
+            <input type="range" min="0" max="5" value="1" step="0.1" data-drift-speed>
+            <span class="mobius-controls__value" data-drift-speed-value>1.0x</span>
+          </label>
+        </div>
+        <div class="mobius-controls__buttons">
+          <button type="button" class="mobius-controls__play-pause" data-reset-view>Reset View</button>
+        </div>
+      </div>
+      <button type="button" class="mobius-controls__open visible" data-open-controls>Open Toolbar</button>
+    </section>
+  </div>
+  <style>
+    .mobius-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100dvw;
+      height: 100dvh;
+      overflow: hidden;
+    }
+    .mobius-canvas mm-mobiusstrip {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .mobius-controls {
+      position: fixed;
+      z-index: 99;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(20, 20, 24, 0.16);
+      backdrop-filter: blur(2px) saturate(165%);
+      -webkit-backdrop-filter: blur(2px) saturate(165%);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      padding: 16px;
+      border-radius: 24px;
+      color: rgba(255, 255, 255, 0.72);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 92%;
+      max-width: 560px;
+      text-align: center;
+      font-family: 'IBM Plex Sans', sans-serif;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform-origin: bottom center;
+    }
+    .mobius-controls.collapsed {
+      opacity: 0;
+      transform: translateX(-50%) scale(0.85) translateY(10px);
+      pointer-events: none;
+    }
+    .mobius-controls__close {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 50%;
+      color: inherit;
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .mobius-controls__close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .mobius-controls__open {
+      position: fixed;
+      z-index: 99;
+      bottom: 10px;
+      left: 50%;
+      background: rgba(20, 20, 24, 0.16);
+      backdrop-filter: blur(2px) saturate(165%);
+      -webkit-backdrop-filter: blur(2px) saturate(165%);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      padding: 10px 22px;
+      border-radius: 20px;
+      color: rgba(255, 255, 255, 0.72);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.35);
+      font: inherit;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateX(-50%) scale(0.85);
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform-origin: bottom center;
+    }
+    .mobius-controls__open.visible {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+      pointer-events: auto;
+    }
+    .mobius-controls__open:hover {
+      background: rgba(20, 20, 24, 0.3);
+    }
+    .mobius-controls__group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 20px;
+      justify-content: center;
+      width: 100%;
+    }
+    .mobius-controls label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .mobius-controls label[hidden] {
+      display: none;
+    }
+    .mobius-controls input[type="range"],
+    .mobius-controls input[type="checkbox"] {
+      accent-color: rgba(255, 255, 255, 0.85);
+    }
+    .mobius-controls select {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 8px;
+      color: #fff;
+      font: inherit;
+      font-size: 13px;
+      padding: 4px 8px;
+    }
+    .mobius-controls select option {
+      color: #000;
+    }
+    .mobius-controls input[type="color"] {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      overflow: hidden;
+    }
+    .mobius-controls__value {
+      min-width: 3.5em;
+      display: inline-block;
+    }
+    .mobius-controls__buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .mobius-controls__play-pause {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 14px;
+      color: inherit;
+      font: inherit;
+      font-size: 14px;
+      padding: 6px 20px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .mobius-controls__play-pause:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    @media (max-width: 600px) {
+      .mobius-controls {
+        width: 95%;
+        bottom: 20px;
+        padding: 12px;
+        border-radius: 20px;
+      }
+      .mobius-controls__group {
+        flex-direction: column;
+        align-items: center;
+      }
+      .mobius-controls__open {
+        bottom: 20px;
+      }
+    }
+  </style>
+</body>
+
+</html>

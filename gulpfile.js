@@ -39,7 +39,4 @@ exports.default = () => {
   );
 };
 
-exports.build = (done) => {
-  series(minifyJS, sassToCss, postCss);
-  done();
-};
+exports.build = series(minifyJS, sassToCss, postCss);

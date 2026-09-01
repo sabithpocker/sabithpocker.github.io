@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description"
+    content="Recursive geometry: Koch curves, Sierpinski triangles, and spirographs. What they are, their history, and where the field is headed." />
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="dist/css/style.css" rel="stylesheet" />
+  <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
+  <title>Recursive Geometry - Markup Monks</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-B0BEV3T4NK');
+  </script>
+</head>
+
+<body>
+  <div class="content" data-content>
+    <side-bar></side-bar>
+    <section class="fractals">
+      <header class="fractals__header category-header">
+        <h1 class="fractals__main-header">Recursive Geometry</h1>
+        <h5 class="fractals__sub-header">
+          Shapes built by repeating a rule at shrinking scales
+        </h5>
+      </header>
+      <div class="category-intro">
+        <div class="category-intro__section">
+          <h3>What it is</h3>
+          <p>
+            These shapes come from explicit geometric construction rather than iteration in the complex plane:
+            a line segment replaced by a bent version of itself, a triangle subdivided into smaller triangles,
+            a curve traced by a circle rolling inside another circle. Apply the same rule to every new piece,
+            recursively, and the result is a shape with detail at every scale.
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>History</h3>
+          <p>
+            Helge von Koch introduced his snowflake curve in 1904 as an example of a continuous curve with no
+            tangent anywhere - a deliberately "pathological" object meant to challenge intuitions about curves,
+            not a piece of art. Wac&#322;aw Sierpi&#324;ski described his triangle and carpet around 1915-1916 in
+            the context of set theory and topology. Both constructions predate the word "fractal" by half a
+            century; they were curiosities for pure mathematicians long before Benoit Mandelbrot reframed them
+            as fractals with a shared vocabulary - self-similarity, fractal dimension.
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>Main Contributors</h3>
+          <p>
+            Helge von Koch, Wac&#322;aw Sierpi&#324;ski, Georg Cantor (whose 1883 "dust" set is an ancestor of
+            the idea), and Benoit Mandelbrot, who unified these separate constructions under fractal geometry.
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>Latest Trends</h3>
+          <p>
+            Procedural generation in games and film leans heavily on recursive/L-system rules to grow trees,
+            terrain, and coastlines on demand. Generative-art tooling increasingly animates the construction
+            process itself - watching a curve grow through recursion depth - rather than only showing the
+            finished shape. And tiling or packing variations turn a single recursive curve into a repeating
+            surface pattern, which is the direction this site's own Koch and Sierpi&#324;ski pieces take.
+          </p>
+        </div>
+      </div>
+      <div class="category-grid">
+        <a class="category-card" href="koch-code.html">
+          <h4>Koch Code</h4>
+          <p>A grid tiled edge-to-edge, where every line segment is itself a Koch curve, animated with
+            organically drifting recursion depth.</p>
+        </a>
+        <a class="category-card" href="koch-snowflake.html">
+          <h4>Koch Snowflake</h4>
+          <p>The classic closed six-pointed Koch curve, hex-packed across the page so neighboring snowflakes
+            nest into each other's gaps.</p>
+        </a>
+        <a class="category-card" href="sierpinski-fractal.html">
+          <h4>Sierpinski Fractal</h4>
+          <p>A genuine edge-to-edge triangular tessellation where every tile is its own independently
+            animated Sierpinski subdivision.</p>
+        </a>
+        <a class="category-card" href="spirograph.html">
+          <h4>Spirograph</h4>
+          <p>The classic rolling-circle curve, fully parametric and animated - outer/inner radius, line
+            count, and detail all live-adjustable.</p>
+        </a>
+      </div>
+    </section>
+  </div>
+</body>
+
+</html>

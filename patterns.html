@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description"
+    content="Geometric tessellation patterns inspired by Islamic architecture. What they are, their history, and where the field is headed." />
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="dist/css/style.css" rel="stylesheet" />
+  <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
+  <title>Patterns & Tessellation - Markup Monks</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-B0BEV3T4NK');
+  </script>
+</head>
+
+<body>
+  <div class="content" data-content>
+    <side-bar></side-bar>
+    <section class="fractals">
+      <header class="fractals__header category-header">
+        <h1 class="fractals__main-header">Patterns &amp; Tessellation</h1>
+        <h5 class="fractals__sub-header">
+          Repeating geometry from a compass and a straightedge
+        </h5>
+      </header>
+      <div class="category-intro">
+        <div class="category-intro__section">
+          <h3>What it is</h3>
+          <p>
+            Repeating geometric designs built from a small set of shapes and symmetry rules - most famously
+            the star-and-polygon tilings found across Islamic architecture and decoration, historically
+            produced with nothing more than a compass and straightedge.
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>History</h3>
+          <p>
+            Geometric tessellation flourished across the Islamic world from roughly the 8th century onward,
+            reaching particular sophistication in Persian, Moorish, and Central Asian architecture. The
+            Alhambra palace in Granada, Spain - built mostly in the 13th-14th centuries under the Nasrid
+            dynasty - is one of the most studied surviving examples; mathematicians later found that its walls
+            exemplify all 17 possible wallpaper symmetry groups. In 2007, physicists Peter Lu and Paul
+            Steinhardt proposed that some medieval Islamic tilings, built from "girih" tiles, may have
+            approximated quasicrystalline (Penrose-like) patterns centuries before their mathematical discovery
+            in the West.
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>Main Contributors</h3>
+          <p>
+            The mostly-anonymous craftsmen and geometers of the medieval Islamic world; in modern scholarship,
+            Peter Lu and Paul Steinhardt for the girih-tile research, and mathematician H.S.M. Coxeter for his
+            work on the symmetry groups underlying such patterns.
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>Latest Trends</h3>
+          <p>
+            Computational recreation of these tiling systems - parametric pattern generators rather than hand
+            construction - lets the same underlying geometry be explored far faster than by hand. This site's
+            own piece goes a step further, layering a modern reaction-diffusion "dissolve" effect onto
+            historically grounded tiling geometry.
+          </p>
+        </div>
+      </div>
+      <div class="category-grid">
+        <a class="category-card" href="alhambra.html">
+          <h4>Al Hambra Pattern</h4>
+          <p>Islamic geometric tessellation with a reaction-diffusion dissolve/reform cycle layered on
+            top, plus optional perspective tilt.</p>
+        </a>
+      </div>
+    </section>
+  </div>
+</body>
+
+</html>

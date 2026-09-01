@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="dist/css/style.css" rel="stylesheet" />
+  <script type="module" src="dist/js/components/mm-kochsnowflake.js"></script>
+  <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
+  <script type="module" src="dist/js/koch-snowflake.js"></script>
+  <script type="module" src="dist/js/utils/title-card.js"></script>
+  <title>Koch Snowflake - Markup Monks</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-B0BEV3T4NK');
+  </script>
+</head>
+
+<body>
+  <div class="content" data-content>
+    <side-bar></side-bar>
+    <section class="fractals">
+      <header class="fractals__header fractals__header--full-view" data-title-card>
+        <button type="button" class="title-card__close" data-close-title aria-label="Close title">&times;</button>
+        <h1 class="fractals__main-header">Koch Snowflake</h1>
+        <h5 class="fractals__sub-header">
+          Web component for Koch Snowflake
+        </h5>
+        <p class="intro__details code">
+          Usage:
+          <code>&lt;mm-kochsnowflake grid-cols="8" grid-rows="6" levels="3"&gt;&lt;/mm-kochsnowflake&gt;
+          </code>
+        </p>
+      </header>
+      <button type="button" class="title-card__open" data-open-title></button>
+      <div class="snowflake-grid">
+        <mm-kochsnowflake class="snowflake-grid__canvas" data-snowflake-el grid-cols="8" grid-rows="6"
+          levels="3"></mm-kochsnowflake>
+      </div>
+      <div class="snowflake-controls collapsed" data-snowflake-controls>
+        <button type="button" class="snowflake-controls__close" data-close-controls aria-label="Close toolbar">&times;</button>
+        <div class="snowflake-controls__group">
+          <label>
+            Grid Columns:
+            <input type="range" min="2" max="16" value="8" step="1" data-grid-cols>
+            <span class="snowflake-controls__value" data-grid-cols-value>8</span>
+          </label>
+          <label>
+            Grid Rows:
+            <input type="range" min="2" max="24" value="6" step="1" data-grid-rows>
+            <span class="snowflake-controls__value" data-grid-rows-value>6</span>
+          </label>
+        </div>
+        <div class="snowflake-controls__group">
+          <label>
+            Max Detail:
+            <input type="range" min="0" max="4" value="3" step="1" data-max-levels>
+            <span class="snowflake-controls__value" data-max-levels-value>3</span>
+          </label>
+          <label>
+            Animation Speed:
+            <input type="range" min="0" max="5" value="2.5" step="0.1" data-anim-speed>
+            <span class="snowflake-controls__value" data-anim-speed-value>2.5x</span>
+          </label>
+        </div>
+        <div class="snowflake-controls__buttons">
+          <button type="button" class="snowflake-controls__play-pause" data-play-pause>Pause</button>
+        </div>
+      </div>
+      <button type="button" class="snowflake-controls__open visible" data-open-controls>Open Toolbar</button>
+    </section>
+  </div>
+  <style>
+    .snowflake-grid {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100dvw;
+      height: 100dvh;
+      overflow: hidden;
+    }
+    .snowflake-grid__canvas {
+      display: grid;
+      width: 100%;
+      height: 100%;
+    }
+    .snowflake-controls {
+      position: fixed;
+      z-index: 99;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(20, 20, 24, 0.16);
+      backdrop-filter: blur(2px) saturate(165%);
+      -webkit-backdrop-filter: blur(2px) saturate(165%);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      padding: 16px;
+      border-radius: 24px;
+      color: rgba(255, 255, 255, 0.72);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 90%;
+      max-width: 460px;
+      text-align: center;
+      font-family: 'IBM Plex Sans', sans-serif;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform-origin: bottom center;
+    }
+    .snowflake-controls.collapsed {
+      opacity: 0;
+      transform: translateX(-50%) scale(0.85) translateY(10px);
+      pointer-events: none;
+    }
+    .snowflake-controls__close {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 50%;
+      color: inherit;
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .snowflake-controls__close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .snowflake-controls__open {
+      position: fixed;
+      z-index: 99;
+      bottom: 10px;
+      left: 50%;
+      background: rgba(20, 20, 24, 0.16);
+      backdrop-filter: blur(2px) saturate(165%);
+      -webkit-backdrop-filter: blur(2px) saturate(165%);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      padding: 10px 22px;
+      border-radius: 20px;
+      color: rgba(255, 255, 255, 0.72);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.35);
+      font: inherit;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateX(-50%) scale(0.85);
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform-origin: bottom center;
+    }
+    .snowflake-controls__open.visible {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+      pointer-events: auto;
+    }
+    .snowflake-controls__open:hover {
+      background: rgba(20, 20, 24, 0.3);
+    }
+    .snowflake-controls__group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 20px;
+      justify-content: center;
+      width: 100%;
+    }
+    .snowflake-controls label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .snowflake-controls input[type="range"] {
+      accent-color: rgba(255, 255, 255, 0.85);
+    }
+    .snowflake-controls__value {
+      min-width: 3.5em;
+      display: inline-block;
+    }
+    .snowflake-controls__buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .snowflake-controls__play-pause {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 14px;
+      color: inherit;
+      font: inherit;
+      font-size: 14px;
+      padding: 6px 20px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .snowflake-controls__play-pause:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    @media (max-width: 600px) {
+      .snowflake-controls {
+        width: 95%;
+        bottom: 20px;
+        padding: 12px;
+        border-radius: 20px;
+      }
+      .snowflake-controls__group {
+        flex-direction: column;
+        align-items: center;
+      }
+      .snowflake-controls__open {
+        bottom: 20px;
+      }
+    }
+  </style>
+</body>
+
+</html>

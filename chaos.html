@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description"
+    content="Strange attractors and chaotic dynamical systems: Clifford and Peter de Jong maps. What they are, their history, and where the field is headed." />
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="dist/css/style.css" rel="stylesheet" />
+  <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
+  <title>Chaos & Dynamical Systems - Markup Monks</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-B0BEV3T4NK');
+  </script>
+</head>
+
+<body>
+  <div class="content" data-content>
+    <side-bar></side-bar>
+    <section class="fractals">
+      <header class="fractals__header category-header">
+        <h1 class="fractals__main-header">Chaos &amp; Dynamical Systems</h1>
+        <h5 class="fractals__sub-header">
+          Deterministic rules, unpredictable trajectories, stable structure
+        </h5>
+      </header>
+      <div class="category-intro">
+        <div class="category-intro__section">
+          <h3>What it is</h3>
+          <p>
+            Chaotic systems are fully deterministic - the same rule, applied over and over, from the same
+            starting point, always produces the same trajectory - yet nearby starting points diverge so fast
+            that long-term behavior is effectively unpredictable. Despite that unpredictability, the
+            trajectory doesn't wander aimlessly: it traces out a stable, intricately structured shape called a
+            strange attractor. Clifford and Peter de Jong maps are two-dimensional examples - four numbers and
+            one iterated formula are enough to generate an endless variety of these shapes.
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>History</h3>
+          <p>
+            Henri Poincar&eacute; first recognized sensitive dependence on initial conditions while studying
+            the three-body problem in the 1890s. The field took its modern form in the 1960s-70s: Edward
+            Lorenz discovered the attractor that bears his name in 1963 while simplifying weather-prediction
+            equations, and later popularized the "butterfly effect"; David Ruelle and Floris Takens coined the
+            term "strange attractor" in 1971. Peter de Jong and later Clifford Pickover explored simple 2D
+            iterated maps in the 1980s-90s specifically for their visual richness, connecting chaos theory
+            directly to computer art.
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>Main Contributors</h3>
+          <p>
+            Henri Poincar&eacute;, Edward Lorenz, David Ruelle, Floris Takens, Mitchell Feigenbaum (universality
+            in chaos), Peter de Jong, and Clifford Pickover.
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>Latest Trends</h3>
+          <p>
+            GPU/WebGL-accelerated rendering now accumulates millions of attractor points in real time instead
+            of over a slow offline batch run. "Generative instrument" tools let anyone explore parameter space
+            by randomizing or slowly drifting values live, turning a fixed equation into an ever-morphing
+            piece. And chaos theory itself continues to see renewed use in physically-based simulation - fluid,
+            weather, and financial modeling - alongside its purely visual, artistic life.
+          </p>
+        </div>
+      </div>
+      <div class="category-grid">
+        <a class="category-card" href="attractors.html">
+          <h4>Strange Attractors</h4>
+          <p>Clifford &amp; Peter de Jong maps rendered as a density histogram from millions of chaotic-orbit
+            iterations. Randomize for an endless supply of compositions.</p>
+        </a>
+      </div>
+    </section>
+  </div>
+</body>
+
+</html>

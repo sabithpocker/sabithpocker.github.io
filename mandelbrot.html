@@ -12,7 +12,9 @@
   <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
   <script type="module" src="dist/js/components/ui-elements/fullscreen-button.js"></script>
   <script type="module" src="dist/js/components/performance/performance-monitor.js"></script>
-  <title>Mandelbrot - Markup Monks</title>
+  <script type="module" src="dist/js/mandelbrot.js"></script>
+  <script type="module" src="dist/js/utils/title-card.js"></script>
+  <title>Mandelbrot / Multibrot - Markup Monks</title>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
   <script>
@@ -28,24 +30,201 @@
   <div class="content" data-content>
     <side-bar></side-bar>
     <section class="fractals">
-      <header class="fractals__header shader-canvas">
-        <h1 class="fractals__main-header">Mandelbrot Set</h1>
+      <header class="fractals__header shader-canvas" data-title-card>
+        <button type="button" class="title-card__close" data-close-title aria-label="Close title">&times;</button>
+        <h1 class="fractals__main-header">Mandelbrot / Multibrot</h1>
         <h5 class="fractals__sub-header">
-          Web component for Mandelbrot set
+          One formula, a whole family of fractals
         </h5>
         <p class="intro__details code">
           Usage:
-          <code>&lt;mm-mandelbrot class=&quot;fractals__item&quot;&gt;&lt;/mm-mandelbrot&gt;
-              </code>
+          <code>&lt;mm-mandelbrot&gt;&lt;/mm-mandelbrot&gt;
+          </code>
         </p>
       </header>
+      <button type="button" class="title-card__open" data-open-title></button>
       <div class="fractals__items">
-        <mm-mandelbrot class="fractals__item shader-canvas" animate="true"></mm-mandelbrot>
+        <mm-mandelbrot class="fractals__item shader-canvas" data-mandelbrot-el></mm-mandelbrot>
       </div>
+      <div class="mandelbrot-controls collapsed" data-mandelbrot-controls>
+        <button type="button" class="mandelbrot-controls__close" data-close-controls aria-label="Close toolbar">&times;</button>
+        <div class="mandelbrot-controls__group">
+          <label>
+            Power (n):
+            <input type="range" min="-2" max="6" value="2" step="0.05" data-power>
+            <span class="mandelbrot-controls__value" data-power-value>2.00</span>
+          </label>
+          <label>
+            Iterations:
+            <input type="range" min="20" max="400" value="100" step="10" data-iterations>
+            <span class="mandelbrot-controls__value" data-iterations-value>100</span>
+          </label>
+          <label>
+            Escape Radius:
+            <input type="range" min="2" max="20" value="2" step="0.5" data-escape-radius>
+            <span class="mandelbrot-controls__value" data-escape-radius-value>2</span>
+          </label>
+        </div>
+        <div class="mandelbrot-controls__group">
+          <label>
+            <input type="checkbox" data-drift-toggle checked>
+            Organic Power Drift
+          </label>
+          <label>
+            Drift Speed:
+            <input type="range" min="0" max="5" value="1" step="0.1" data-drift-speed>
+            <span class="mandelbrot-controls__value" data-drift-speed-value>1.0x</span>
+          </label>
+        </div>
+        <div class="mandelbrot-controls__buttons">
+          <button type="button" class="mandelbrot-controls__play-pause" data-reset-view>Reset View</button>
+        </div>
+      </div>
+      <button type="button" class="mandelbrot-controls__open visible" data-open-controls>Open Toolbar</button>
     </section>
     <fullscreen-button></fullscreen-button>
     <mm-performance-monitor></mm-performance-monitor>
   </div>
+  <style>
+    .mandelbrot-controls {
+      position: fixed;
+      z-index: 99;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(20, 20, 24, 0.16);
+      backdrop-filter: blur(2px) saturate(165%);
+      -webkit-backdrop-filter: blur(2px) saturate(165%);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      padding: 16px;
+      border-radius: 24px;
+      color: rgba(255, 255, 255, 0.72);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+      font-family: 'IBM Plex Sans', sans-serif;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform-origin: bottom center;
+    }
+    .mandelbrot-controls.collapsed {
+      opacity: 0;
+      transform: translateX(-50%) scale(0.85) translateY(10px);
+      pointer-events: none;
+    }
+    .mandelbrot-controls__close {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 50%;
+      color: inherit;
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .mandelbrot-controls__close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .mandelbrot-controls__open {
+      position: fixed;
+      z-index: 99;
+      bottom: 10px;
+      left: 50%;
+      background: rgba(20, 20, 24, 0.16);
+      backdrop-filter: blur(2px) saturate(165%);
+      -webkit-backdrop-filter: blur(2px) saturate(165%);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      padding: 10px 22px;
+      border-radius: 20px;
+      color: rgba(255, 255, 255, 0.72);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3), 0 1px 2px rgba(0, 0, 0, 0.35);
+      font: inherit;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateX(-50%) scale(0.85);
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform-origin: bottom center;
+    }
+    .mandelbrot-controls__open.visible {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+      pointer-events: auto;
+    }
+    .mandelbrot-controls__open:hover {
+      background: rgba(20, 20, 24, 0.3);
+    }
+    .mandelbrot-controls__group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 20px;
+      justify-content: center;
+      width: 100%;
+    }
+    .mandelbrot-controls label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .mandelbrot-controls input[type="range"],
+    .mandelbrot-controls input[type="checkbox"] {
+      accent-color: rgba(255, 255, 255, 0.85);
+    }
+    .mandelbrot-controls__value {
+      min-width: 3.5em;
+      display: inline-block;
+    }
+    .mandelbrot-controls__buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .mandelbrot-controls__play-pause {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 14px;
+      color: inherit;
+      font: inherit;
+      font-size: 14px;
+      padding: 6px 20px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .mandelbrot-controls__play-pause:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    @media (max-width: 600px) {
+      .mandelbrot-controls {
+        width: 95%;
+        bottom: 20px;
+        padding: 12px;
+        border-radius: 20px;
+      }
+      .mandelbrot-controls__group {
+        flex-direction: column;
+        align-items: center;
+      }
+      .mandelbrot-controls__open {
+        bottom: 20px;
+      }
+    }
+  </style>
 </body>
 
 </html>
