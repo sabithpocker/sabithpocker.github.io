@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description"
+    content="Shader and signal experiments that don't fit a single named mathematical family yet - a sandbox for rendering techniques." />
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="dist/css/style.css" rel="stylesheet" />
+  <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
+  <title>Shader Playground - Markup Monks</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-B0BEV3T4NK');
+  </script>
+</head>
+
+<body>
+  <div class="content" data-content>
+    <side-bar></side-bar>
+    <section class="fractals">
+      <header class="fractals__header category-header">
+        <h1 class="fractals__main-header">Shader Playground</h1>
+        <h5 class="fractals__sub-header">
+          Experiments built around a shader or signal, not a named system
+        </h5>
+      </header>
+      <div class="category-intro">
+        <div class="category-intro__section">
+          <h3>What it is</h3>
+          <p>
+            A looser category for pieces built directly around a shader, canvas technique, or an external
+            signal like audio, rather than a specific named mathematical object. It's a sandbox for trying
+            rendering ideas before they're developed enough to earn their own category - or for pieces that are
+            interesting on their own terms without needing to be.
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>History &amp; Contributors</h3>
+          <p>
+            Less a single mathematical lineage than a reflection of the demoscene and creative-coding
+            traditions - communities like Shadertoy and GLSL Sandbox - that treat the fragment shader itself as
+            an art medium. There's no equivalent of a Mandelbrot or a M&ouml;bius here to credit; the point of
+            this category is exploration rather than reproducing a named classical result.
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>Latest Trends</h3>
+          <p>
+            Audio-reactive visuals (mapping a live signal's frequency/amplitude straight into shader uniforms)
+            and general-purpose "blank canvas" shader components that get repurposed for whatever the next
+            experiment needs, rather than being rebuilt from scratch each time.
+          </p>
+        </div>
+      </div>
+      <div class="category-grid">
+        <a class="category-card" href="generic-shader.html">
+          <h4>Generic Shader</h4>
+          <p>A blank web component that paints based on a supplied shader - the starting point for new
+            rendering experiments on this site.</p>
+        </a>
+        <a class="category-card" href="audio-visualizer.html">
+          <h4>Audio Visualizer</h4>
+          <p>A waveform visualizer driven directly by an audio signal's frequency data.</p>
+        </a>
+      </div>
+    </section>
+  </div>
+</body>
+
+</html>

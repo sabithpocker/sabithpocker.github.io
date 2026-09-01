@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description"
+    content="Topology experiments: the Mobius strip and other surfaces. What topology is, its history, and where the field is headed." />
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
+    rel="stylesheet" />
+  <link href="dist/css/style.css" rel="stylesheet" />
+  <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
+  <title>Topology - Markup Monks</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-B0BEV3T4NK');
+  </script>
+</head>
+
+<body>
+  <div class="content" data-content>
+    <side-bar></side-bar>
+    <section class="fractals">
+      <header class="fractals__header category-header">
+        <h1 class="fractals__main-header">Topology</h1>
+        <h5 class="fractals__sub-header">
+          What survives stretching and bending, but not cutting
+        </h5>
+      </header>
+      <div class="category-intro">
+        <div class="category-intro__section">
+          <h3>What it is</h3>
+          <p>
+            Topology studies properties that survive continuous deformation - stretching, bending, twisting -
+            but not cutting or gluing. What matters is connectivity and structure, not exact distance or angle.
+            A M&ouml;bius strip, torus, and Klein bottle are the classic hands-on examples: surfaces whose
+            "strangeness" (one-sidedness, holes, self-intersection when forced into 3D) comes purely from how
+            they're connected, not from any particular measurement.
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>History</h3>
+          <p>
+            The field's founding moment is usually traced to Leonhard Euler's 1736 solution to the Seven
+            Bridges of K&ouml;nigsberg problem and his polyhedron formula. August M&ouml;bius and Johann
+            Benedict Listing independently described the one-sided strip now named after M&ouml;bius in 1858.
+            Felix Klein described his self-intersecting "bottle" in 1882 - a name usually attributed to a
+            translation slip between the German words for "surface" (<em>Fl&auml;che</em>) and "bottle"
+            (<em>Flasche</em>). Henri Poincar&eacute; formalized topology as its own branch of mathematics
+            around 1895.
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>Main Contributors</h3>
+          <p>
+            Leonhard Euler, August M&ouml;bius, Johann Benedict Listing, Felix Klein, Henri Poincar&eacute;, and
+            in the 20th century William Thurston, who reshaped low-dimensional topology and geometry.
+          </p>
+        </div>
+        <div class="category-intro__section">
+          <h3>Latest Trends</h3>
+          <p>
+            Real-time WebGL/Three.js rendering makes previously abstract surfaces directly manipulable in a
+            browser rather than confined to a diagram. Knot theory has growing ties to biology (how DNA knots
+            itself) and quantum computing (topological qubits). And generative art is starting to apply
+            fractal deformation to classical topological surfaces - a "fractal M&ouml;bius" or "fractal
+            torus" - which is the direction this site's own roadmap plans to take the category next.
+          </p>
+        </div>
+      </div>
+      <div class="category-grid">
+        <a class="category-card" href="mobius.html">
+          <h4>Mobius Strip</h4>
+          <p>A parametric surface rendered in 3D with Three.js - twist, width, and material all adjustable,
+            drag to rotate.</p>
+        </a>
+      </div>
+    </section>
+  </div>
+</body>
+
+</html>

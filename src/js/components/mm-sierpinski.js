@@ -44,16 +44,20 @@ class Sierpinski extends HTMLElement {
     }
 
     connectedCallback() {
-        const depth = parseInt(this.getAttribute('depth')) || 5;
-        const minSideLength = parseInt(this.getAttribute('min-side-length')) || 500;
-        const maxSideLength = parseInt(this.getAttribute('max-side-length')) || 600;
-        const color = this.getAttribute('color') || '0.1, 0.2, 0.5';
+        this.depth = parseInt(this.getAttribute('depth')) || 5;
+        this.color = this.getAttribute('color') || '0.1, 0.2, 0.5';
+        // Grid mode: when both are set, render() tiles the canvas with a grid
+        // of equilateral triangles (each its own Sierpinski subdivision, with
+        // a gap between them) instead of one big triangle - see
+        // drawSierpinskiGrid().
+        this.gridCols = this.hasAttribute('grid-cols') ? parseInt(this.getAttribute('grid-cols')) : null;
+        this.gridRows = this.hasAttribute('grid-rows') ? parseInt(this.getAttribute('grid-rows')) : null;
+        this.gap = this.hasAttribute('gap') ? parseFloat(this.getAttribute('gap')) / 100 : 0.15;
 
         this.vertexShaderSource = this.getAttribute('vertex-shader-source') || this.defaultVertexShaderSource;
         this.fragmentShaderSource = this.getAttribute('fragment-shader-source') || this.defaultFragmentShaderSource;
 
         this.initializeWebGL();
-        this.drawSierpinski(depth, minSideLength, maxSideLength, color);
         this.render(0);
     }
 
@@ -86,7 +90,7 @@ class Sierpinski extends HTMLElement {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
     }
 
-    drawSierpinski(depth, minSideLength, maxSideLength, color) {
+    drawSierpinski(depth, color) {
         const width = this.gl.canvas.width;
         const height = this.gl.canvas.height;
         const side = Math.min(width, height) * 0.75;
@@ -96,11 +100,73 @@ class Sierpinski extends HTMLElement {
         const childPoints = this.getChildTrianglePoints(points, depth);
         const colorArray = color.split(',').map(parseFloat);
 
-        childPoints.forEach(points => this.drawTriangle(this.simpleShader, ...points, colorArray));
+        this.drawTrianglesBatch(childPoints.flat(), colorArray);
     }
 
-    getRandomSideLength(min, max) {
-        return Math.random() * (max - min) + min;
+    // Tiles the canvas with a genuine edge-to-edge triangular tessellation
+    // (the {3,6} tiling: each row is a strip of alternating up/down
+    // equilateral triangles that share edges with their neighbors, covering
+    // the plane with no gaps), then shrinks every triangle toward its own
+    // centroid by `gap` for a thin, uniform seam - a packed tiling with
+    // breathing room, not independent tiles floating in oversized cells.
+    // Each tile is independently Sierpinski-subdivided to depthAt(row, j) (a
+    // per-tile depth override, e.g. driven by an external noise-based
+    // animation loop - see sierpinski.js - falling back to the flat
+    // `this.depth` when not set). All resulting sub-triangles across every
+    // tile are batched into a single buffer/draw call, since a real grid at
+    // any meaningful depth can produce tens of thousands of tiny triangles -
+    // one draw call per triangle would make the toolbar's live sliders
+    // unusably slow.
+    drawSierpinskiGrid() {
+        const width = this.gl.canvas.width;
+        const height = this.gl.canvas.height;
+        const cols = Math.max(1, this.gridCols);
+        const rows = Math.max(1, this.gridRows);
+        const side = width / cols;
+        const rowHeight = side * (Math.sqrt(3) / 2);
+        const gap = Math.min(0.6, Math.max(0, this.gap));
+        const colorArray = (this.color || '0.1, 0.2, 0.5').split(',').map(parseFloat);
+        const depthAt = this.tileDepthFn || (() => this.depth);
+
+        const triangles = [];
+        for (let row = 0; row < rows; row++) {
+            const yTop = row * rowHeight;
+            const yBottom = yTop + rowHeight;
+            if (yTop > height) break;
+
+            // Starts one triangle early (j = -1, a "down" triangle centered
+            // on x = 0) so the left edge is capped by a clipped half-triangle
+            // matching the one the row already produces on the right (the
+            // last "down" triangle's base extends half a side past `width`)
+            // - without this the row is missing exactly that left-edge half.
+            for (let j = -1; j < cols * 2; j++) {
+                const x0 = j * (side / 2);
+                const pointingUp = j % 2 === 0;
+                const base = pointingUp
+                    ? [x0, yBottom, x0 + side, yBottom, x0 + side / 2, yTop]
+                    : [x0, yTop, x0 + side, yTop, x0 + side / 2, yBottom];
+                const gapped = this.shrinkTowardCentroid(base, gap);
+                const depth = Math.max(0, Math.round(depthAt(row, j)));
+                this.getChildTrianglePoints(gapped, depth).forEach(t => triangles.push(...t));
+            }
+        }
+
+        this.drawTrianglesBatch(triangles, colorArray);
+    }
+
+    // Moves each vertex of a triangle toward its own centroid by `gap`
+    // (0..1) - shrinking a triangle this way, rather than toward some outer
+    // cell's center, leaves a symmetric seam on every edge so neighboring
+    // tiles in a tessellation stay evenly spaced instead of drifting apart.
+    shrinkTowardCentroid(points, gap) {
+        const cx = (points[0] + points[2] + points[4]) / 3;
+        const cy = (points[1] + points[3] + points[5]) / 3;
+        const scale = 1 - gap;
+        return [
+            cx + (points[0] - cx) * scale, cy + (points[1] - cy) * scale,
+            cx + (points[2] - cx) * scale, cy + (points[3] - cy) * scale,
+            cx + (points[4] - cx) * scale, cy + (points[5] - cy) * scale,
+        ];
     }
 
     getProgram(gl, vertexShaderSource, fragmentShaderSource) {
@@ -206,15 +272,27 @@ class Sierpinski extends HTMLElement {
         gl.drawArrays(primitiveType, offset, count);
     }
 
+    // Batched version of drawTriangle(): uploads every triangle's vertices in
+    // one buffer and issues a single drawArrays(TRIANGLES,...) call instead
+    // of one bufferData+drawArrays pair per triangle.
+    drawTrianglesBatch(flatPoints, colorArray = []) {
+        if (flatPoints.length === 0) return;
+        if (colorArray.length >= 3) {
+            this.gl.uniform4f(this.simpleShader.colorUniformLocation, colorArray[0], colorArray[1], colorArray[2], colorArray[3] ?? 1);
+        }
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(flatPoints), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.simpleShader.positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, flatPoints.length / 2);
+    }
+
     render(timestamp) {
         this.clearCanvas([0, 0, 0, 0], this.gl);
-        this.gl.uniform1f(this.timeLocation, timestamp / 2500.0);
-        const depth = parseInt(this.getAttribute('depth')) || 5;
-        const minSideLength = parseInt(this.getAttribute('min-side-length')) || 500;
-        const maxSideLength = parseInt(this.getAttribute('max-side-length')) || 600;
-        const color = this.getAttribute('color') || '0.1, 0.2, 0.5';
-        this.drawSierpinski(depth, minSideLength, maxSideLength, color);
-        // requestAnimationFrame(this.render.bind(this));
+        this.gl.uniform1f(this.timeLocation, (timestamp || 0) / 2500.0);
+        if (this.gridCols && this.gridRows) {
+            this.drawSierpinskiGrid();
+        } else {
+            this.drawSierpinski(this.depth, this.color || '0.1, 0.2, 0.5');
+        }
     }
 }
 

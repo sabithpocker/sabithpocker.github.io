@@ -8,11 +8,11 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
     rel="stylesheet" />
   <link href="dist/css/style.css" rel="stylesheet" />
-  <script type="module" src="dist/js/components/mm-sierpinski.js"></script>
+  <script type="module" src="dist/js/components/mm-attractor.js"></script>
   <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
-  <script type="module" src="dist/js/sierpinski.js"></script>
+  <script type="module" src="dist/js/attractors.js"></script>
   <script type="module" src="dist/js/utils/title-card.js"></script>
-  <title>Sierpinski Fractal - Markup Monks</title>
+  <title>Strange Attractors - Markup Monks</title>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
   <script>
@@ -30,61 +30,84 @@
     <section class="fractals">
       <header class="fractals__header fractals__header--full-view" data-title-card>
         <button type="button" class="title-card__close" data-close-title aria-label="Close title">&times;</button>
-        <h1 class="fractals__main-header">Sierpinski Fractal</h1>
+        <h1 class="fractals__main-header">Strange Attractors</h1>
         <h5 class="fractals__sub-header">
-          Web component for Sierpinski Fractal
+          Clifford &amp; Peter de Jong maps
         </h5>
         <p class="intro__details code">
-          Usage:
-          <code>&lt;mm-sierpinski grid-cols="8" grid-rows="6" gap="6" depth="3"&gt;&lt;/mm-sierpinski&gt;
-          </code>
+          Four numbers, a chaotic orbit iterated millions of times, and a
+          density histogram in place of a pixel-by-pixel formula. Press
+          Randomize - thousands of compositions live in this tiny system.
         </p>
       </header>
       <button type="button" class="title-card__open" data-open-title></button>
-      <div class="sierpinski-grid">
-        <mm-sierpinski class="sierpinski-grid__canvas" data-sierpinski-el grid-cols="8" grid-rows="6" gap="6"
-          depth="3" color="0.2, 0.6, 0.3"></mm-sierpinski>
+      <div class="attractor-canvas">
+        <mm-attractor data-attractor-el></mm-attractor>
       </div>
-      <div class="sierpinski-controls collapsed" data-sierpinski-controls>
-        <button type="button" class="sierpinski-controls__close" data-close-controls aria-label="Close toolbar">&times;</button>
-        <div class="sierpinski-controls__group">
+      <div class="attractor-controls collapsed" data-attractor-controls>
+        <button type="button" class="attractor-controls__close" data-close-controls aria-label="Close toolbar">&times;</button>
+        <div class="attractor-controls__group">
           <label>
-            Grid Columns:
-            <input type="range" min="2" max="16" value="8" step="1" data-grid-cols>
-            <span class="sierpinski-controls__value" data-grid-cols-value>8</span>
+            Type:
+            <select data-type>
+              <option value="clifford">Clifford</option>
+              <option value="dejong">Peter de Jong</option>
+            </select>
           </label>
           <label>
-            Grid Rows:
-            <input type="range" min="2" max="24" value="6" step="1" data-grid-rows>
-            <span class="sierpinski-controls__value" data-grid-rows-value>6</span>
-          </label>
-          <label>
-            Gap:
-            <input type="range" min="0" max="60" value="6" step="1" data-gap>
-            <span class="sierpinski-controls__value" data-gap-value>6%</span>
-          </label>
-        </div>
-        <div class="sierpinski-controls__group">
-          <label>
-            Max Detail:
-            <input type="range" min="0" max="5" value="3" step="1" data-max-depth>
-            <span class="sierpinski-controls__value" data-max-depth-value>3</span>
-          </label>
-          <label>
-            Animation Speed:
-            <input type="range" min="0" max="5" value="2.5" step="0.1" data-anim-speed>
-            <span class="sierpinski-controls__value" data-anim-speed-value>2.5x</span>
+            Palette:
+            <select data-palette>
+              <option value="0">Mono</option>
+              <option value="1">Ember</option>
+              <option value="2">Neon</option>
+              <option value="3">Aurora</option>
+            </select>
           </label>
         </div>
-        <div class="sierpinski-controls__buttons">
-          <button type="button" class="sierpinski-controls__play-pause" data-play-pause>Pause</button>
+        <div class="attractor-controls__group">
+          <label>
+            a:
+            <input type="range" min="-3" max="3" value="-1.4" step="0.001" data-a>
+            <span class="attractor-controls__value" data-a-value>-1.400</span>
+          </label>
+          <label>
+            b:
+            <input type="range" min="-3" max="3" value="1.6" step="0.001" data-b>
+            <span class="attractor-controls__value" data-b-value>1.600</span>
+          </label>
+        </div>
+        <div class="attractor-controls__group">
+          <label>
+            c:
+            <input type="range" min="-3" max="3" value="1.0" step="0.001" data-c>
+            <span class="attractor-controls__value" data-c-value>1.000</span>
+          </label>
+          <label>
+            d:
+            <input type="range" min="-3" max="3" value="0.7" step="0.001" data-d>
+            <span class="attractor-controls__value" data-d-value>0.700</span>
+          </label>
+        </div>
+        <div class="attractor-controls__group">
+          <label>
+            <input type="checkbox" data-drift-toggle checked>
+            Organic Drift
+          </label>
+          <label>
+            Drift Speed:
+            <input type="range" min="0" max="5" value="1" step="0.1" data-drift-speed>
+            <span class="attractor-controls__value" data-drift-speed-value>1.0x</span>
+          </label>
+        </div>
+        <div class="attractor-controls__buttons">
+          <button type="button" class="attractor-controls__randomize" data-randomize>Randomize</button>
         </div>
       </div>
-      <button type="button" class="sierpinski-controls__open visible" data-open-controls>Open Toolbar</button>
+      <button type="button" class="attractor-controls__open visible" data-open-controls>Open Toolbar</button>
     </section>
   </div>
   <style>
-    .sierpinski-grid {
+    .attractor-canvas {
       position: absolute;
       top: 0;
       left: 0;
@@ -92,12 +115,12 @@
       height: 100dvh;
       overflow: hidden;
     }
-    .sierpinski-grid__canvas {
-      display: grid;
+    .attractor-canvas mm-attractor {
+      display: block;
       width: 100%;
       height: 100%;
     }
-    .sierpinski-controls {
+    .attractor-controls {
       position: fixed;
       z-index: 99;
       bottom: 10px;
@@ -117,18 +140,18 @@
       align-items: center;
       gap: 10px;
       width: 90%;
-      max-width: 460px;
+      max-width: 500px;
       text-align: center;
       font-family: 'IBM Plex Sans', sans-serif;
       transition: opacity 0.3s ease, transform 0.3s ease;
       transform-origin: bottom center;
     }
-    .sierpinski-controls.collapsed {
+    .attractor-controls.collapsed {
       opacity: 0;
       transform: translateX(-50%) scale(0.85) translateY(10px);
       pointer-events: none;
     }
-    .sierpinski-controls__close {
+    .attractor-controls__close {
       position: absolute;
       top: 8px;
       right: 8px;
@@ -146,10 +169,10 @@
       cursor: pointer;
       transition: background 0.2s ease;
     }
-    .sierpinski-controls__close:hover {
+    .attractor-controls__close:hover {
       background: rgba(255, 255, 255, 0.2);
     }
-    .sierpinski-controls__open {
+    .attractor-controls__open {
       position: fixed;
       z-index: 99;
       bottom: 10px;
@@ -171,22 +194,22 @@
       transition: opacity 0.3s ease, transform 0.3s ease;
       transform-origin: bottom center;
     }
-    .sierpinski-controls__open.visible {
+    .attractor-controls__open.visible {
       opacity: 1;
       transform: translateX(-50%) scale(1);
       pointer-events: auto;
     }
-    .sierpinski-controls__open:hover {
+    .attractor-controls__open:hover {
       background: rgba(20, 20, 24, 0.3);
     }
-    .sierpinski-controls__group {
+    .attractor-controls__group {
       display: flex;
       flex-wrap: wrap;
       gap: 10px 20px;
       justify-content: center;
       width: 100%;
     }
-    .sierpinski-controls label {
+    .attractor-controls label {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -194,43 +217,57 @@
       justify-content: center;
       font-size: 14px;
     }
-    .sierpinski-controls input[type="range"] {
+    .attractor-controls input[type="range"],
+    .attractor-controls input[type="checkbox"] {
       accent-color: rgba(255, 255, 255, 0.85);
     }
-    .sierpinski-controls__value {
-      min-width: 3.5em;
+    .attractor-controls select {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 8px;
+      color: #fff;
+      font: inherit;
+      font-size: 13px;
+      padding: 4px 8px;
+    }
+    .attractor-controls select option {
+      color: #000;
+    }
+    .attractor-controls__value {
+      min-width: 4.5em;
       display: inline-block;
     }
-    .sierpinski-controls__buttons {
+    .attractor-controls__buttons {
       display: flex;
       gap: 10px;
     }
-    .sierpinski-controls__play-pause {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.28);
+    .attractor-controls__randomize {
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.32);
       border-radius: 14px;
       color: inherit;
       font: inherit;
-      font-size: 14px;
-      padding: 6px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 8px 28px;
       cursor: pointer;
       transition: background 0.2s ease;
     }
-    .sierpinski-controls__play-pause:hover {
-      background: rgba(255, 255, 255, 0.2);
+    .attractor-controls__randomize:hover {
+      background: rgba(255, 255, 255, 0.26);
     }
     @media (max-width: 600px) {
-      .sierpinski-controls {
+      .attractor-controls {
         width: 95%;
         bottom: 20px;
         padding: 12px;
         border-radius: 20px;
       }
-      .sierpinski-controls__group {
+      .attractor-controls__group {
         flex-direction: column;
         align-items: center;
       }
-      .sierpinski-controls__open {
+      .attractor-controls__open {
         bottom: 20px;
       }
     }

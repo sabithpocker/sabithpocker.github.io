@@ -8,11 +8,11 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;400;600;700&display=swap"
     rel="stylesheet" />
   <link href="dist/css/style.css" rel="stylesheet" />
-  <script type="module" src="dist/js/components/mm-sierpinski.js"></script>
+  <script type="module" src="dist/js/components/mm-phoenix.js"></script>
   <script type="module" src="dist/js/components/ui-elements/side-bar.js"></script>
-  <script type="module" src="dist/js/sierpinski.js"></script>
+  <script type="module" src="dist/js/phoenix.js"></script>
   <script type="module" src="dist/js/utils/title-card.js"></script>
-  <title>Sierpinski Fractal - Markup Monks</title>
+  <title>Phoenix Fractal - Markup Monks</title>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B0BEV3T4NK"></script>
   <script>
@@ -30,61 +30,97 @@
     <section class="fractals">
       <header class="fractals__header fractals__header--full-view" data-title-card>
         <button type="button" class="title-card__close" data-close-title aria-label="Close title">&times;</button>
-        <h1 class="fractals__main-header">Sierpinski Fractal</h1>
+        <h1 class="fractals__main-header">Phoenix Fractal</h1>
         <h5 class="fractals__sub-header">
-          Web component for Sierpinski Fractal
+          Web component for the Phoenix fractal
         </h5>
         <p class="intro__details code">
           Usage:
-          <code>&lt;mm-sierpinski grid-cols="8" grid-rows="6" gap="6" depth="3"&gt;&lt;/mm-sierpinski&gt;
+          <code>&lt;mm-phoenix&gt;&lt;/mm-phoenix&gt;
           </code>
         </p>
       </header>
       <button type="button" class="title-card__open" data-open-title></button>
-      <div class="sierpinski-grid">
-        <mm-sierpinski class="sierpinski-grid__canvas" data-sierpinski-el grid-cols="8" grid-rows="6" gap="6"
-          depth="3" color="0.2, 0.6, 0.3"></mm-sierpinski>
+      <div class="phoenix-canvas">
+        <mm-phoenix data-phoenix-el></mm-phoenix>
       </div>
-      <div class="sierpinski-controls collapsed" data-sierpinski-controls>
-        <button type="button" class="sierpinski-controls__close" data-close-controls aria-label="Close toolbar">&times;</button>
-        <div class="sierpinski-controls__group">
+      <div class="phoenix-controls collapsed" data-phoenix-controls>
+        <button type="button" class="phoenix-controls__close" data-close-controls aria-label="Close toolbar">&times;</button>
+        <div class="phoenix-controls__group">
           <label>
-            Grid Columns:
-            <input type="range" min="2" max="16" value="8" step="1" data-grid-cols>
-            <span class="sierpinski-controls__value" data-grid-cols-value>8</span>
+            c (real):
+            <input type="range" min="-2" max="2" value="0.5667" step="0.001" data-c-real>
+            <span class="phoenix-controls__value" data-c-real-value>0.567</span>
           </label>
           <label>
-            Grid Rows:
-            <input type="range" min="2" max="24" value="6" step="1" data-grid-rows>
-            <span class="sierpinski-controls__value" data-grid-rows-value>6</span>
-          </label>
-          <label>
-            Gap:
-            <input type="range" min="0" max="60" value="6" step="1" data-gap>
-            <span class="sierpinski-controls__value" data-gap-value>6%</span>
+            c (imag):
+            <input type="range" min="-2" max="2" value="0" step="0.001" data-c-imag>
+            <span class="phoenix-controls__value" data-c-imag-value>0.000</span>
           </label>
         </div>
-        <div class="sierpinski-controls__group">
+        <div class="phoenix-controls__group">
           <label>
-            Max Detail:
-            <input type="range" min="0" max="5" value="3" step="1" data-max-depth>
-            <span class="sierpinski-controls__value" data-max-depth-value>3</span>
+            p (real):
+            <input type="range" min="-1.5" max="1.5" value="-0.5" step="0.001" data-p-real>
+            <span class="phoenix-controls__value" data-p-real-value>-0.500</span>
           </label>
           <label>
-            Animation Speed:
-            <input type="range" min="0" max="5" value="2.5" step="0.1" data-anim-speed>
-            <span class="sierpinski-controls__value" data-anim-speed-value>2.5x</span>
+            p (imag):
+            <input type="range" min="-1.5" max="1.5" value="0" step="0.001" data-p-imag>
+            <span class="phoenix-controls__value" data-p-imag-value>0.000</span>
           </label>
         </div>
-        <div class="sierpinski-controls__buttons">
-          <button type="button" class="sierpinski-controls__play-pause" data-play-pause>Pause</button>
+        <div class="phoenix-controls__group">
+          <label>
+            Iterations:
+            <input type="range" min="20" max="400" value="150" step="10" data-iterations>
+            <span class="phoenix-controls__value" data-iterations-value>150</span>
+          </label>
+          <label>
+            Escape Radius:
+            <input type="range" min="2" max="20" value="4" step="0.5" data-escape-radius>
+            <span class="phoenix-controls__value" data-escape-radius-value>4</span>
+          </label>
+          <label>
+            Symmetry:
+            <input type="range" min="1" max="8" value="1" step="1" data-symmetry>
+            <span class="phoenix-controls__value" data-symmetry-value>1</span>
+          </label>
+          <label>
+            Rotation:
+            <input type="range" min="-180" max="180" value="90" step="1" data-rotation>
+            <span class="phoenix-controls__value" data-rotation-value>90&deg;</span>
+          </label>
+        </div>
+        <div class="phoenix-controls__group">
+          <label>
+            Palette:
+            <select data-palette>
+              <option value="0">Classic</option>
+              <option value="1">Ember</option>
+              <option value="2">Ocean</option>
+              <option value="3">Aurora</option>
+            </select>
+          </label>
+          <label>
+            <input type="checkbox" data-drift-toggle checked>
+            Organic Drift
+          </label>
+          <label>
+            Drift Speed:
+            <input type="range" min="0" max="5" value="1" step="0.1" data-drift-speed>
+            <span class="phoenix-controls__value" data-drift-speed-value>1.0x</span>
+          </label>
+        </div>
+        <div class="phoenix-controls__buttons">
+          <button type="button" class="phoenix-controls__play-pause" data-reset-view>Reset View</button>
         </div>
       </div>
-      <button type="button" class="sierpinski-controls__open visible" data-open-controls>Open Toolbar</button>
+      <button type="button" class="phoenix-controls__open visible" data-open-controls>Open Toolbar</button>
     </section>
   </div>
   <style>
-    .sierpinski-grid {
+    .phoenix-canvas {
       position: absolute;
       top: 0;
       left: 0;
@@ -92,12 +128,12 @@
       height: 100dvh;
       overflow: hidden;
     }
-    .sierpinski-grid__canvas {
-      display: grid;
+    .phoenix-canvas mm-phoenix {
+      display: block;
       width: 100%;
       height: 100%;
     }
-    .sierpinski-controls {
+    .phoenix-controls {
       position: fixed;
       z-index: 99;
       bottom: 10px;
@@ -116,19 +152,19 @@
       flex-direction: column;
       align-items: center;
       gap: 10px;
-      width: 90%;
-      max-width: 460px;
+      width: 92%;
+      max-width: 620px;
       text-align: center;
       font-family: 'IBM Plex Sans', sans-serif;
       transition: opacity 0.3s ease, transform 0.3s ease;
       transform-origin: bottom center;
     }
-    .sierpinski-controls.collapsed {
+    .phoenix-controls.collapsed {
       opacity: 0;
       transform: translateX(-50%) scale(0.85) translateY(10px);
       pointer-events: none;
     }
-    .sierpinski-controls__close {
+    .phoenix-controls__close {
       position: absolute;
       top: 8px;
       right: 8px;
@@ -146,10 +182,10 @@
       cursor: pointer;
       transition: background 0.2s ease;
     }
-    .sierpinski-controls__close:hover {
+    .phoenix-controls__close:hover {
       background: rgba(255, 255, 255, 0.2);
     }
-    .sierpinski-controls__open {
+    .phoenix-controls__open {
       position: fixed;
       z-index: 99;
       bottom: 10px;
@@ -171,22 +207,22 @@
       transition: opacity 0.3s ease, transform 0.3s ease;
       transform-origin: bottom center;
     }
-    .sierpinski-controls__open.visible {
+    .phoenix-controls__open.visible {
       opacity: 1;
       transform: translateX(-50%) scale(1);
       pointer-events: auto;
     }
-    .sierpinski-controls__open:hover {
+    .phoenix-controls__open:hover {
       background: rgba(20, 20, 24, 0.3);
     }
-    .sierpinski-controls__group {
+    .phoenix-controls__group {
       display: flex;
       flex-wrap: wrap;
       gap: 10px 20px;
       justify-content: center;
       width: 100%;
     }
-    .sierpinski-controls label {
+    .phoenix-controls label {
       display: flex;
       align-items: center;
       gap: 8px;
@@ -194,18 +230,31 @@
       justify-content: center;
       font-size: 14px;
     }
-    .sierpinski-controls input[type="range"] {
+    .phoenix-controls input[type="range"],
+    .phoenix-controls input[type="checkbox"] {
       accent-color: rgba(255, 255, 255, 0.85);
     }
-    .sierpinski-controls__value {
+    .phoenix-controls select {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 8px;
+      color: #fff;
+      font: inherit;
+      font-size: 13px;
+      padding: 4px 8px;
+    }
+    .phoenix-controls select option {
+      color: #000;
+    }
+    .phoenix-controls__value {
       min-width: 3.5em;
       display: inline-block;
     }
-    .sierpinski-controls__buttons {
+    .phoenix-controls__buttons {
       display: flex;
       gap: 10px;
     }
-    .sierpinski-controls__play-pause {
+    .phoenix-controls__play-pause {
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.28);
       border-radius: 14px;
@@ -216,21 +265,21 @@
       cursor: pointer;
       transition: background 0.2s ease;
     }
-    .sierpinski-controls__play-pause:hover {
+    .phoenix-controls__play-pause:hover {
       background: rgba(255, 255, 255, 0.2);
     }
     @media (max-width: 600px) {
-      .sierpinski-controls {
+      .phoenix-controls {
         width: 95%;
         bottom: 20px;
         padding: 12px;
         border-radius: 20px;
       }
-      .sierpinski-controls__group {
+      .phoenix-controls__group {
         flex-direction: column;
         align-items: center;
       }
-      .sierpinski-controls__open {
+      .phoenix-controls__open {
         bottom: 20px;
       }
     }
